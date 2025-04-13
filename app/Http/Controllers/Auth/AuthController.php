@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
 use App\Services\AuthService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -16,6 +17,13 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'message' => 'Login successful'
+        ]);
+    }
+
+    public function showAuthUser(Request $request)
+    {
+        return response()->json([
+            'user' => $request->user(),
         ]);
     }
 }

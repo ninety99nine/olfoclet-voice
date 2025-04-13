@@ -1,63 +1,114 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 class="text-xl font-semibold mb-4">Sign in to your account</h1>
 
-        <form @submit.prevent="submit">
-          <div class="mb-4">
-            <label class="block mb-1 text-sm font-medium">Email</label>
-            <input v-model="form.email" type="email" class="w-full p-2 border rounded" />
-          </div>
+    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2  transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
 
-          <div class="mb-4">
-            <label class="block mb-1 text-sm font-medium">Password</label>
-            <input v-model="form.password" type="password" class="w-full p-2 border rounded" />
-          </div>
+        <div class="flex items-center justify-center p-6 bg-gray-50">
 
-          <div class="flex justify-between items-center mb-6">
-            <label class="text-sm">
-              <input type="checkbox" v-model="form.remember" class="mr-1"> Remember me
-            </label>
-            <router-link to="/forgot-password" class="text-sm text-blue-600 hover:underline">Forgot password?</router-link>
-          </div>
+            <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
 
-          <button :disabled="loading" type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-            {{ loading ? 'Signing in...' : 'Login' }}
-          </button>
-        </form>
+                <!-- Logo -->
+                <div class="flex justify-center mb-6">
+                    <Logo />
+                </div>
 
-        <p v-if="error" class="text-red-500 text-sm mt-4">{{ error }}</p>
-      </div>
+                <h1 class="text-gray-500 text-center mb-4">Sign in to your account</h1>
+
+                <form @submit.prevent="submit" class="space-y-4">
+
+                    <Input
+                        type="email"
+                        label="Email"
+                        v-model="form.email"
+                        :errorText="formState.getFormError('email')" />
+
+                    <Input
+                        type="password"
+                        label="Password"
+                        v-model="form.password"
+                        :errorText="formState.getFormError('password')" />
+
+                    <div v-if="formState.generalErrorText" class="text-red-500 text-sm mb-3">
+                        {{ formState.generalErrorText }}
+                    </div>
+
+                    <div class="flex justify-end mb-6">
+                        <router-link to="/forgot-password" class="text-sm text-blue-600 hover:underline">Forgot password?</router-link>
+                    </div>
+
+                    <Button
+                        size="md"
+                        type="primary"
+                        class="w-full"
+                        :action="submit">
+                        <span>{{ loading ? 'Signing in...' : 'Login' }}</span>
+                    </Button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- Right: Full Height Image (hidden on small screens) -->
+        <div class="hidden lg:block">
+
+            <img :src="'/images/smiling-customer-service-agent.jpg'"
+                class="w-full h-full object-cover"
+                alt="Customer service agent"
+            />
+
+        </div>
+
     </div>
+
   </template>
 
-  <script setup>
-    import { ref } from 'vue';
-    import axios from 'axios';
-    import { useRouter } from 'vue-router';
+  <script>
 
-    const router = useRouter();
-    const loading = ref(false);
-    const error = ref('');
+    import Logo from '@Partials/Logo.vue';
+    import Input from '@Partials/Input.vue';
+    import Button from '@Partials/Button.vue';
 
-    const form = ref({
-        email: '',
-        password: '',
-        remember: false
-    });
+    export default {
+        name: 'Login',
+        components: { Logo, Input, Button },
+        inject: ['authState', 'formState'],
+        data() {
+            return {
+                loading: false,
+                form: {
+                    email: '',
+                    password: ''
+                },
+            };
+        },
+        methods: {
+            async submit() {
+                if(this.loading) return;
+                this.formState.hideFormErrors();
 
-    const submit = async () => {
-        loading.value = true;
-        error.value = '';
+                if(this.form.email.trim() == '') {
+                    this.formState.setFormError('email', 'Enter your email');
+                }else if(this.form.password.trim() == '') {
+                    this.formState.setFormError('password', 'Enter your password');
+                }
 
-        try {
-        const response = await axios.post('/api/login', form.value);
-        // Handle success
-        router.push('/dashboard');
-        } catch (err) {
-        error.value = err.response?.data?.message || 'Login failed.';
-        } finally {
-        loading.value = false;
+                if(this.formState.hasErrors) {
+                    return;
+                }
+
+                this.loading = true;
+
+                try {
+                    await this.authState.login(this.form);
+                    this.$router.push({ name: 'show-home' });
+                } catch (err) {
+                    this.formState.setServerFormErrors(err);
+                } finally {
+                    this.loading = false;
+                }
+            }
         }
     };
-  </script>
+
+</script>

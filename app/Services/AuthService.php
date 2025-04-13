@@ -9,7 +9,9 @@ class AuthService
 {
     public function attemptLogin(array $credentials): string
     {
-        if (!Auth::attempt($credentials, $credentials['remember'] ?? false)) {
+        $authCredentials = collect($credentials)->only(['email', 'password'])->toArray();
+
+        if (!Auth::attempt($authCredentials)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.']
             ]);
@@ -18,3 +20,4 @@ class AuthService
         return Auth::user()->createToken('auth_token')->plainTextToken;
     }
 }
+
