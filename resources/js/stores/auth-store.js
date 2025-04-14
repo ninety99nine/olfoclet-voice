@@ -18,7 +18,9 @@ export const useAuthStore = defineStore('auth', {
             this.setTokenOnRequest(this.token);
             this.setTokenOnLocalStorage(this.token);
         },
-        logout() {
+        async logout () {
+            await axios.post('/api/logout');
+
             this.user = null;
             this.token = null;
             localStorage.removeItem('auth_token');

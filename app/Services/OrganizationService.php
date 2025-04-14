@@ -10,7 +10,7 @@ class OrganizationService
 {
     public function list()
     {
-        $pagination = Organization::paginate();
+        $pagination = Organization::latest()->paginate();
         return OrganizationResource::collection($pagination);
     }
 

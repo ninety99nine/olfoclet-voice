@@ -86,7 +86,7 @@
                                     Account
                                 </a>
 
-                                <span class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 cursor-pointer focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 dark:focus:text-neutral-300" href="#">
+                                <span @click="attemptLogout" class="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 cursor-pointer focus:outline-hidden focus:bg-gray-100 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 dark:focus:bg-neutral-700 dark:focus:text-neutral-300" href="#">
                                     <LogOut :size="16"></LogOut>
                                     Sign Out
                                 </span>
@@ -114,33 +114,29 @@
     import { User, LogOut } from 'lucide-vue-next';
 
     export default {
+        inject: ['authState', 'notificationState'],
         components: { Logo, User, LogOut },
-        methods: {
-            attemptLogout() {
-
-                this.isLoggingOut = true;
-
-                logout().then(response => {
-
-                    if(response.status == 200) {
-
-                        this.isLoggingOut = false;
-
-                        // Redirect to login
-                        this.$router.replace({ name: 'login' });
-
-                    }
-
-                }).catch(errorException => {
-
-                    //  Stop loader
-                    this.isLoggingOut = false;
-
-                    this.showErrors(errorException, 'attemptLogout');
-
-                });
+        data() {
+            return {
+                isLoggingOut: false
             }
         },
+        methods: {
+            async attemptLogout() {
+                this.isLoggingOut = true;
+                try {
+                    await this.authState.logout();
+                    this.$router.replace({ name: 'login' });
+                } catch (error) {
+                    this.isLoggingOut = false;
+                    console.log('error 2');
+                    console.log(error);
+                    this.notificationState.showWarningNotification(
+                        error?.response?.data?.message || error.message || 'Something went wrong trying to logout'
+                    );
+                }
+            }
+        }
     }
 
 </script>

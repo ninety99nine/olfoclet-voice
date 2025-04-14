@@ -19,5 +19,11 @@ class AuthService
 
         return Auth::user()->createToken('auth_token')->plainTextToken;
     }
+
+    public function logout(): void
+    {
+        Auth::user()->currentAccessToken()?->delete();
+    }
 }
+
 

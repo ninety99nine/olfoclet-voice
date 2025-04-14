@@ -142,9 +142,9 @@ export default {
             } catch (error) {
 
                 this.formState.setServerFormErrors(error);
-                if(error.response.data.message) {
-                    this.notificationState.showWarningNotification(error.response.data.message);
-                }
+                this.notificationState.showWarningNotification(
+                    error?.response?.data?.message || error.message || 'Something went wrong trying to create the organisation'
+                );
 
             } finally {
                 this.isCreating = false;

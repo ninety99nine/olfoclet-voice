@@ -1,49 +1,50 @@
 <template>
 
-    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2  transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
+    <div class="min-h-screen grid grid-cols-1 lg:grid-cols-2 transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
 
-        <div class="flex items-center justify-center p-6 bg-gray-50">
+        <div class="flex items-center justify-center p-6 bg-slate-100">
 
-            <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+            <div class="w-full max-w-md">
 
-                <!-- Logo -->
-                <div class="flex justify-center mb-6">
-                    <Logo />
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+
+                    <h1 class="text-2xl font-semibold leading-none tracking-tight mb-4">Sign in</h1>
+                    <h1 class="text-sm text-gray-500 mb-4">Enter your credentials to access the dashboard</h1>
+
+                    <form @submit.prevent="submit" class="space-y-4">
+
+                        <Input
+                            type="email"
+                            label="Email"
+                            v-model="form.email"
+                            :errorText="formState.getFormError('email')" />
+
+                        <Input
+                            type="password"
+                            label="Password"
+                            v-model="form.password"
+                            :errorText="formState.getFormError('password')" />
+
+                        <div v-if="formState.generalErrorText" class="text-red-500 text-sm mb-3">
+                            {{ formState.generalErrorText }}
+                        </div>
+
+                        <div class="flex justify-end mb-6">
+                            <router-link to="/forgot-password" class="text-sm text-blue-600 hover:underline">Forgot password?</router-link>
+                        </div>
+
+                        <Button
+                            size="md"
+                            type="primary"
+                            class="w-full"
+                            :action="submit"
+                            :leftIcon="LogIn">
+                            <span class="ml-1">{{ loading ? 'Signing in...' : 'Login' }}</span>
+                        </Button>
+
+                    </form>
+
                 </div>
-
-                <h1 class="text-gray-500 text-center mb-4">Sign in to your account</h1>
-
-                <form @submit.prevent="submit" class="space-y-4">
-
-                    <Input
-                        type="email"
-                        label="Email"
-                        v-model="form.email"
-                        :errorText="formState.getFormError('email')" />
-
-                    <Input
-                        type="password"
-                        label="Password"
-                        v-model="form.password"
-                        :errorText="formState.getFormError('password')" />
-
-                    <div v-if="formState.generalErrorText" class="text-red-500 text-sm mb-3">
-                        {{ formState.generalErrorText }}
-                    </div>
-
-                    <div class="flex justify-end mb-6">
-                        <router-link to="/forgot-password" class="text-sm text-blue-600 hover:underline">Forgot password?</router-link>
-                    </div>
-
-                    <Button
-                        size="md"
-                        type="primary"
-                        class="w-full"
-                        :action="submit">
-                        <span>{{ loading ? 'Signing in...' : 'Login' }}</span>
-                    </Button>
-
-                </form>
 
             </div>
 
@@ -66,6 +67,7 @@
   <script>
 
     import Logo from '@Partials/Logo.vue';
+    import { LogIn } from 'lucide-vue-next';
     import Input from '@Partials/Input.vue';
     import Button from '@Partials/Button.vue';
 
@@ -75,6 +77,7 @@
         inject: ['authState', 'formState'],
         data() {
             return {
+                LogIn,
                 loading: false,
                 form: {
                     email: '',

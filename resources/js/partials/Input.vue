@@ -79,7 +79,7 @@
                     'flex',
                     wrapperAlignItems,
                     {
-                        'bg-white py-2.5 px-2.5 rounded-md border border-gray-300 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-blue-800':
+                        'bg-slate-50 py-2.5 px-2.5 rounded-md border border-gray-300 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-blue-800':
                         [
                             'text', 'password', 'email', 'number', 'tel', 'url', 'search', 'date',
                             'datetime-local', 'month', 'week', 'time', 'money', 'percentage', 'textarea'
@@ -109,8 +109,9 @@
 
                 <!-- Prefix Icon Slot -->
                 <slot v-if="$slots.prefix" name="prefix"></slot>
-                <Mail v-else-if="type == 'email'" :size="20" class="mr-2 -mt-0.5 -mb-0.5"></Mail>
-                <Search v-else-if="type == 'search'" :size="20" class="mr-2 -mt-0.5 -mb-0.5"></Search>
+                <Mail v-else-if="type == 'email'" :size="20" class="mr-2 -mt-0.5 -mb-0.5 text-slate-400"></Mail>
+                <Lock v-else-if="type == 'password'" :size="20" class="mr-2 -mt-0.5 -mb-0.5 text-slate-400"></Lock>
+                <Search v-else-if="type == 'search'" :size="20" class="mr-2 -mt-0.5 -mb-0.5 text-slate-400"></Search>
                 <div v-else-if="type == 'money' && currency" class="text-sm leading-4 mr-2">
                     {{ currencySymbol }}
                 </div>
@@ -243,16 +244,10 @@
                 <div v-else-if="type == 'password'" :class="[showPassword ? '' : '']">
 
                     <!-- Open Eye Icon -->
-                    <svg v-if="showPassword" @click="showPassword = false" class="w-4 h-4 text-gray-700 hover:text-gray-600 active:text-gray-500 cursor-pointer" fill="none" :class="{ 'hidden': !showPassword, 'block': showPassword }" :xmlns="showPassword ? 'http://www.w3.org/2000/svg' : ''" viewBox="0 0 20 20" stroke="currentColor" >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 12a2 2 0 100-4 2 2 0 000 4z" ></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 10a8.001 8.001 0 11-16 0 8.001 8.001 0 0116 0z" ></path>
-                    </svg>
+                    <Eye v-if="showPassword" @click="showPassword = false" size="16" class="cursor-pointer text-slate-400"></Eye>
 
                     <!-- Closed Eye Icon -->
-                    <svg v-else @click="showPassword = true" class="w-4 h-4 text-gray-700 hover:text-gray-600 active:text-gray-500 cursor-pointer" fill="none" :class="{ 'block': !showPassword, 'hidden': showPassword }" :xmlns="!showPassword ? 'http://www.w3.org/2000/svg' : ''" viewBox="0 0 24 24" stroke="currentColor" >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" ></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12a7.5 7.5 0 1114.999-1.5L19.5 12H5z" ></path>
-                    </svg>
+                    <EyeOff v-else @click="showPassword = true" size="16" class="cursor-pointer text-slate-400"></EyeOff>
 
                 </div>
                 <svg v-else-if="type == 'percentage'" class="h-3 w-3 ml-1" fill="#374151" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 263.285 263.285" xml:space="preserve">
@@ -379,24 +374,23 @@
 
     import "intl-tel-input/styles";
     import debounce from 'lodash.debounce';
-    import { Mail } from 'lucide-vue-next';
-    import { Search } from 'lucide-vue-next';
     import cloneDeep from 'lodash.clonedeep';
     import Button from '@Partials/Button.vue';
     import Popover from '@Partials/Popover.vue';
     import Tooltip from '@Partials/Tooltip.vue';
-    import currencies from '@Json/currencies.json';
     import Skeleton from '@Partials/Skeleton.vue';
+    import currencies from '@Json/currencies.json';
     import capitalize from '@Directives/capitalize.js';
     import IntlTelInput from "intl-tel-input/vueWithUtils";
     import { generateUniqueId } from '@Utils/generalUtils.js';
     import { convertToValidMoney } from '@Utils/numberUtils.js';
     import { parsePhoneNumberFromString } from 'libphonenumber-js';
+    import { Eye, Mail, Lock, Search, EyeOff } from 'lucide-vue-next';
 
     export default {
         inject: ['notificationState'],
         directives: { capitalize },
-        components: { Mail, Search, Button, Popover, Tooltip, Skeleton, IntlTelInput },
+        components: { Eye, Mail, Lock, Search, EyeOff, Button, Popover, Tooltip, Skeleton, IntlTelInput },
         props: {
             modelValue: {
                 type: [String, Boolean, Array, null]
