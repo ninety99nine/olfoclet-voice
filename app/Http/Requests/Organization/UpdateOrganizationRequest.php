@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Http\Requests\Organisation;
+namespace App\Http\Requests\Organization;
 
-use App\Models\Organization;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateOrganizationRequest extends FormRequest
+class UpdateOrganizationRequest extends FormRequest
 {
     public function authorize()
     {
-        return $this->user()->can('create', Organization::class);
+        return $this->user()->can('update', $this->organization);
     }
 
     public function rules()

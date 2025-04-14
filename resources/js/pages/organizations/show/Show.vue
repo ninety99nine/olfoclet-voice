@@ -16,13 +16,13 @@
                 <!-- Tabs -->
                 <Tabs v-model="activeTab" :tabs="tabs" />
 
-                <AddOrganisationModal @refresh="fetchOrganizations">
+                <AddOrganizationModal @refresh="fetchOrganizations">
                     <template #default="{ showModal }">
                         <Button type="primary" size="md" :leftIcon="Plus" leftIconSize="20" :action="showModal">
                             <span>Add Organization</span>
                         </Button>
                     </template>
-                </AddOrganisationModal>
+                </AddOrganizationModal>
 
             </div>
 
@@ -85,6 +85,7 @@
                                 <td class="px-4 py-3">
 
                                     <div class="flex justify-end gap-1">
+                                        <Button type="outline" size="xs" :leftIcon="ExternalLink" leftIconSize="12" :action="() => navigateToOrganizationLogin(org.alias)"></Button>
                                         <Button type="outline" size="xs" :leftIcon="UserPlus" leftIconSize="12"></Button>
                                         <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12"></Button>
                                         <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12"></Button>
@@ -114,11 +115,12 @@
     import Pill from '@Partials/Pill.vue';
     import Tabs from '@Partials/Tabs.vue';
     import Button from '@Partials/Button.vue';
-    import AddOrganisationModal from '@Pages/organisations/components/AddOrganisationModal.vue';
-    import { Box, Plus, Lock, Trash2, Pencil, UserPlus, Building, ShieldCheck } from 'lucide-vue-next';
+    import AddOrganizationModal from '@Pages/organizations/components/AddOrganizationModal.vue';
+    import { Box, Plus, Lock, Trash2, Pencil, UserPlus, Building, ShieldCheck, ExternalLink } from 'lucide-vue-next';
 
     export default {
-        components: { Pill, Tabs, Button, AddOrganisationModal },
+        inject: ['notificationState'],
+        components: { Pill, Tabs, Button, AddOrganizationModal },
         data() {
             return {
                 Lock,
@@ -126,6 +128,7 @@
                 Trash2,
                 Pencil,
                 UserPlus,
+                ExternalLink,
                 isLoading: true,
                 organizations: [],
                 activeTab: 'organizations',
@@ -142,13 +145,22 @@
             }
         },
         methods: {
+            navigateToOrganizationLogin(alias) {
+                const url = `${window.location.origin}/${alias}/login`;
+                window.open(url, '_blank');
+            },
             async fetchOrganizations() {
                 this.isLoading = true;
                 try {
                     const response = await axios.get('/api/organizations');
                     this.organizations = response.data.data;
                 } catch (error) {
+
+                    const message = error?.response?.data?.message || error?.message || 'Something went wrong while fetching organizations';
+                    this.notificationState.showWarningNotification(message);
+
                     console.error('Failed to fetch organizations:', error);
+
                 } finally {
                     this.isLoading = false;
                 }

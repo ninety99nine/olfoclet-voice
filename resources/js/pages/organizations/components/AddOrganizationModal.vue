@@ -141,10 +141,11 @@ export default {
 
             } catch (error) {
 
+                const message = error?.response?.data?.message || error?.message || 'Something went wrong trying to create the organisation';
+                this.notificationState.showWarningNotification(message);
                 this.formState.setServerFormErrors(error);
-                this.notificationState.showWarningNotification(
-                    error?.response?.data?.message || error.message || 'Something went wrong trying to create the organisation'
-                );
+
+                console.error('Failed to create organization:', error);
 
             } finally {
                 this.isCreating = false;

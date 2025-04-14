@@ -2,45 +2,104 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Organization;
-use App\Http\Requests\Organisation\CreateOrganizationRequest;
-use App\Http\Requests\Organisation\UpdateOrganizationRequest;
+use Illuminate\Http\JsonResponse;
 use App\Services\OrganizationService;
+use App\Http\Controllers\BaseController;
+use App\Http\Resources\OrganizationResources;
+use App\Http\Requests\Organization\CreateOrganizationRequest;
+use App\Http\Requests\Organization\UpdateOrganizationRequest;
 
-class OrganizationController extends Controller
+class OrganizationController extends BaseController
 {
+    /**
+     * @var OrganizationService
+     */
     protected $service;
 
+    /**
+     * OrganizationController constructor.
+     *
+     * @param OrganizationService $service
+     */
     public function __construct(OrganizationService $service)
     {
         $this->service = $service;
     }
 
-    public function index()
+    /**
+     * Show organizations.
+     *
+     * @return OrganizationResources
+     */
+    public function showOrganizations(): OrganizationResources
     {
-        return $this->service->list();
+        return $this->prepareOutput($this->service->showOrganizations());
     }
 
-    public function create(CreateOrganizationRequest $request)
+    /**
+     * Create organization.
+     *
+     * @param CreateOrganizationRequest $request
+     * @return JsonResponse
+     */
+    public function createOrganization(CreateOrganizationRequest $request): JsonResponse
     {
-        return $this->service->create($request->validated());
+        return $this->prepareOutput($this->service->createOrganization($request->validated()));
     }
 
-    public function show(Organization $organization)
+    /**
+     * Delete multiple organizations.
+     *
+     * @return JsonResponse
+     */
+    public function deleteOrganizations(): JsonResponse
     {
-        return $organization;
+        $organizationIds = request()->input('organization_ids', []);
+        return $this->prepareOutput($this->service->deleteOrganizations($organizationIds));
     }
 
-    public function update(UpdateOrganizationRequest $request, Organization $organization)
+    /**
+     * Show organization by alias.
+     *
+     * @param string $alias
+     * @return JsonResponse
+     */
+    public function showOrganizationByAlias(string $alias): JsonResponse
     {
-        return $this->service->update($organization, $request->validated());
+        return $this->prepareOutput($this->service->showOrganizationByAlias($alias));
     }
 
-    public function destroy(Organization $organization)
+    /**
+     * Show single organization.
+     *
+     * @param string $organizationId
+     * @return JsonResponse
+     */
+    public function showOrganization(string $organizationId): JsonResponse
     {
-        $this->service->delete($organization);
-        return response()->json(null, 204);
+        return $this->prepareOutput($this->service->showOrganization($organizationId));
+    }
+
+    /**
+     * Update organization.
+     *
+     * @param UpdateOrganizationRequest $request
+     * @param string $organizationId
+     * @return JsonResponse
+     */
+    public function updateOrganization(UpdateOrganizationRequest $request, string $organizationId): JsonResponse
+    {
+        return $this->prepareOutput($this->service->updateOrganization($organizationId, $request->validated()));
+    }
+
+    /**
+     * Delete organization.
+     *
+     * @param string $organizationId
+     * @return JsonResponse
+     */
+    public function deleteOrganization(string $organizationId): JsonResponse
+    {
+        return $this->prepareOutput($this->service->deleteOrganization($organizationId));
     }
 }
-
-

@@ -12,6 +12,7 @@ class OrganizationResource extends JsonResource
         return [
             'id'      => $this->id,
             'name'    => $this->name,
+            'alias'    => $this->alias,
             'active'  => $this->active,
             'country' => $this->country,
             'created_at' => $this->created_at->toDateString(),

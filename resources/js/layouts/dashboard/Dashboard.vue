@@ -1,14 +1,18 @@
 <template>
 
-    <Header></Header>
+    <div class="transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
 
-    <Notifications></Notifications>
+        <Notifications></Notifications>
 
-    <Breadcrumb></Breadcrumb>
+        <Header></Header>
 
-    <Sidebar></Sidebar>
+        <Breadcrumb></Breadcrumb>
 
-    <Content></Content>
+        <Sidebar></Sidebar>
+
+        <Content></Content>
+
+    </div>
 
 </template>
 

@@ -3,13 +3,29 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
     {
-        path: '/',
-        redirect: '/login',
-    },
-    {
-        path: '/login',
-        name: 'login',
-        component: () => import('@Pages/auth/Login.vue'),
+        component: () => import('@Layouts/auth/Auth.vue'),
+        children: [
+            {
+                path: '/',
+                redirect: '/login',
+            },
+            {
+                path: '/login',
+                name: 'login',
+                component: () => import('@Pages/auth/Login.vue'),
+            },
+            {
+                path: '/:alias/login',
+                name: 'organization-login',
+                component: () => import('@Pages/auth/Login.vue'),
+                props: true
+            },
+            {
+                path: '/:catchAll(.*)',
+                name: 'notFound',
+                component: () => import('@Pages/error/404.vue'),
+            }
+        ]
     },
     {
         path: '/dashboard',
@@ -27,9 +43,9 @@ const routes = [
                 component: () => import('@Pages/agents/show/Show.vue'),
             },
             {
-                path: 'organisations',
-                name: 'show-organisations',
-                component: () => import('@Pages/organisations/show/Show.vue'),
+                path: 'organizations',
+                name: 'show-organizations',
+                component: () => import('@Pages/organizations/show/Show.vue'),
             },
             {
                 path: 'account',
@@ -37,11 +53,6 @@ const routes = [
                 component: () => import('@Pages/account/show/Show.vue'),
             },
         ]
-    },
-    {
-        path: '/:catchAll(.*)',
-        name: 'notFound',
-        component: () => import('@Pages/error/404.vue'),
     }
 ];
 

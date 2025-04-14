@@ -16,13 +16,13 @@
                 <!-- Tabs -->
                 <Tabs v-model="activeTab" :tabs="tabs" />
 
-                <AddOrganisationModal @refresh="fetchOrganizations">
+                <AddOrganizationModal @refresh="fetchOrganizations">
                     <template #trigger="{ showModal }">
                         <Button type="primary" size="md" :leftIcon="Plus" leftIconSize="20" :action="showModal">
                         <span>Add Organization</span>
                         </Button>
                     </template>
-                </AddOrganisationModal>
+                </AddOrganizationModal>
 
             </div>
 
@@ -114,11 +114,11 @@
     import Pill from '@Partials/Pill.vue';
     import Tabs from '@Partials/Tabs.vue';
     import Button from '@Partials/Button.vue';
-    import AddOrganisationModal from '@Pages/organisations/components/AddOrganisationModal.vue';
+    import AddOrganizationModal from '@Pages/Organizations/components/AddOrganizationModal.vue';
     import { Box, Plus, Lock, Trash2, Pencil, UserPlus, Building, ShieldCheck } from 'lucide-vue-next';
 
     export default {
-        components: { Pill, Tabs, Button, AddOrganisationModal },
+        components: { Pill, Tabs, Button, AddOrganizationModal },
         data() {
             return {
                 Lock,

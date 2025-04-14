@@ -48,7 +48,7 @@
 
                 <HouseIcon v-if="menu.name == 'Home'" :size="20"></HouseIcon>
                 <UsersRoundIcon v-else-if="menu.name == 'Agents'" :size="20"></UsersRoundIcon>
-                <BuildingIcon v-else-if="menu.name == 'Organisations'" :size="20"></BuildingIcon>
+                <BuildingIcon v-else-if="menu.name == 'Organizations'" :size="20"></BuildingIcon>
 
                 <span>{{ menu.name }}</span>
 
@@ -74,7 +74,7 @@
                 menus: [
                 { name: 'Home', route: 'show-home' },
                 { name: 'Agents', route: 'show-agents' },
-                { name: 'Organisations', route: 'show-organisations' },
+                { name: 'Organizations', route: 'show-organizations' },
                 ],
             };
         }

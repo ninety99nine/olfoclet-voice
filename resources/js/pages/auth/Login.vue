@@ -6,7 +6,17 @@
 
             <div class="w-full max-w-md">
 
-                <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+                <div class="flex justify-center mb-6">
+
+                    <h1 v-if="organization" class="text-4xl font-semibold leading-none tracking-tight mb-4">
+                        {{ organization.name }}
+                    </h1>
+
+                    <Logo v-else />
+
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-6">
 
                     <h1 class="text-2xl font-semibold leading-none tracking-tight mb-4">Sign in</h1>
                     <h1 class="text-sm text-gray-500 mb-4">Enter your credentials to access the dashboard</h1>
@@ -46,6 +56,8 @@
 
                 </div>
 
+                <p class="text-sm text-center text-gray-500">© {{ currentYear }} Telcoflo. All rights reserved.</p>
+
             </div>
 
         </div>
@@ -74,15 +86,17 @@
     export default {
         name: 'Login',
         components: { Logo, Input, Button },
-        inject: ['authState', 'formState'],
+        inject: ['authState', 'formState', 'notificationState'],
         data() {
             return {
                 LogIn,
-                loading: false,
                 form: {
                     email: '',
                     password: ''
                 },
+                loading: false,
+                organization: null,
+                currentYear: new Date().getFullYear()
             };
         },
         methods: {
@@ -110,6 +124,27 @@
                 } finally {
                     this.loading = false;
                 }
+            }
+        },
+        async mounted() {
+            const alias = this.$route.params.alias;
+
+            if (alias) {
+
+                try {
+
+                    const { data } = await axios.get(`/api/organizations/alias/${alias}`);
+                    this.organization = data;
+
+                } catch (error) {
+
+                    const message = error?.response?.data?.message || error?.message || 'Something went wrong while searching for the organization';
+                    this.notificationState.showWarningNotification(message);
+
+                    console.error('Failed to fetch organization:', error);
+
+                }
+
             }
         }
     };
