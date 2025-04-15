@@ -3,9 +3,19 @@
     <div>
 
         <!-- Columns Button -->
-        <Button :action="openColumnsDrawer" type="outline" size="sm" icon="bars-4"></Button>
+        <Button
+            size="xs"
+            type="outline"
+            :leftIcon="Logs"
+            :action="openColumnsDrawer">
+            <span>Columns</span>
+        </Button>
 
-        <Drawer ref="columnsDrawer" placement="right" :bodyScrolling="true" :backdrop="true" :hideCloseIcon="true">
+        <Drawer
+            placement="right"
+            ref="columnsDrawer"
+            :showFooter="false"
+            :scrollOnContent="false">
 
             <template #content>
 
@@ -42,11 +52,12 @@
 
                 <!-- Show Everything Toggle Switch -->
                 <div class="p-4 border-b shadow-sm">
-                    <ToggleSwitch
-                        size="md"
-                        v-model="showEverything">
-                        Show Everything
-                    </ToggleSwitch>
+
+                    <Switch
+                        size="sm"
+                        v-model="showEverything"
+                        suffixText="Show Everything"/>
+
                 </div>
 
                 <div class="divide-y mb-4">
@@ -63,11 +74,12 @@
 
                             <div class="flex items-center justify-between p-4">
 
-                                <Checkbox
+                                <Input
                                     @click.stop
-                                    v-model="column.active">
-                                    <span class="text-sm block">{{ column.name }}</span>
-                                </Checkbox>
+                                    type="checkbox"
+                                    v-model="column.active"
+                                    :inputLabel="column.name">
+                                </Input>
 
                                 <!-- Drag & Drop Handle -->
                                 <svg class="draggable-handle w-4 h-4 cursor-grab hover:text-yellow-500 visible:cursor-grabbing" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -85,8 +97,12 @@
                 <!-- Reset Columns Button -->
                 <div class="px-4 mb-60">
 
-                    <Button :action="resetColumns" type="light" size="sm" class="w-full">
-                        <span>Rest Columns</span>
+                    <Button
+                        size="sm"
+                        type="light"
+                        class="w-full"
+                        :action="resetColumns">
+                        <span>Reset Columns</span>
                     </Button>
 
                 </div>
@@ -101,17 +117,18 @@
 
 <script>
 
+    import Pill from '@Partials/Pill.vue';
+    import Input from '@Partials/Input.vue';
     import cloneDeep from 'lodash/cloneDeep';
-    import Pill from '@Partials/pills/Pill.vue';
-    import Button from '@Partials/buttons/Button.vue';
-    import Drawer from '@Partials/drawers/Drawer.vue';
+    import Button from '@Partials/Button.vue';
+    import Drawer from '@Partials/Drawer.vue';
+    import Switch from '@Partials/Switch.vue';
+    import { Logs } from 'lucide-vue-next';
     import { VueDraggableNext } from 'vue-draggable-next';
-    import Checkbox from '@Partials/checkboxes/Checkbox.vue';
-    import ToggleSwitch from '@Partials/toggle-switches/ToggleSwitch.vue';
 
     export default {
         inject: ['formState'],
-        components: { draggable: VueDraggableNext, Pill, Button, Drawer, Checkbox, ToggleSwitch },
+        components: { draggable: VueDraggableNext, Input, Pill, Button, Drawer, Switch },
         props: {
             columns: {
                 type: Array,
@@ -121,6 +138,7 @@
         emits: ['updatedColumns'],
         data() {
             return {
+                Logs,
                 showMore: false,
                 columnsDrawer: null,
                 showEverything: false,

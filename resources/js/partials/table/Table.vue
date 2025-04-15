@@ -1,7 +1,7 @@
 <template>
 
     <!-- Table -->
-    <div class="bg-white py-4 px-4 shadow-sm rounded-xl overflow-y-auto relative">
+    <div>
 
         <slot name="header"></slot>
 
@@ -10,23 +10,33 @@
             <div class="w-1/3 flex justify-center items-center space-x-4">
 
                 <!-- Search Input -->
-                <SearchInput v-model="localSearchTerm" :isSearching="isSearching" class="w-full"></SearchInput>
+                <Input
+                    type="search"
+                    class="w-full"
+                    :debounced="true"
+                    placeholder="Search"
+                    v-model="localSearchTerm"
+                    :isSearching="isSearching">
+                </Input>
 
             </div>
 
             <div v-if="pagination" class="flex justify-center items-center space-x-2">
 
                 <!-- Filter Drawer Button -->
-                <FilterDrawer ref="filterDrawer" :filterExpressions="filterExpressions" @updatedFilters="updatedFilters"></FilterDrawer>
+                <FilterDrawer ref="filterDrawer" :resource="resource" :filterExpressions="filterExpressions" @updatedFilters="updatedFilters"></FilterDrawer>
 
                 <!-- Sorting Drawer Button -->
-                <SortingDrawer ref="sortingDrawer" :sortingExpressions="sortingExpressions" @updatedSorting="updatedSorting"></SortingDrawer>
+                <SortingDrawer ref="sortingDrawer" :resource="resource" :sortingExpressions="sortingExpressions" @updatedSorting="updatedSorting"></SortingDrawer>
 
                 <!-- Columns Drawer Button -->
                 <ColumnsDrawer ref="columnsDrawer" :columns="columns" @updatedColumns="updatedColumns"></ColumnsDrawer>
 
+                <!-- Slot Before Refresh Button -->
+                <slot name="beforeRefreshButton"></slot>
+
                 <!-- Refresh Button -->
-                <Button :action="refresh" type="outline" size="sm" icon="refresh"></Button>
+                <Button :action="refresh" type="outline" size="sm" :leftIcon="RotateCcw"></Button>
 
                 <!-- Slot After Refresh Button -->
                 <slot name="afterRefreshButton"></slot>
@@ -38,31 +48,32 @@
         <transition name="fade-1" mode="out-in">
             <div v-if="hasFilterExpressions && !hasFilters" class="flex flex-col items-center mb-4">
                 <div class="flex items-center space-x-2">
-                    <SpinningLoader></SpinningLoader>
+                    <Loader></Loader>
                     <span class="text-sm text-gray-500">Preparing filters</span>
                 </div>
             </div>
             <div v-else-if="hasSortingExpressions && !hasSorting" class="flex flex-col items-center mb-4">
                 <div class="flex items-center space-x-2">
-                    <SpinningLoader></SpinningLoader>
+                    <Loader></Loader>
                     <span class="text-sm text-gray-500">Preparing sorting</span>
                 </div>
             </div>
             <div v-else-if="hasFilters || hasSorting" class="flex flex-wrap gap-2 mb-4">
                 <Pill :key="index" v-for="(filter, index) in filters" type="primary" size="xs" :closableAction="() => removeAppliedFilter(filter)">{{ filter.label }}</Pill>
-                <Pill :key="index" v-for="(sort, index) in sorting" type="info" size="xs" :closableAction="() => removeAppliedSort(sort)">{{ sort.label }}</Pill>
+                <Pill :key="index" v-for="(sort, index) in sorting" type="success" size="xs" :closableAction="() => removeAppliedSort(sort)">{{ sort.label }}</Pill>
             </div>
         </transition>
 
         <!-- Table Loader -->
         <div v-if="pagination && isLoading && !isSearching" class="absolute top-0 bottom-0 left-0 right-0 bg-white/50 flex justify-center items-center">
-            <SpinningLoader v-if="!isSearching"></SpinningLoader>
+            <Loader v-if="!isSearching"></Loader>
         </div>
 
         <!-- Below Toolbar -->
         <slot name="belowToolbar"></slot>
 
-        <div class="w-full overflow-x-auto rounded-lg">
+        <div class="w-full overflow-x-auto border border-gray-200 rounded-lg">
+
             <table class="w-full text-sm text-left rtl:text-right text-gray-500">
 
                 <!-- Table Head -->
@@ -131,7 +142,6 @@
                 -->
                 <tbody v-else>
                     <slot name="body"></slot>
-
                 </tbody>
 
             </table>
@@ -149,16 +159,15 @@
 
             <div class="flex items-center space-x-4">
 
-                <SelectInput
+                <Select
                     width="w-fit"
-                    v-model="localPerPage">
-                    <option v-for="(perPage, index) in perPageOptions" :value="perPage" :key="index">
-                        {{ perPage }} per page
-                    </option>
-                </SelectInput>
+                    :search="false"
+                    v-model="localPerPage"
+                    :options="perPageOptions">
+                </Select>
 
-                <!-- Bottom Pagination -->
-                <Pagination v-if="pagination" :pagination="pagination" @paginate="paginate"></Pagination>
+                <!-- Bottom Paginator -->
+                <Paginator v-if="pagination" :pagination="pagination" @paginate="paginate"></Paginator>
 
             </div>
 
@@ -169,23 +178,21 @@
 </template>
 
 <script>
-    /**
-     * Component Reference: https://flowbite.com/docs/components/tables/
-     */
-    import Pill from '@Partials/pills/Pill.vue';
-    import { Modal, initFlowbite } from "flowbite";
-    import Button from '@Partials/buttons/Button.vue';
+
+    import Pill from '@Partials/Pill.vue'
+    import Input from '@Partials/Input.vue';
+    import Select from '@Partials/Select.vue';
+    import Button from '@Partials/Button.vue';
+    import Loader from '@Partials/Loader.vue';
+    import { RotateCcw } from 'lucide-vue-next';
     import { generateUniqueId } from '@Utils/generalUtils.js';
-    import SearchInput from '@Partials/inputs/SearchInput.vue';
-    import SelectInput from '@Partials/inputs/SelectInput.vue';
-    import Pagination from '@Partials/paginations/Pagination.vue';
-    import SpinningLoader from '@Partials/loaders/SpinningLoader.vue';
-    import FilterDrawer from '@Partials/tables/components/FilterDrawer.vue';
-    import ColumnsDrawer from '@Partials/tables/components/ColumnsDrawer.vue';
-    import SortingDrawer from '@Partials/tables/components/SortingDrawer.vue';
+    import Paginator from '@Partials/table/components/Paginator.vue';
+    import FilterDrawer from '@Partials/table/components/FilterDrawer.vue';
+    import ColumnsDrawer from '@Partials/table/components/ColumnsDrawer.vue';
+    import SortingDrawer from '@Partials/table/components/SortingDrawer.vue';
 
     export default {
-        components: { Pill, Button, SearchInput, SelectInput, Pagination, SpinningLoader, FilterDrawer, ColumnsDrawer, SortingDrawer },
+        components: { Pill, Button, Input, Select, Paginator, Loader, FilterDrawer, ColumnsDrawer, SortingDrawer },
         props: {
             isLoading: {
                 type: Boolean,
@@ -201,6 +208,9 @@
             perPage: {
                 type: String,
                 default: '15'
+            },
+            resource: {
+                type: String
             },
             columns: {
                 type: Array,
@@ -218,6 +228,7 @@
         emits: ['search', 'refresh', 'paginate', 'updatedColumns', 'updatedFilters', 'updatedSorting', 'updatedPerPage'],
         data() {
             return {
+                RotateCcw,
                 modal: null,
                 filters: [],
                 sorting: [],
@@ -225,8 +236,7 @@
                 sortingDrawer: null,
                 localPerPage: this.perPage,
                 localSearchTerm: this.searchTerm,
-                perPageOptions: ['15', '50', '100', '200'],
-                uniqueModalId: generateUniqueId('modal'),
+                uniqueModalId: generateUniqueId('modal')
             }
         },
         watch: {
@@ -266,6 +276,12 @@
             },
             totalActiveColumns() {
                 return this.columns.filter((tableHeader) => tableHeader.active).length;
+            },
+            perPageOptions() {
+                return ['15', '50', '100', '200'].map(value => ({
+                    label: `${value} per page`,
+                    value: parseInt(value),
+                }));
             }
         },
         methods: {
@@ -292,23 +308,6 @@
             removeAppliedSort(sort) {
                 this.sortingDrawer.removeAppliedSort(sort);
             }
-        },
-        mounted() {
-
-            /**
-             *  Flowbite javascript will not work unless we deliberately
-             *  Initialize Flowbite on mount of the Vue component.
-             *
-             *  Reference: https://stackoverflow.com/questions/76043935/flowbite-is-not-working-with-inertia-laravel-app
-             */
-            initFlowbite();
-
-            const $targetEl = document.getElementById(this.uniqueModalId);
-
-            if($targetEl != null) {
-                this.modal = new Modal($targetEl);
-            }
-
         }
     };
 </script>

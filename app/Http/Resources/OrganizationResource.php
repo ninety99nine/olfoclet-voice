@@ -16,6 +16,10 @@ class OrganizationResource extends JsonResource
             'active'  => $this->active,
             'country' => $this->country,
             'created_at' => $this->created_at->toDateString(),
+            '_links' => [
+                'update_organization' => route('show-organization', ['organization' => $this->resource->id]),
+                'delete_organization' => route('show-organization', ['organization' => $this->resource->id])
+            ]
         ];
     }
 }

@@ -9,29 +9,28 @@ use Illuminate\Auth\Access\Response;
 
 class OrganizationPolicy
 {
-    public function viewAny(User $user)
+    public function viewAny(User $user): bool
     {
         return $user->type === UserType::SUPER_ADMIN->value;
     }
 
-    public function view(User $user, Organization $organization)
+    public function view(User $user, Organization $organization): bool
     {
         return $user->type === UserType::SUPER_ADMIN->value;
     }
 
-    public function create(User $user)
+    public function create(User $user): bool
     {
         return $user->type === UserType::SUPER_ADMIN->value;
     }
 
-    public function update(User $user, Organization $organization)
+    public function update(User $user, Organization $organization): bool
     {
         return $user->type === UserType::SUPER_ADMIN->value;
     }
 
-    public function delete(User $user, Organization $organization)
+    public function delete(User $user, Organization $organization): bool
     {
         return $user->type === UserType::SUPER_ADMIN->value;
     }
-
 }

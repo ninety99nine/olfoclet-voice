@@ -2,15 +2,15 @@
 
     <Modal
         size="sm"
-        ref="createModal"
+        ref="modal"
         :showFooter="true"
         :dismissable="true"
         :scrollOnContent="false"
         :showApproveButton="true"
         :approveLoading="isCreating"
         header="Create New Organization"
+        approveText="Create Organization"
         :approveAction="createOrganization"
-        :approveText="'Create Organization'"
         subheader="Add a new call center for an organisation">
 
         <template #trigger="props">
@@ -82,76 +82,81 @@
 </template>
 
 <script>
-import axios from 'axios';
-import Modal from '@Partials/Modal.vue';
-import Input from '@Partials/Input.vue';
-import Switch from '@Partials/Switch.vue';
-import Select from '@Partials/Select.vue';
-import SelectCountry from '@Partials/SelectCountry.vue';
 
-export default {
-    components: { Modal, Input, Switch, Select, SelectCountry },
-    inject: ['formState', 'notificationState'],
-    data() {
-        return {
-            isCreating: false,
-            createAdmin: false,
-            form: {
-                name: '',
-                country: '',
-                admin_name: '',
-                admin_email: '',
-                admin_mobile: ''
+    import axios from 'axios';
+    import Modal from '@Partials/Modal.vue';
+    import Input from '@Partials/Input.vue';
+    import Switch from '@Partials/Switch.vue';
+    import Select from '@Partials/Select.vue';
+    import SelectCountry from '@Partials/SelectCountry.vue';
+
+    export default {
+        components: { Modal, Input, Switch, Select, SelectCountry },
+        inject: ['formState', 'notificationState'],
+        data() {
+            return {
+                isCreating: false,
+                createAdmin: false,
+                form: {
+                    name: '',
+                    country: '',
+                    admin_name: '',
+                    admin_email: '',
+                    admin_mobile: ''
+                }
             }
-        }
-    },
-    methods: {
-        reset() {
-            this.form.name = '';
-            this.form.country = '';
-            this.form.admin_name = '';
-            this.form.admin_email = '';
-            this.form.admin_mobile = '';
         },
-        async createOrganization(hideModal) {
-
-            this.formState.hideFormErrors();
-
-            if (this.form.name.trim() === '') this.formState.setFormError('name', 'Organization name is required');
-            if (this.form.country === '') this.formState.setFormError('country', 'Select a country');
-
-            if(this.createAdmin) {
-                if (this.form.admin_name.trim() === '') this.formState.setFormError('admin_name', 'Admin name is required');
-                if (this.form.admin_email.trim() === '') this.formState.setFormError('admin_email', 'Admin email is required');
-                if (this.form.admin_mobile.trim() === '') this.formState.setFormError('admin_mobile', 'Phone number is required');
-            }
-
-            if (this.formState.hasErrors) return;
-
-            this.isCreating = true;
-
-            try {
-
-                await axios.post('/api/organizations', this.form);
-                this.notificationState.showSuccessNotification('Organisation created');
-
-                this.$emit('refresh');
+        methods: {
+            showModal() {
                 this.reset();
-                hideModal();
+                this.$refs.modal.showModal();
+            },
+            reset() {
+                this.form.name = '';
+                this.form.country = '';
+                this.form.admin_name = '';
+                this.form.admin_email = '';
+                this.form.admin_mobile = '';
+            },
+            async createOrganization(hideModal) {
 
-            } catch (error) {
+                this.formState.hideFormErrors();
 
-                const message = error?.response?.data?.message || error?.message || 'Something went wrong trying to create the organisation';
-                this.notificationState.showWarningNotification(message);
-                this.formState.setServerFormErrors(error);
+                if (this.form.name.trim() === '') this.formState.setFormError('name', 'Organization name is required');
+                if (this.form.country === '') this.formState.setFormError('country', 'Select a country');
 
-                console.error('Failed to create organization:', error);
+                if(this.createAdmin) {
+                    if (this.form.admin_name.trim() === '') this.formState.setFormError('admin_name', 'Admin name is required');
+                    if (this.form.admin_email.trim() === '') this.formState.setFormError('admin_email', 'Admin email is required');
+                    if (this.form.admin_mobile.trim() === '') this.formState.setFormError('admin_mobile', 'Phone number is required');
+                }
 
-            } finally {
-                this.isCreating = false;
+                if (this.formState.hasErrors) return;
+
+                this.isCreating = true;
+
+                try {
+
+                    await axios.post('/api/organizations', this.form);
+                    this.notificationState.showSuccessNotification('Organisation created');
+
+                    this.$emit('created');
+                    hideModal();
+
+                } catch (error) {
+
+                    const message = error?.response?.data?.message || error?.message || 'Something went wrong trying to create the organisation';
+                    this.notificationState.showWarningNotification(message);
+                    this.formState.setServerFormErrors(error);
+
+                    console.error('Failed to create organization:', error);
+
+                } finally {
+                    this.isCreating = false;
+                }
             }
         }
     }
-}
+
 </script>
 

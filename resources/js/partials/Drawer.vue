@@ -45,7 +45,7 @@
 
                 <div
                     v-if="content || $slots.content"
-                    :class="['p-4 flex-1 overflow-y-auto', { 'max-h-80' : scrollOnContent }]">
+                    :class="['flex-1 overflow-y-auto', { 'p-4' : content }, { 'max-h-80' : scrollOnContent }]">
                     <slot name="content" :hideDrawer="hideDrawer">
                         <p class="text-sm text-gray-700 dark:text-neutral-400">
                             {{ content }}

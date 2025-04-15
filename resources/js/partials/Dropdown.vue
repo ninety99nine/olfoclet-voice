@@ -13,9 +13,9 @@
                 v-if="trigger"
                 :size="triggerSize"
                 :type="triggerType"
-                :icon="triggerIcon"
                 :action="toggleDropdown"
-                :skeleton="triggerLoading">
+                :skeleton="triggerLoading"
+                :leftIcon="triggerLeftIcon">
 
                 <div class="flex items-center space-x-1">
 
@@ -56,9 +56,12 @@
                         v-for="(option, index) in options"
                         @click="() => handleItemClick(option)"
                         :class="[
-                            'px-4 py-2 text-sm hover:bg-gray-100',
+                            'flex items-center space-x-2 px-4 py-2 text-sm hover:bg-gray-100',
                             option.disabled ? 'cursor-not-allowed text-gray-400' : 'cursor-pointer text-gray-700',
                         ]">
+
+                        <!-- Left Icon -->
+                        <component v-if="option.icon" :is="option.icon" :size="option.iconSize ?? '16'" />
 
                         <!-- Custom Slot Support -->
                         <slot name="option" :option="option">
@@ -103,7 +106,7 @@
                 type: String,
                 default: 'light'
             },
-            triggerIcon: {
+            triggerLeftIcon: {
                 type: [String, null],
                 default: null
             },
@@ -123,7 +126,7 @@
             },
             width: {
                 type: String,
-                default: "w-60"
+                default: "w-full"
             }
         },
         data() {

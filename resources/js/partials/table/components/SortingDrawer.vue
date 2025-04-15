@@ -3,9 +3,19 @@
     <div>
 
         <!-- Sort Button -->
-        <Button :action="openSortDrawer" type="outline" size="sm" icon="sort-downwards"></Button>
+        <Button
+            size="xs"
+            type="outline"
+            :action="openSortDrawer"
+            :leftIcon="ArrowDownWideNarrow">
+            <span>Sort</span>
+        </Button>
 
-        <Drawer ref="sortDrawer" placement="right" :bodyScrolling="true" :backdrop="true" :hideCloseIcon="true">
+        <Drawer
+            ref="sortDrawer"
+            placement="right"
+            :showFooter="false"
+            :scrollOnContent="false">
 
             <template #content>
 
@@ -43,7 +53,7 @@
                 <div v-if="isLoadingSorting" class="flex justify-center my-8">
 
                     <!-- Loader -->
-                    <SpinningLoader></SpinningLoader>
+                    <Loader></Loader>
 
                 </div>
 
@@ -93,11 +103,12 @@
 
                                 <div v-for="(option, index2) in sorting.options" :key="index2">
 
-                                    <Checkbox
+                                    <Input
+                                        type="checkbox"
                                         v-model="option.active"
+                                        :inputLabel="option.label"
                                         @click.stop="() => toggleSortOption(index, index2)">
-                                        {{ option.label }}
-                                    </Checkbox>
+                                    </Input>
 
                                 </div>
 
@@ -112,13 +123,24 @@
                 <!-- Clear Sorting Button -->
                 <div v-if="!isLoadingSorting" class="flex flex-col items-center px-4 space-y-8 mb-60">
 
-                    <Button :action="showMoreOrLess" type="outline" size="xs" :icon="showMore ? 'short-up-arrow' : 'short-down-arrow'">
+                    <Button
+                        size="xs"
+                        type="outline"
+                        :action="showMoreOrLess"
+                        :leftIcon="showMore ? ArrowUp : ArrowDown"
+                        v-if="hasPrioritySortOptions && hasNonPrioritySortOptions">
                         <span>{{ showMore ? 'show less options' : 'show more options' }}</span>
                     </Button>
 
-                    <Button :action="clearSorting" type="light" size="sm" class="w-full">
+                    <Button
+                        size="sm"
+                        type="light"
+                        class="w-full"
+                        :action="clearSorting"
+                        v-if="totalActiveSortOptions">
                         <span>Clear Sorting</span>
                     </Button>
+
                 </div>
 
             </template>
@@ -132,30 +154,36 @@
 <script>
 
     import isEqual from 'lodash/isEqual';
+    import Pill from '@Partials/Pill.vue';
+    import Input from '@Partials/Input.vue';
     import cloneDeep from 'lodash/cloneDeep';
-    import Pill from '@Partials/pills/Pill.vue';
-    import Button from '@Partials/buttons/Button.vue';
-    import Drawer from '@Partials/drawers/Drawer.vue';
+    import Button from '@Partials/Button.vue';
+    import Drawer from '@Partials/Drawer.vue';
+    import Loader from '@Partials/Loader.vue';
     import { VueDraggableNext } from 'vue-draggable-next';
-    import { getApi } from '@Repositories/api-repository.js';
-    import Checkbox from '@Partials/checkboxes/Checkbox.vue';
-    import SpinningLoader from '@Partials/loaders/SpinningLoader.vue';
+    import { ArrowDownWideNarrow, ArrowUp, ArrowDown } from 'lucide-vue-next';
 
     export default {
-        inject: ['apiState' , 'formState'],
-        components: { draggable: VueDraggableNext, Pill, Button, Drawer, Checkbox, SpinningLoader },
+        inject: ['notificationState'],
+        components: { draggable: VueDraggableNext, Pill, Input, Button, Drawer, Loader },
         props: {
             sortingExpressions: {
                 type: Array,
                 default: () => []
             },
+            resource: {
+                type: String
+            },
         },
         emits: ['updatedSorting'],
         data() {
             return {
+                ArrowUp,
+                ArrowDown,
                 showMore: false,
                 sortDrawer: null,
                 localSorting: null,
+                ArrowDownWideNarrow,
                 originalSorting: null,
                 isLoadingSorting: false,
                 lastEmittedSorting: null,
@@ -179,6 +207,20 @@
                 return this.localSorting.filter((sort) => {
                     return sort.options.some((option) => option.active);
                 }).length;
+            },
+            hasPrioritySortOptions() {
+                if(this.localSorting == null) return false;
+
+                return this.localSorting.filter((sort) => {
+                    return sort.priority;
+                }).length > 0;
+            },
+            hasNonPrioritySortOptions() {
+                if(this.localSorting == null) return false;
+
+                return this.localSorting.filter((sort) => {
+                    return !sort.priority;
+                }).length > 0;
             }
         },
         methods: {
@@ -282,56 +324,55 @@
             clearSorting() {
                 this.localSorting = cloneDeep(this.originalSorting);
             },
-            getSorting() {
+            async getSorting() {
 
-                if(this.isLoadingSorting) return;
+                try {
 
-                //  Start loader
-                this.isLoadingSorting = true;
+                    if(this.isLoadingSorting) return;
 
-                //  Set the query params
-                const params = {
-                    'type': 'orders'
-                };
+                    //  Start loader
+                    this.isLoadingSorting = true;
 
-                getApi(this.apiState.apiHome['_links']['showSorting'], params).then(response => {
+                    //  Set the query params
+                    const config = {
+                        params: {
+                            'type': this.resource
+                        }
+                    };
 
-                    if(response.status == 200) {
+                    const response = await axios.get('/api/sorting', config);
 
-                        this.localSorting = response.data.map(sorting => {
-                            return {
-                                ...sorting,
-                                active: false,
-                                options: sorting.options.map((option) => {
+                    this.localSorting = response.data.map(sorting => {
+                        return {
+                            ...sorting,
+                            active: false,
+                            options: sorting.options.map((option) => {
 
-                                    let _option = {
-                                        ...option,
-                                        active: false
-                                    };
+                                let _option = {
+                                    ...option,
+                                    active: false
+                                };
 
-                                    return _option;
+                                return _option;
 
-                                })
-                            };
-                        });
+                            })
+                        };
+                    });
 
-                        this.originalSorting = cloneDeep(this.localSorting);
+                    this.originalSorting = cloneDeep(this.localSorting);
 
-                        this.applySortingExpressions();
+                    this.applySortingExpressions();
 
-                    }
+                } catch (error) {
 
-                    //  Stop loader
+                    const message = error?.response?.data?.message || error?.message || 'Something went wrong while fetching the sorting options';
+                    this.notificationState.showWarningNotification(message);
+
+                    console.error('Failed to fetch sorting options:', error);
+
+                } finally {
                     this.isLoadingSorting = false;
-
-                }).catch(errorException => {
-
-                    //  Stop loader
-                    this.isLoadingSorting = false;
-
-                    this.formState.setServerFormErrors(errorException);
-
-                });
+                }
 
             },
         },

@@ -8,6 +8,7 @@ use App\Http\Controllers\BaseController;
 use App\Http\Resources\OrganizationResources;
 use App\Http\Requests\Organization\CreateOrganizationRequest;
 use App\Http\Requests\Organization\UpdateOrganizationRequest;
+use App\Models\Organization;
 
 class OrganizationController extends BaseController
 {
@@ -72,34 +73,34 @@ class OrganizationController extends BaseController
     /**
      * Show single organization.
      *
-     * @param string $organizationId
+     * @param Organization $organization
      * @return JsonResponse
      */
-    public function showOrganization(string $organizationId): JsonResponse
+    public function showOrganization(Organization $organization): JsonResponse
     {
-        return $this->prepareOutput($this->service->showOrganization($organizationId));
+        return $this->prepareOutput($this->service->showOrganization($organization->id));
     }
 
     /**
      * Update organization.
      *
      * @param UpdateOrganizationRequest $request
-     * @param string $organizationId
+     * @param Organization $organization
      * @return JsonResponse
      */
-    public function updateOrganization(UpdateOrganizationRequest $request, string $organizationId): JsonResponse
+    public function updateOrganization(UpdateOrganizationRequest $request, Organization $organization): JsonResponse
     {
-        return $this->prepareOutput($this->service->updateOrganization($organizationId, $request->validated()));
+        return $this->prepareOutput($this->service->updateOrganization($organization->id, $request->validated()));
     }
 
     /**
      * Delete organization.
      *
-     * @param string $organizationId
+     * @param Organization $organization
      * @return JsonResponse
      */
-    public function deleteOrganization(string $organizationId): JsonResponse
+    public function deleteOrganization(Organization $organization): JsonResponse
     {
-        return $this->prepareOutput($this->service->deleteOrganization($organizationId));
+        return $this->prepareOutput($this->service->deleteOrganization($organization->id));
     }
 }

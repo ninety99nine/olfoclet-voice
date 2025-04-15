@@ -4,17 +4,18 @@ namespace App\Http\Controllers\Auth;
 
 use Illuminate\Http\Request;
 use App\Services\AuthService;
-use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Http\Controllers\BaseController;
 use App\Http\Requests\Auth\LoginRequest;
 
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
         $token = app(AuthService::class)->attemptLogin($credentials);
 
-        return response()->json([
+        return $this->prepareOutput([
             'token' => $token,
             'message' => 'Login successful'
         ]);
@@ -24,15 +25,13 @@ class AuthController extends Controller
     {
         app(AuthService::class)->logout();
 
-        return response()->json([
+        return $this->prepareOutput([
             'message' => 'Logged out successfully'
         ]);
     }
 
     public function showAuthUser(Request $request)
     {
-        return response()->json([
-            'user' => $request->user(),
-        ]);
+        return new UserResource($request->user());
     }
 }

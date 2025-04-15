@@ -3,9 +3,19 @@
     <div>
 
         <!-- Filter Button -->
-        <Button :action="openFilterDrawer" type="outline" size="sm" icon="filter"></Button>
+        <Button
+            size="xs"
+            type="outline"
+            :leftIcon="ListFilter"
+            :action="openFilterDrawer">
+            <span>Filter</span>
+        </Button>
 
-        <Drawer ref="filterDrawer" placement="right" :bodyScrolling="true" :backdrop="true" :hideCloseIcon="true">
+        <Drawer
+            ref="filterDrawer"
+            placement="right"
+            :showFooter="false"
+            :scrollOnContent="false">
 
             <template #content>
 
@@ -43,7 +53,7 @@
                 <div v-if="isLoadingFilters" class="flex justify-center my-8">
 
                     <!-- Loader -->
-                    <SpinningLoader></SpinningLoader>
+                    <Loader></Loader>
 
                 </div>
 
@@ -76,11 +86,12 @@
                                 <!-- If it's an options type filter (Checkboxes) -->
                                 <div v-for="(option, index2) in filter.options" :key="index2">
 
-                                    <Checkbox
+                                    <Input
                                         @click.stop
-                                        v-model="option.active">
-                                        {{ option.label }}
-                                    </Checkbox>
+                                        type="checkbox"
+                                        v-model="option.active"
+                                        :inputLabel="option.label">
+                                    </Input>
 
                                     <div v-if="option.active && ['date', 'money'].includes(filter.type)" class="my-4">
 
@@ -89,13 +100,14 @@
 
                                             <Datepicker @click.stop v-model="option.value1"></Datepicker>
                                             <Datepicker v-if="['bt', 'bt_ex'].includes(option.value)" @click.stop v-model="option.value2"></Datepicker>
+
                                         </div>
 
                                         <!-- If it's a money type filter (Numeric Input) -->
                                         <div v-else-if="filter.type === 'money'" class="space-y-4">
 
-                                            <MoneyInput @click.stop v-model="option.value1" />
-                                            <MoneyInput v-if="['bt', 'bt_ex'].includes(option.value)" @click.stop v-model="option.value2" />
+                                            <Input type="money" @click.stop v-model="option.value1" />
+                                            <Input type="money" v-if="['bt', 'bt_ex'].includes(option.value)" @click.stop v-model="option.value2" />
 
                                         </div>
 
@@ -114,13 +126,24 @@
                 <!-- Clear Filters Button -->
                 <div v-if="!isLoadingFilters" class="flex flex-col items-center px-4 space-y-8 mb-60">
 
-                    <Button :action="showMoreOrLess" type="outline" size="xs" :icon="showMore ? 'short-up-arrow' : 'short-down-arrow'">
+                    <Button
+                        size="xs"
+                        type="outline"
+                        :action="showMoreOrLess"
+                        :leftIcon="showMore ? ArrowUp : ArrowDown"
+                        v-if="hasPriorityFilters && hasNonPriorityFilters">
                         <span>{{ showMore ? 'show less options' : 'show more options' }}</span>
                     </Button>
 
-                    <Button :action="clearFilters" type="light" size="sm" class="w-full">
+                    <Button
+                        size="sm"
+                        type="light"
+                        class="w-full"
+                        :action="clearFilters"
+                        v-if="totalActiveFilters">
                         <span>Clear Filters</span>
                     </Button>
+
                 </div>
 
             </template>
@@ -135,27 +158,33 @@
 
     import dayjs from 'dayjs';
     import isEqual from 'lodash/isEqual';
+    import Pill from '@Partials/Pill.vue';
+    import Input from '@Partials/Input.vue';
     import cloneDeep from 'lodash/cloneDeep';
-    import Pill from '@Partials/pills/Pill.vue';
-    import Button from '@Partials/buttons/Button.vue';
-    import Drawer from '@Partials/drawers/Drawer.vue';
-    import Checkbox from '@Partials/checkboxes/Checkbox.vue';
-    import MoneyInput from '@Partials/inputs/MoneyInput.vue';
-    import Datepicker from '@Partials/datepicker/Datepicker.vue';
-    import SpinningLoader from '@Partials/loaders/SpinningLoader.vue';
+    import Button from '@Partials/Button.vue';
+    import Drawer from '@Partials/Drawer.vue';
+    import Loader from '@Partials/Loader.vue';
+    import Datepicker from '@Partials/Datepicker.vue';
+    import { ListFilter, ArrowUp, ArrowDown } from 'lucide-vue-next';
 
     export default {
-        inject: ['apiState' , 'formState', 'storeState'],
-        components: { Pill, Button, Drawer, Checkbox, MoneyInput, Datepicker, SpinningLoader },
+        inject: ['notificationState'],
+        components: { Pill, Input, Button, Drawer, Datepicker, Loader },
         props: {
             filterExpressions: {
                 type: Array,
                 default: () => []
             },
+            resource: {
+                type: String
+            },
         },
         emits: ['updatedFilters'],
         data() {
             return {
+                ArrowUp,
+                ArrowDown,
+                ListFilter,
                 showMore: false,
                 localFilters: null,
                 filterDrawer: null,
@@ -178,6 +207,27 @@
             },
             hasFilterExpressions() {
                 return this.filterExpressions.length > 0;
+            },
+            totalActiveFilters() {
+                if(this.localFilters == null) return 0;
+
+                return this.localFilters.filter((filter) => {
+                    return filter.options.some((option) => option.active);
+                }).length;
+            },
+            hasPriorityFilters() {
+                if(this.localFilters == null) return false;
+
+                return this.localFilters.filter((filter) => {
+                    return filter.priority;
+                }).length > 0;
+            },
+            hasNonPriorityFilters() {
+                if(this.localFilters == null) return false;
+
+                return this.localFilters.filter((filter) => {
+                    return !filter.priority;
+                }).length > 0;
             }
         },
         methods: {
@@ -360,72 +410,65 @@
             },
             async getFilters() {
 
-                if(this.isLoadingFilters) return;
+                try {
 
-                this.isLoadingFilters = true;
+                    if(this.isLoadingFilters) return;
 
-                const url = this.apiState.apiHome['_links']['showFilters'];
+                    //  Start loader
+                    this.isLoadingFilters = true;
 
-                let config = {
-                    params: {
-                        'type': 'orders'
-                    }
+                    //  Set the query params
+                    const config = {
+                        params: {
+                            'type': this.resource
+                        }
+                    };
+
+                    const response = await axios.get('/api/filters', config);
+
+                    this.localFilters = response.data.map(filter => {
+                        return {
+                            ...filter,
+                            active: false,
+                            options: filter.options.map((option) => {
+
+                                let _option = {
+                                    ...option,
+                                    active: false
+                                };
+
+                                if(filter.type == 'money') {
+
+                                    _option.value1 = '0.00';
+                                    _option.value2 = '0.00';
+
+                                }else if(filter.type == 'date') {
+
+                                    _option.value1 = dayjs().subtract(7, 'day').format('DD MMM YYYY'); // 7 days ago
+                                    _option.value2 = dayjs().add(7, 'day').format('DD MMM YYYY');      // 7 days ahead
+
+                                }
+
+                                return _option;
+
+                            })
+                        };
+                    });
+
+                    this.originalFilters = cloneDeep(this.localFilters);
+                    this.applyFilterExpressions();
+
+                } catch (error) {
+
+                    const message = error?.response?.data?.message || error?.message || 'Something went wrong while fetching the filter options';
+                    this.notificationState.showWarningNotification(message);
+
+                    console.error('Failed to fetch filter options:', error);
+
+                } finally {
+                    this.isLoadingFilters = false;
                 }
-
-                if(this.store) {
-                    config.params['store_id'] = this.store.id
-                }
-
-                await axios.get(url, config).then(response => {
-
-                    if(response.status == 200) {
-
-                        this.localFilters = response.data.map(filter => {
-                            return {
-                                ...filter,
-                                active: false,
-                                options: filter.options.map((option) => {
-
-                                    let _option = {
-                                        ...option,
-                                        active: false
-                                    };
-
-                                    if(filter.type == 'money') {
-
-                                        _option.value1 = '0.00';
-                                        _option.value2 = '0.00';
-
-                                    }else if(filter.type == 'date') {
-
-                                        _option.value1 = dayjs().subtract(7, 'day').format('DD MMM YYYY'); // 7 days ago
-                                        _option.value2 = dayjs().add(7, 'day').format('DD MMM YYYY');      // 7 days ahead
-
-                                    }
-
-                                    return _option;
-
-                                })
-                            };
-                        });
-
-                        this.originalFilters = cloneDeep(this.localFilters);
-                        this.applyFilterExpressions();
-
-                    }else{
-
-                        this.formState.setFormError('general', response.data.message);
-                        this.notificationState.showWarningNotification(response.data.message);
-
-                    }
-
-                }).catch(errorException => {
-                    this.formState.setServerFormErrors(errorException);
-                });
-
-                this.isLoadingFilters = false;
-
-            },
+            }
         },
         mounted() {
             this.filterDrawer = this.$refs.filterDrawer;
