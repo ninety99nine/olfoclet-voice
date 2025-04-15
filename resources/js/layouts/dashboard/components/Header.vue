@@ -121,6 +121,14 @@
                 isLoggingOut: false
             }
         },
+        computed: {
+            authUser() {
+                return this.authState.user;
+            },
+            isLoadingAuthUser() {
+                return this.authState.isLoadingUser;
+            }
+        },
         methods: {
             async attemptLogout() {
                 this.isLoggingOut = true;
@@ -129,8 +137,6 @@
                     this.$router.replace({ name: 'login' });
                 } catch (error) {
                     this.isLoggingOut = false;
-                    console.log('error 2');
-                    console.log(error);
                     this.notificationState.showWarningNotification(
                         error?.response?.data?.message || error.message || 'Something went wrong trying to logout'
                     );

@@ -34,6 +34,14 @@
                     v-model="form.country"
                     :errorText="formState.getFormError('country')" />
 
+                <Input
+                    type="number"
+                    label="Seats"
+                    placeholder="10"
+                    :showAsterisk="true"
+                    v-model="form.seats"
+                    :errorText="formState.getFormError('seats')" />
+
                 <div class="border-t border-gray-200 border-dashed space-y-4 pt-4">
 
                     <Switch
@@ -99,6 +107,7 @@
                 createAdmin: false,
                 form: {
                     name: '',
+                    seats: '1',
                     country: '',
                     admin_name: '',
                     admin_email: '',
@@ -113,6 +122,7 @@
             },
             reset() {
                 this.form.name = '';
+                this.form.seats = '1';
                 this.form.country = '';
                 this.form.admin_name = '';
                 this.form.admin_email = '';
@@ -124,6 +134,7 @@
 
                 if (this.form.name.trim() === '') this.formState.setFormError('name', 'Organization name is required');
                 if (this.form.country === '') this.formState.setFormError('country', 'Select a country');
+                if (this.form.seats === '') this.formState.setFormError('seats', 'Number of seats is required');
 
                 if(this.createAdmin) {
                     if (this.form.admin_name.trim() === '') this.formState.setFormError('admin_name', 'Admin name is required');

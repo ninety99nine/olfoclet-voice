@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Organization;
+use Spatie\Permission\Models\Role;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\OrganizationResources;
 
@@ -27,23 +28,26 @@ class OrganizationService extends BaseService
      */
     public function createOrganization(array $data): array
     {
-        $Organization = Organization::create($data);
-        return $this->showCreatedResource($Organization);
+        $organization = Organization::create($data);
+        Role::create(['name' => 'admin', 'organization_id' => $organization->id]);
+        Role::create(['name' => 'agent', 'organization_id' => $organization->id]);
+
+        return $this->showCreatedResource($organization);
     }
 
     /**
      * Delete Organization.
      *
-     * @param int $OrganizationId
+     * @param int $organizationId
      * @return array
      */
-    public function deleteOrganization(int $OrganizationId): array
+    public function deleteOrganization(int $organizationId): array
     {
-        $Organization = Organization::findOrFail($OrganizationId);
+        $organization = Organization::findOrFail($organizationId);
 
-        if($Organization) {
+        if($organization) {
 
-            $deleted = $Organization->delete();
+            $deleted = $organization->delete();
 
             if ($deleted) {
                 return ['deleted' => true, 'message' => 'Organization deleted'];
@@ -71,17 +75,17 @@ class OrganizationService extends BaseService
     /**
      * Delete Organizations.
      *
-     * @param array $OrganizationIds
+     * @param array $organizationIds
      * @return array
      */
-    public function deleteOrganizations(array $OrganizationIds): array
+    public function deleteOrganizations(array $organizationIds): array
     {
-        $Organizations = Organization::whereIn('id', $OrganizationIds)->get();
+        $organizations = Organization::whereIn('id', $organizationIds)->get();
 
-        if($totalOrganizations = $Organizations->count()) {
+        if($totalOrganizations = $organizations->count()) {
 
-            foreach($Organizations as $Organization) {
-                $Organization->delete();
+            foreach($organizations as $organization) {
+                $organization->delete();
             }
 
             return ['deleted' => true, 'message' => $totalOrganizations  .($totalOrganizations  == 1 ? ' Organization': ' Organizations') . ' deleted'];
@@ -94,30 +98,30 @@ class OrganizationService extends BaseService
     /**
      * Show Organization.
      *
-     * @param int $OrganizationId
+     * @param int $organizationId
      * @return OrganizationResource
      */
-    public function showOrganization(int $OrganizationId): OrganizationResource
+    public function showOrganization(int $organizationId): OrganizationResource
     {
-        $Organization = Organization::findOrFail($OrganizationId);
-        return $this->showResource($Organization);
+        $organization = Organization::findOrFail($organizationId);
+        return $this->showResource($organization);
     }
 
     /**
      * Update Organization.
      *
-     * @param int $OrganizationId
+     * @param int $organizationId
      * @param array $data
      * @return array
      */
-    public function updateOrganization(int $OrganizationId, array $data): array
+    public function updateOrganization(int $organizationId, array $data): array
     {
-        $Organization = Organization::findOrFail($OrganizationId);
+        $organization = Organization::findOrFail($organizationId);
 
-        if($Organization) {
+        if($organization) {
 
-            $Organization->update($data);
-            return $this->showUpdatedResource($Organization);
+            $organization->update($data);
+            return $this->showUpdatedResource($organization);
 
         }else{
 

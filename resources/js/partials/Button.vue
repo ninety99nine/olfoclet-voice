@@ -45,7 +45,7 @@
                 type: String,
                 default: 'primary',
                 validator: (value) => [
-                    'light', 'primary', 'success', 'warning', 'danger', 'dark', 'outline', 'outlineDanger'
+                    'light', 'primary', 'success', 'warning', 'danger', 'ghost', 'dark', 'outline', 'outlineDanger'
                 ].includes(value)
             },
             disabled: {
@@ -110,11 +110,18 @@
                 var classes = [];
                 const baseClasses = [this.spacing, this.rounded, 'group flex justify-center items-center font-semibold transition-all duration-250 active:scale-95'];
 
-                const sizeClasses = {
-                    xs: "py-1.5 px-3 text-xs",
-                    sm: "py-1.5 px-4 text-sm",
-                    md: "py-2 px-5 text-base",
-                    lg: "py-2.5 px-6 text-lg"
+                const paddingClasses = {
+                    xs: "py-1.5 px-3",
+                    sm: "py-1.5 px-4",
+                    md: "py-2 px-5",
+                    lg: "py-2.5 px-6"
+                };
+
+                const fontSizeClasses = {
+                    xs: "text-xs",
+                    sm: "text-sm",
+                    md: "text-base",
+                    lg: "text-lg"
                 };
 
                 const typeClasses = {
@@ -128,16 +135,21 @@
                     outlineDanger: "border border-red-600 bg-transparent hover:bg-red-200 text-red-600",
                     disabled: "bg-gray-100 text-gray-300",
                     skeleton: "bg-gray-100 text-gray-300",
+                    ghost: "bg-transparent text-blue-600 hover:text-blue-800 hover:underline shadow-none"
                 };
 
                 classes.push(baseClasses);
-                classes.push(sizeClasses[this.size]);
+                classes.push(fontSizeClasses[this.size]);
 
-                if(this.disabled) {
+                if (this.type !== 'ghost') {
+                    classes.push(paddingClasses[this.size]);
+                }
+
+                if (this.disabled) {
                     classes.push(typeClasses['disabled'], 'cursor-not-allowed');
-                }else if(this.skeleton) {
+                } else if (this.skeleton) {
                     classes.push(typeClasses['skeleton'], 'cursor-not-allowed');
-                }else{
+                } else {
                     classes.push(typeClasses[this.type], 'cursor-pointer');
                 }
 

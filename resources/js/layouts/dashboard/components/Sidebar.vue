@@ -46,9 +46,7 @@
                     : 'text-white hover:bg-slate-700 dark:text-neutral-200 dark:hover:bg-neutral-700'
                 ]">
 
-                <HouseIcon v-if="menu.name == 'Home'" :size="20"></HouseIcon>
-                <UsersRoundIcon v-else-if="menu.name == 'Agents'" :size="20"></UsersRoundIcon>
-                <BuildingIcon v-else-if="menu.name == 'Organizations'" :size="20"></BuildingIcon>
+                <component v-if="menu.icon" :is="menu.icon" :size="20" />
 
                 <span>{{ menu.name }}</span>
 
@@ -63,18 +61,17 @@
   </template>
 
   <script>
-    import { HouseIcon } from 'lucide-vue-next';
-    import { BuildingIcon } from 'lucide-vue-next';
-    import { UsersRoundIcon } from 'lucide-vue-next';
+
+    import { PhoneCall, HouseIcon, BuildingIcon, UsersRoundIcon } from 'lucide-vue-next';
 
     export default {
-        components: { HouseIcon, BuildingIcon, UsersRoundIcon },
         data() {
             return {
                 menus: [
-                { name: 'Home', route: 'show-home' },
-                { name: 'Agents', route: 'show-agents' },
-                { name: 'Organizations', route: 'show-organizations' },
+                    { name: 'Home', route: 'show-home', icon: HouseIcon },
+                    { name: 'Calls', route: 'show-calls', icon: PhoneCall },
+                    { name: 'Users', route: 'show-users', icon: UsersRoundIcon },
+                    { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
                 ],
             };
         }

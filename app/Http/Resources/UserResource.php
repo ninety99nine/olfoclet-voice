@@ -10,12 +10,17 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'      => $this->id,
-            'type'  => $this->type,
-            'name'    => $this->name,
-            'email'    => $this->email,
+            'id' => $this->id,
+            'name' => $this->name,
+            'type' => $this->type,
+            'email' => $this->email,
             'updated_at' => $this->created_at->toDateString(),
-            'created_at' => $this->created_at->toDateString()
+            'created_at' => $this->created_at->toDateString(),
+            'organizations_count' => $this->whenCounted('organizations'),
+            '_links' => [
+                'update_user' => route('show-user', ['user' => $this->resource->id]),
+                'delete_user' => route('show-user', ['user' => $this->resource->id])
+            ]
         ];
     }
 }

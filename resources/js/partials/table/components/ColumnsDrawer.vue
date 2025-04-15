@@ -24,15 +24,15 @@
 
                     <div class="flex items-center space-x-2">
 
-                        <!-- Columns Icon -->
-                        <svg class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
+                        <div class="flex items-center space-x-2 text-gray-700">
 
-                        <!-- Heading -->
-                        <h2 class="text-gray-700">
-                            Columns
-                        </h2>
+                            <!-- Columns Icon -->
+                            <Logs size="20"></Logs>
+
+                            <!-- Heading -->
+                            <h2>Columns</h2>
+
+                        </div>
 
                     </div>
 
@@ -117,18 +117,18 @@
 
 <script>
 
+    import { Logs } from 'lucide-vue-next';
     import Pill from '@Partials/Pill.vue';
     import Input from '@Partials/Input.vue';
     import cloneDeep from 'lodash/cloneDeep';
     import Button from '@Partials/Button.vue';
     import Drawer from '@Partials/Drawer.vue';
     import Switch from '@Partials/Switch.vue';
-    import { Logs } from 'lucide-vue-next';
     import { VueDraggableNext } from 'vue-draggable-next';
 
     export default {
         inject: ['formState'],
-        components: { draggable: VueDraggableNext, Input, Pill, Button, Drawer, Switch },
+        components: { Logs, draggable: VueDraggableNext, Input, Pill, Button, Drawer, Switch },
         props: {
             columns: {
                 type: Array,

@@ -12,12 +12,17 @@ class Organization extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'country', 'active', 'alias'
+        'name', 'country', 'active', 'alias', 'seats'
     ];
 
     #[Scope]
     protected function search(Builder $query, string $searchTerm): void
     {
         $query->where('name', 'like', '%' . $searchTerm . '%');
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 }

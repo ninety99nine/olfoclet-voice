@@ -16,7 +16,8 @@ class UpdateOrganizationRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'country' => 'required|string',
-            'active' => 'sometimes|boolean'
+            'active' => 'sometimes|boolean',
+            'seats' => 'sometimes|integer|min:1',
         ];
     }
 

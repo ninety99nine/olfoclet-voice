@@ -16,7 +16,10 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/filters', [FilterController::class, 'showFilters']);
 Route::get('/sorting', [SortingController::class, 'showSorting']);
 
-require __DIR__.'/api/organizations.php';
+// Automatically require route files in routes/api/*.php
+foreach (glob(__DIR__ . '/api/*.php') as $routeFile) {
+    require $routeFile;
+}
 
 Route::post('/voice/ivr', function () {
     $response = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;

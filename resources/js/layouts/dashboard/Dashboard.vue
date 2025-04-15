@@ -25,7 +25,7 @@
     import Notifications from '@Layouts/dashboard/components/Notifications.vue';
 
     export default {
-        inject: ['authState', 'formState', 'changeHistoryState'],
+        inject: ['formState', 'changeHistoryState'],
         components: {
             Header, Content, Sidebar, Breadcrumb, Notifications
         },
@@ -43,45 +43,6 @@
                     }
                 ],
                 isLoggingOut: false
-            }
-        },
-        computed: {
-            authUser() {
-                return this.authState.user;
-            },
-            isLoadingAuthUser() {
-                return this.authState.isLoadingUser;
-            }
-        },
-        methods: {
-            isActiveNavMenu(navMenu) {
-                const routeNames = [navMenu.routeName];
-                if(navMenu.associatedRouteNames) routeNames.push(...navMenu.associatedRouteNames);
-                return routeNames.includes(this.$route.name);
-            },
-            attemptLogout() {
-
-                this.isLoggingOut = true;
-
-                logout().then(response => {
-
-                    if(response.status == 200) {
-
-                        this.isLoggingOut = false;
-
-                        // Redirect to login
-                        this.$router.replace({ name: 'login' });
-
-                    }
-
-                }).catch(errorException => {
-
-                    //  Stop loader
-                    this.isLoggingOut = false;
-
-                    this.showErrors(errorException, 'attemptLogout');
-
-                });
             }
         },
         mounted() {

@@ -5,7 +5,7 @@
         <template v-if="showTable">
 
             <!-- Page Header -->
-            <div class="space-y-1">
+            <div class="space-y-8">
 
                 <div class="flex items-end space-x-2">
 
@@ -102,7 +102,7 @@
                                 <!-- Table Column Names -->
                                 <template v-for="(column, index) in columns" :key="index">
 
-                                    <th v-if="column.active" scope="col" class="whitespace-nowrap align-top pr-4 py-4">
+                                    <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top pr-4 py-4', { 'text-center' : ['Users'].includes(column.name) }]">
                                         {{ column.name }}
                                     </th>
 
@@ -158,6 +158,11 @@
                                         <!-- Status -->
                                         <td v-if="column.name == 'Status'" class="whitespace-nowrap align-center pr-4 py-4">
                                             <Pill :type="organization.active ? 'success' : 'warning'" size="xs">{{ organization.active ? 'Active' : 'Inactive' }}</Pill>
+                                        </td>
+
+                                        <!-- Users -->
+                                        <td v-if="column.name == 'Users'" class="whitespace-nowrap align-center text-center pr-4 py-4">
+                                            <span>{{ organization.users_count }}/{{ organization.seats }}</span>
                                         </td>
 
                                         <!-- Created Date -->
@@ -254,6 +259,7 @@
 
     import axios from 'axios';
     import isEqual from 'lodash/isEqual';
+    import Tabs from '@Partials/Tabs.vue';
     import Pill from '@Partials/Pill.vue';
     import Modal from '@Partials/Modal.vue';
     import Input from '@Partials/Input.vue';
@@ -263,16 +269,16 @@
     import Table from '@Partials/table/Table.vue';
     import { getCountryName } from '@Utils/generalUtils.js';
     import { formattedDatetime, formattedRelativeDate } from '@Utils/dateUtils.js';
-    import { Plus, Pencil, Trash2, UserPlus, Building, ExternalLink } from 'lucide-vue-next';
     import AddOrganizationModal from '@Pages/organizations/components/AddOrganizationModal.vue';
     import UpdateOrganizationModal from '@Pages/organizations/components/UpdateOrganizationModal.vue';
     import DeleteOrganizationModal from '@Pages/organizations/components/DeleteOrganizationModal.vue';
     import DeleteOrganizationsModal from '@Pages/organizations/components/DeleteOrganizationsModal.vue';
+    import { Box, Plus, ShieldCheck, Pencil, Trash2, UserPlus, Building, ExternalLink } from 'lucide-vue-next';
 
     export default {
         inject: ['formState', 'notificationState'],
         components: {
-            Pill, Modal, Input, Button, Popover, Dropdown, Table, Building,
+            Tabs, Pill, Modal, Input, Button, Popover, Dropdown, Table, Building,
             AddOrganizationModal, UpdateOrganizationModal, DeleteOrganizationModal, DeleteOrganizationsModal
         },
         data() {
@@ -292,8 +298,14 @@
                 organizations: [],
                 filterExpressions: [],
                 sortingExpressions: [],
+                activeTab: 'organizations',
                 isLoadingOrganizations: false,
                 columns: this.prepareColumns(),
+                tabs: [
+                    { label: 'Organizations', value: 'organizations', icon: Building },
+                    { label: 'Subscription Plans', value: 'subscriptions', icon: Box },
+                    { label: 'Security', value: 'security', icon: ShieldCheck },
+                ],
                 dropdownOptions: [
                     {
                         icon: Trash2,
@@ -332,8 +344,8 @@
             formattedDatetime: formattedDatetime,
             formattedRelativeDate: formattedRelativeDate,
             prepareColumns() {
-                const columnNames = ['Organization', 'Country', 'Status', 'Created Date'];
-                const defaultColumnNames  = ['Organization', 'Country', 'Status', 'Created Date'];
+                const columnNames = ['Organization', 'Country', 'Status', 'Users', 'Created Date'];
+                const defaultColumnNames  = ['Organization', 'Country', 'Status', 'Users', 'Created Date'];
 
                 return columnNames.map(name => ({
                     name,
@@ -419,12 +431,10 @@
 
                     url = url ?? '/api/organizations';
 
-                    console.log('url');
-                    console.log(url);
-
                     let config = {
                         params: {
-                            'per_page': this.perPage
+                            'per_page': this.perPage,
+                            '_countable_relationships': 'users'
                         }
                     }
 

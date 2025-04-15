@@ -38,9 +38,14 @@ const routes = [
                 component: () => import('@Pages/home/show/Show.vue'),
             },
             {
-                path: 'agents',
-                name: 'show-agents',
-                component: () => import('@Pages/agents/show/Show.vue'),
+                path: 'calls',
+                name: 'show-calls',
+                component: () => import('@Pages/calls/show/Show.vue'),
+            },
+            {
+                path: 'users',
+                name: 'show-users',
+                component: () => import('@Pages/users/show/Show.vue'),
             },
             {
                 path: 'organizations',

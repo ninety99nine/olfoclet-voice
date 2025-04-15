@@ -24,15 +24,15 @@
 
                     <div class="flex items-center space-x-2">
 
-                        <!-- Sort Icon -->
-                        <svg class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0-3.75-3.75M17.25 21 21 17.25" />
-                        </svg>
+                        <div class="flex items-center space-x-2 text-gray-700">
 
-                        <!-- Heading -->
-                        <h2 class="text-gray-700">
-                            Sorting
-                        </h2>
+                            <!-- Sort Icon -->
+                            <ArrowDownWideNarrow size="20"></ArrowDownWideNarrow>
+
+                            <!-- Heading -->
+                            <h2>Sorting</h2>
+
+                        </div>
 
                     </div>
 
@@ -165,7 +165,7 @@
 
     export default {
         inject: ['notificationState'],
-        components: { draggable: VueDraggableNext, Pill, Input, Button, Drawer, Loader },
+        components: { draggable: VueDraggableNext, Pill, Input, Button, Drawer, Loader, ArrowDownWideNarrow },
         props: {
             sortingExpressions: {
                 type: Array,

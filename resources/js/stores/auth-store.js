@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { defineStore } from 'pinia';
+import { useNotificationStore } from "@Stores/notification-store.js";
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -19,7 +20,14 @@ export const useAuthStore = defineStore('auth', {
             this.setTokenOnLocalStorage(this.token);
         },
         async logout () {
-            await axios.post('/api/logout');
+            try {
+                await axios.post('/api/logout');
+            } catch (error) {
+                this.isLoggingOut = false;
+                useNotificationStore().showWarningNotification(
+                    error?.response?.data?.message || error.message || 'Something went wrong trying to logout'
+                );
+            }
 
             this.user = null;
             this.token = null;

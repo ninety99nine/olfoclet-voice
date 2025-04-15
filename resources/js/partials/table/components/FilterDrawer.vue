@@ -6,7 +6,7 @@
         <Button
             size="xs"
             type="outline"
-            :leftIcon="ListFilter"
+            :leftIcon="Funnel"
             :action="openFilterDrawer">
             <span>Filter</span>
         </Button>
@@ -22,17 +22,13 @@
                 <!-- Header -->
                 <div class="flex justify-between items-center space-x-2 bg-gray-100 border-b shadow-sm p-4">
 
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 text-gray-700">
 
                         <!-- Filter Icon -->
-                        <svg class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
-                        </svg>
+                        <Funnel size="20"></Funnel>
 
                         <!-- Heading -->
-                        <h2 class="text-gray-700">
-                            Filters
-                        </h2>
+                        <h2>Filters</h2>
 
                     </div>
 
@@ -165,11 +161,11 @@
     import Drawer from '@Partials/Drawer.vue';
     import Loader from '@Partials/Loader.vue';
     import Datepicker from '@Partials/Datepicker.vue';
-    import { ListFilter, ArrowUp, ArrowDown } from 'lucide-vue-next';
+    import { Funnel, ArrowUp, ArrowDown } from 'lucide-vue-next';
 
     export default {
         inject: ['notificationState'],
-        components: { Pill, Input, Button, Drawer, Datepicker, Loader },
+        components: { Pill, Input, Button, Drawer, Datepicker, Loader, Funnel },
         props: {
             filterExpressions: {
                 type: Array,
@@ -182,9 +178,9 @@
         emits: ['updatedFilters'],
         data() {
             return {
+                Funnel,
                 ArrowUp,
                 ArrowDown,
-                ListFilter,
                 showMore: false,
                 localFilters: null,
                 filterDrawer: null,
