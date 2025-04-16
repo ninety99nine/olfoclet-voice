@@ -3,32 +3,40 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Enums\UserType;
+use App\Enums\SystemRole;
 
-class UserPolicy
+class UserPolicy extends BasePolicy
 {
+    /**
+     * Grant all permissions to super admins who have roles not tied to any organization.
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        return $this->isSuperAdmin($user);
+    }
+
     public function viewAny(User $user): bool
     {
-        return $user->type === UserType::SUPER_ADMIN->value;
+        return false;
     }
 
     public function view(User $user, User $model): bool
     {
-        return $user->type === UserType::SUPER_ADMIN->value;
+        return false;
     }
 
     public function create(User $user): bool
     {
-        return $user->type === UserType::SUPER_ADMIN->value;
+        return false;
     }
 
     public function update(User $user, User $model): bool
     {
-        return $user->type === UserType::SUPER_ADMIN->value;
+        return false;
     }
 
     public function delete(User $user, User $model): bool
     {
-        return $user->type === UserType::SUPER_ADMIN->value;
+        return false;
     }
 }

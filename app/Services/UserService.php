@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Enums\UserType;
+use App\Models\Role;
 use App\Models\User;
+use App\Enums\SystemRole;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserResources;
@@ -34,12 +35,19 @@ class UserService extends BaseService
         $user = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
-            'type'     => $data['type'],
             'password' => $data['password']
         ]);
 
-        if (isset($data['organization_id']) && $data['type'] === UserType::REGULAR->value) {
+        if($data['type'] === SystemRole::SUPER_ADMIN->value) {
+
+            $superAdminRole = Role::where('name', SystemRole::SUPER_ADMIN->value)->whereNull('organization_id');
+            $user->assignRole($superAdminRole);
+
+        }else if (isset($data['organization_id']) && $data['type'] === SystemRole::REGULAR->value) {
+
             $user->organizations()->syncWithoutDetaching([$data['organization_id']]);
+            //  Add the role assigned
+
         }
 
         // Optionally dispatch email here...
@@ -51,10 +59,10 @@ class UserService extends BaseService
     /**
      * Delete User.
      *
-     * @param int $userId
+     * @param string $userId
      * @return array
      */
-    public function deleteUser(int $userId): array
+    public function deleteUser(string $userId): array
     {
         $user = User::findOrFail($userId);
 
@@ -99,10 +107,10 @@ class UserService extends BaseService
     /**
      * Show User.
      *
-     * @param int $userId
+     * @param string $userId
      * @return UserResource
      */
-    public function showUser(int $userId): UserResource
+    public function showUser(string $userId): UserResource
     {
         $user = User::findOrFail($userId);
         return $this->showResource($user);
@@ -111,11 +119,11 @@ class UserService extends BaseService
     /**
      * Update User.
      *
-     * @param int $userId
+     * @param string $userId
      * @param array $data
      * @return array
      */
-    public function updateUser(int $userId, array $data): array
+    public function updateUser(string $userId, array $data): array
     {
         $user = User::findOrFail($userId);
 

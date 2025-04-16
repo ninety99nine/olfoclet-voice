@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Role;
 use App\Models\Organization;
-use Spatie\Permission\Models\Role;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\OrganizationResources;
 
@@ -38,10 +38,10 @@ class OrganizationService extends BaseService
     /**
      * Delete Organization.
      *
-     * @param int $organizationId
+     * @param string $organizationId
      * @return array
      */
-    public function deleteOrganization(int $organizationId): array
+    public function deleteOrganization(string $organizationId): array
     {
         $organization = Organization::findOrFail($organizationId);
 
@@ -98,10 +98,10 @@ class OrganizationService extends BaseService
     /**
      * Show Organization.
      *
-     * @param int $organizationId
+     * @param string $organizationId
      * @return OrganizationResource
      */
-    public function showOrganization(int $organizationId): OrganizationResource
+    public function showOrganization(string $organizationId): OrganizationResource
     {
         $organization = Organization::findOrFail($organizationId);
         return $this->showResource($organization);
@@ -110,11 +110,11 @@ class OrganizationService extends BaseService
     /**
      * Update Organization.
      *
-     * @param int $organizationId
+     * @param string $organizationId
      * @param array $data
      * @return array
      */
-    public function updateOrganization(int $organizationId, array $data): array
+    public function updateOrganization(string $organizationId, array $data): array
     {
         $organization = Organization::findOrFail($organizationId);
 

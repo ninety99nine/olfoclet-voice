@@ -2,22 +2,36 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 🔐 Temporarily disable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 🔄 Truncate all related tables
+        DB::table('model_has_roles')->truncate();
+        DB::table('model_has_permissions')->truncate();
+        DB::table('role_has_permissions')->truncate();
+        DB::table('organization_user')->truncate();
+
+        DB::table('personal_access_tokens')->truncate();
+        DB::table('sessions')->truncate();
+        DB::table('password_reset_tokens')->truncate();
+
+        DB::table('roles')->truncate();
+        DB::table('permissions')->truncate();
+        DB::table('organizations')->truncate();
+        DB::table('users')->truncate();
+
+        // ✅ Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Seed base records
+        $this->call(DefaultSuperAdminSeeder::class);
+        //$this->call(RolesAndPermissionsSeeder::class);
     }
 }

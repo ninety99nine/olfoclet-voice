@@ -49,18 +49,18 @@
                     <!-- Users Table -->
                     <Table
                         @search="search"
+                        resource="users"
                         :columns="columns"
                         :perPage="perPage"
                         @paginate="paginate"
+                        @refresh="fetchUsers"
                         :searchTerm="searchTerm"
                         :pagination="pagination"
-                        resource="users"
-                        @refresh="fetchUsers"
+                        :isLoading="isLoadingUsers"
                         @updatedColumns="updatedColumns"
                         @updatedFilters="updatedFilters"
                         @updatedSorting="updatedSorting"
                         @updatedPerPage="updatedPerPage"
-                        :isLoading="isLoadingUsers"
                         :filterExpressions="filterExpressions"
                         :sortingExpressions="sortingExpressions">
 

@@ -22,6 +22,11 @@ class OrganizationObserver
         //
     }
 
+    public function deleting(Organization $organization): void
+    {
+        //
+    }
+
     public function deleted(Organization $organization): void
     {
         //

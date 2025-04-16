@@ -30,9 +30,9 @@ class OrganizationController extends BaseController
     /**
      * Show organizations.
      *
-     * @return OrganizationResources
+     * @return OrganizationResources|JsonResponse
      */
-    public function showOrganizations(): OrganizationResources
+    public function showOrganizations(): OrganizationResources|JsonResponse
     {
         return $this->prepareOutput($this->service->showOrganizations());
     }

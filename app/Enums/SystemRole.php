@@ -2,8 +2,8 @@
 
 namespace App\Enums;
 
-enum UserType: string
+enum SystemRole: string
 {
     case REGULAR = 'regular';
-    case SUPER_ADMIN = 'super_admin';
+    case SUPER_ADMIN = 'super admin';
 }

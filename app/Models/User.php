@@ -2,24 +2,19 @@
 
 namespace App\Models;
 
-use App\Enums\UserType;
+use App\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
-
-    public static function USER_TYPES(): array
-    {
-        return array_map(fn($status) => $status->value, UserType::cases());
-    }
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, HasUuids;
 
     protected function casts(): array
     {

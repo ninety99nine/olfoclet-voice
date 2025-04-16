@@ -53,6 +53,11 @@ const routes = [
                 component: () => import('@Pages/organizations/show/Show.vue'),
             },
             {
+                path: 'roles',
+                name: 'show-roles',
+                component: () => import('@Pages/roles/show/Show.vue'),
+            },
+            {
                 path: 'account',
                 name: 'show-account',
                 component: () => import('@Pages/account/show/Show.vue'),

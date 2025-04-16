@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class OrganisationPermission
@@ -16,9 +15,12 @@ class OrganisationPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if($request->organization) {
-            setPermissionsTeamId($request->organization->id);
+        $organizationId = $request->route('organization') ?? $request->input('organization_id');
+
+        if ($organizationId) {
+            setPermissionsTeamId($organizationId);
         }
+
         return $next($request);
     }
 }
