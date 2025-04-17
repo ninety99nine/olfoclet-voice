@@ -7,7 +7,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class RoleResource extends JsonResource
 {
-    public function toArray($request)
+    /**
+     * Transform the resource into an array.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
@@ -17,9 +23,10 @@ class RoleResource extends JsonResource
             'updated_at' => $this->updated_at->toDateString(),
             'permissions_count' => $this->whenCounted('permissions'),
             'organization' => OrganizationResource::make($this->whenLoaded('organization')),
-            '_links'       => [
-                'update_role' => route('show-role', ['role' => $this->id]),
-                'delete_role' => route('show-role', ['role' => $this->id]),
+            '_links' => [
+                'self' => route('show-role', ['role' => $this->id]),
+                'update' => route('update-role', ['role' => $this->id]),
+                'delete' => route('delete-role', ['role' => $this->id]),
             ],
         ];
     }

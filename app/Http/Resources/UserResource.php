@@ -7,20 +7,27 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
 {
-    public function toArray($request)
+    /**
+     * Transform the resource into an array.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
             'name' => $this->name,
             'type' => $this->type,
             'email' => $this->email,
-            'updated_at' => $this->created_at->toDateString(),
             'created_at' => $this->created_at->toDateString(),
+            'updated_at' => $this->updated_at->toDateString(),
             'organizations_count' => $this->whenCounted('organizations'),
             '_links' => [
-                'update_user' => route('show-user', ['user' => $this->resource->id]),
-                'delete_user' => route('show-user', ['user' => $this->resource->id])
-            ]
+                'self' => route('show-user', ['user' => $this->id]),
+                'update' => route('update-user', ['user' => $this->id]),
+                'delete' => route('delete-user', ['user' => $this->id]),
+            ],
         ];
     }
 }

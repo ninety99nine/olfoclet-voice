@@ -2,14 +2,41 @@
 
 namespace App\Policies;
 
-use App\Enums\SystemRole;
+use App\Models\User;
+use App\Services\AuthService;
 
 class BasePolicy
 {
-    protected function isSuperAdmin($user): bool
+    /**
+     * @var AuthService
+     */
+    protected $authService;
+
+    /**
+     * Create a new policy instance.
+     *
+     * @param AuthService $authService
+     */
+    public function __construct(AuthService $authService)
     {
-        return $user->roles()->where('name', SystemRole::SUPER_ADMIN->value)
-                    ->whereNull('roles.organization_id')
-                    ->exists();
+        $this->authService = $authService;
+    }
+
+    /**
+     * Check if the user has the specified permission within the organization.
+     *
+     * @param User $user
+     * @param string $ability
+     * @param string|null $organizationId
+     * @return bool
+     */
+    protected function isOrgUserWithPermission(User $user, string $ability, ?string $organizationId): bool
+    {
+        // Middleware ensures organization_id is valid and user is a member (for non-super admins)
+        if (!$organizationId) {
+            return false;
+        }
+
+        return $user->hasPermissionTo($ability, $organizationId);
     }
 }

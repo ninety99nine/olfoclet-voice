@@ -7,7 +7,13 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrganizationResource extends JsonResource
 {
-    public function toArray($request)
+    /**
+     * Transform the resource into an array.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
@@ -17,12 +23,13 @@ class OrganizationResource extends JsonResource
             'active' => $this->active,
             'country' => $this->country,
             'users_count' => $this->whenCounted('users'),
-            'updated_at' => $this->created_at->toDateString(),
             'created_at' => $this->created_at->toDateString(),
+            'updated_at' => $this->updated_at->toDateString(),
             '_links' => [
-                'update_organization' => route('show-organization', ['organization' => $this->resource->id]),
-                'delete_organization' => route('show-organization', ['organization' => $this->resource->id])
-            ]
+                'self' => route('show-organization', ['organization' => $this->id]),
+                'update' => route('update-organization', ['organization' => $this->id]),
+                'delete' => route('delete-organization', ['organization' => $this->id]),
+            ],
         ];
     }
 }

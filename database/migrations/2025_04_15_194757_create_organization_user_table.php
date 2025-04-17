@@ -6,28 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('organization_user', function (Blueprint $table) {
-            $table->id();
             $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
-
-            $table->string('phone')->nullable();
-            $table->string('status')->nullable(); // e.g., Available, Busy, Offline
+            $table->enum('status', ['available', 'on call', 'on break', 'unavailable'])->default('available');
             $table->timestamp('last_seen_at')->nullable();
-
             $table->timestamps();
-            $table->unique(['organization_id', 'user_id']);
+
+            $table->primary(['organization_id', 'user_id']);
+            $table->index('status');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('organization_user');

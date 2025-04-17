@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Organization;
+use App\Listeners\RoleEventListener;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Http\Kernel;
 use App\Observers\OrganizationObserver;
 use Illuminate\Support\ServiceProvider;
@@ -24,12 +26,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        //  Events
+        Event::subscribe(RoleEventListener::class);
+
+        //  Observers
         Organization::observe(OrganizationObserver::class);
 
-        /** @var Kernel $kernel */
+        /**
+         *  Reference: https://spatie.be/docs/laravel-permission/v6/basic-usage/teams-permissions
+         *
+         *  @var Kernel $kernel
+         */
         $kernel = app()->make(Kernel::class);
 
-        //  Reference: https://spatie.be/docs/laravel-permission/v6/basic-usage/teams-permissions
         $kernel->addToMiddlewarePriorityBefore(
             SubstituteBindings::class,
             OrganisationPermission::class

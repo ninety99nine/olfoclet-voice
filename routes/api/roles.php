@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
 use App\Http\Middleware\OrganisationPermission;
 
-
 Route::middleware(['auth:sanctum', OrganisationPermission::class])
     ->prefix('roles')
     ->controller(RoleController::class)
