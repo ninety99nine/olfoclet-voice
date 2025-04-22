@@ -1,6 +1,6 @@
 <template>
     <Modal
-        size="md"
+        size="sm"
         ref="modal"
         :showFooter="true"
         :dismissable="true"
@@ -144,10 +144,12 @@
     import SelectTags from '@Partials/SelectTags.vue';
 
     export default {
-        components: { Modal, Input, Button, Select, SelectTags, Plus, Trash2 },
+        components: { Modal, Input, Button, Select, SelectTags },
         inject: ['formState', 'notificationState'],
         data() {
             return {
+                Plus,
+                Trash2,
                 isCreating: false,
                 form: {
                     organization_id: null,

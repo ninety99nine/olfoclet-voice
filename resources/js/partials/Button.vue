@@ -45,7 +45,8 @@
                 type: String,
                 default: 'primary',
                 validator: (value) => [
-                    'light', 'primary', 'success', 'warning', 'danger', 'ghost', 'dark', 'outline', 'outlineDanger'
+                    'light', 'primary', 'success', 'warning', 'danger', 'ghost', 'dark',
+                    'outline', 'outlineDanger', 'bare', 'bareDanger'
                 ].includes(value)
             },
             disabled: {
@@ -126,7 +127,7 @@
 
                 const typeClasses = {
                     light: "border border-gray-300 bg-gray-100 hover:bg-gray-300",
-                    primary: "bg-blue-600 hover:bg-blue-800 text-white",
+                    primary: "bg-indigo-600 hover:bg-indigo-800 text-white",
                     success: "bg-green-600 hover:bg-green-800 text-white",
                     warning: "bg-yellow-600 hover:bg-yellow-800 text-white",
                     danger: "bg-red-600 hover:bg-red-800 text-white",
@@ -135,13 +136,15 @@
                     outlineDanger: "border border-red-600 bg-transparent hover:bg-red-200 text-red-600",
                     disabled: "bg-gray-100 text-gray-300",
                     skeleton: "bg-gray-100 text-gray-300",
-                    ghost: "bg-transparent text-blue-600 hover:text-blue-800 hover:underline shadow-none"
+                    ghost: "bg-transparent text-blue-600 hover:text-blue-800 hover:underline shadow-none",
+                    bare: "hover:opacity-50",
+                    bareDanger: "hover:opacity-50 text-red-600"
                 };
 
                 classes.push(baseClasses);
                 classes.push(fontSizeClasses[this.size]);
 
-                if (this.type !== 'ghost') {
+                if (!['ghost', 'bare', 'bareDanger'].includes(this.type)) {
                     classes.push(paddingClasses[this.size]);
                 }
 

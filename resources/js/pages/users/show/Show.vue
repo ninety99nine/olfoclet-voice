@@ -1,18 +1,18 @@
 <template>
 
-    <div class="min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
+    <div class="select-none min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
 
         <template v-if="showTable">
 
             <!-- Page Header -->
-            <div class="space-y-1">
+            <div class="flex justify-between">
 
                 <div class="flex items-end space-x-2">
 
-                    <UserIcon size="48" stroke-width="1" class="text-gray-400" />
+                    <UserRoundIcon size="48" stroke-width="1" class="text-gray-400" />
 
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">User Management</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Users</h2>
 
                         <p class="text-sm text-gray-600 dark:text-neutral-400">
                             Manage all users across organizations
@@ -31,131 +31,121 @@
 
             </div>
 
-            <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl">
+            <!-- Users Table -->
+            <Table
+                @search="search"
+                resource="users"
+                :columns="columns"
+                :perPage="perPage"
+                @paginate="paginate"
+                @refresh="fetchUsers"
+                :searchTerm="searchTerm"
+                :pagination="pagination"
+                :isLoading="isLoadingUsers"
+                @updatedColumns="updatedColumns"
+                @updatedFilters="updatedFilters"
+                @updatedSorting="updatedSorting"
+                @updatedPerPage="updatedPerPage"
+                :filterExpressions="filterExpressions"
+                :sortingExpressions="sortingExpressions">
 
-                <div class="p-4 sm:p-6">
+                <!-- Select Action -->
+                <template #belowToolbar>
 
-                    <div class="flex justify-between items-center mb-4">
+                    <div :class="[{ 'hidden': totalCheckedRows === 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
 
-                        <div>
-                            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">All Users</h3>
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">
-                                View and manage all users on the Telcoflo platform
-                            </p>
-                        </div>
+                        <span class="text-sm">Actions: </span>
+
+                        <Dropdown
+                            triggerSize="sm"
+                            :options="dropdownOptions"
+                            :triggerText="`Select Action (${totalCheckedRows} selected)`" />
 
                     </div>
 
-                    <!-- Users Table -->
-                    <Table
-                        @search="search"
-                        resource="users"
-                        :columns="columns"
-                        :perPage="perPage"
-                        @paginate="paginate"
-                        @refresh="fetchUsers"
-                        :searchTerm="searchTerm"
-                        :pagination="pagination"
-                        :isLoading="isLoadingUsers"
-                        @updatedColumns="updatedColumns"
-                        @updatedFilters="updatedFilters"
-                        @updatedSorting="updatedSorting"
-                        @updatedPerPage="updatedPerPage"
-                        :filterExpressions="filterExpressions"
-                        :sortingExpressions="sortingExpressions">
+                </template>
 
-                        <!-- Select Action -->
-                        <template #belowToolbar>
+                <!-- Table Head -->
+                <template #head>
 
-                            <div :class="[{ 'hidden' : totalCheckedRows == 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
+                    <tr class="border-b border-indigo-200">
 
-                                <span class="text-sm">Actions: </span>
+                        <!-- Checkbox -->
+                        <th scope="col" class="whitespace-nowrap align-top font-semibold px-4 py-2.5">
 
-                                <Dropdown
-                                    triggerSize="sm"
-                                    :options="dropdownOptions"
-                                    :triggerText="`Select Action (${totalCheckedRows} selected)`">
-                                </Dropdown>
+                            <Input
+                                type="checkbox"
+                                v-model="selectAll">
+                            </Input>
 
-                            </div>
+                        </th>
+
+                        <!-- Table Column Names -->
+                        <template v-for="(column, index) in columns" :key="index">
+
+                            <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top font-semibold pr-4 py-2.5', { 'text-center' : ['Users'].includes(column.name) }]">
+                                {{ column.name }}
+                            </th>
 
                         </template>
 
-                        <!-- Table Head -->
-                        <template #head>
+                        <!-- Actions -->
+                        <th scope="col" class="whitespace-nowrap align-top font-semibold pr-4 py-2.5">Actions</th>
 
-                            <tr class="border-b border-gray-200">
+                    </tr>
 
-                                <th scope="col" class="whitespace-nowrap align-top px-4 py-4">
-                                    <Input type="checkbox" v-model="selectAll" />
-                                </th>
+                </template>
 
-                                <template v-for="(column, index) in columns" :key="index">
-                                    <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top pr-4 py-4', { 'text-center' : ['Organizations'].includes(column.name) }]">
-                                        {{ column.name }}
-                                    </th>
-                                </template>
+                <!-- Table Body -->
+                <template #body>
 
-                                <th scope="col" class="whitespace-nowrap align-top pr-4 py-4">Actions</th>
+                    <tr @click.stop="onView(user)" v-for="user in users" :key="user.id" :class="[checkedRows[user.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer text-sm border-b border-gray-200']">
 
-                            </tr>
+                        <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
+                            <Input type="checkbox" v-model="checkedRows[user.id]" />
+                        </td>
 
-                        </template>
+                        <template v-for="(column, columnIndex) in columns" :key="columnIndex">
 
-                        <!-- Table Body -->
-                        <template #body>
+                            <template v-if="column.active">
 
-                            <tr @click.stop="onView(user)" v-for="user in users" :key="user.id" :class="[checkedRows[user.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
-
-                                <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
-                                    <Input type="checkbox" v-model="checkedRows[user.id]" />
+                                <!-- Name -->
+                                <td v-if="column.name == 'Name'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div>{{ user.name }}</div>
                                 </td>
 
-                                <template v-for="(column, columnIndex) in columns" :key="columnIndex">
-
-                                    <template v-if="column.active">
-
-                                        <!-- Name -->
-                                        <td v-if="column.name == 'Name'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="font-medium text-sm">{{ user.name }}</div>
-                                        </td>
-
-                                        <!-- Email -->
-                                        <td v-if="column.name == 'Email'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <span>{{ user.email }}</span>
-                                        </td>
-
-                                        <!-- Organizations -->
-                                        <td v-if="column.name == 'Organizations'" class="whitespace-nowrap align-center text-center pr-4 py-4">
-                                            <span>{{ user.organizations_count }}</span>
-                                        </td>
-
-                                        <!-- Created -->
-                                        <td v-else-if="column.name == 'Created Date'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="flex space-x-1 items-center">
-                                                <span>{{ formattedDatetime(user.createdAt) }}</span>
-                                                <Popover placement="top" class="opacity-0 group-hover:opacity-100" :content="formattedRelativeDate(user.createdAt)" />
-                                            </div>
-                                        </td>
-
-                                    </template>
-
-                                </template>
-
-                                <td class="align-top pr-4 py-4 flex items-center space-x-1">
-                                    <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateUserModal(user)" />
-                                    <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteUserModal(user)" />
+                                <!-- Email -->
+                                <td v-if="column.name == 'Email'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <span>{{ user.email }}</span>
                                 </td>
 
-                            </tr>
+                                <!-- Organizations -->
+                                <td v-if="column.name == 'Organizations'" class="whitespace-nowrap align-center text-center pr-4 py-4">
+                                    <span>{{ user.organizations_count }}</span>
+                                </td>
+
+                                <!-- Created -->
+                                <td v-else-if="column.name == 'Created Date'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div class="flex space-x-1 items-center">
+                                        <span>{{ formattedDatetime(user.createdAt) }}</span>
+                                        <Popover placement="top" class="opacity-0 group-hover:opacity-100" :content="formattedRelativeDate(user.createdAt)" />
+                                    </div>
+                                </td>
+
+                            </template>
 
                         </template>
 
-                    </Table>
+                        <td class="h-16 pr-4 py-4 flex align-middle items-center space-x-2">
+                            <Button type="bare" size="xs" :leftIcon="Pencil" leftIconSize="16" :action="() => showUpdateUserModal(user)" />
+                            <Button type="bareDanger" size="xs" :leftIcon="Trash2" leftIconSize="16" :action="() => showDeleteUserModal(user)" />
+                        </td>
 
-                </div>
+                    </tr>
 
-            </div>
+                </template>
+
+            </Table>
 
         </template>
 
@@ -164,7 +154,7 @@
 
             <div class="max-w-sm w-full bg-white shadow-sm rounded-xl p-6 flex flex-col items-center text-center space-y-4 border border-dashed border-gray-200">
 
-                <UserIcon size="48" class="text-gray-400" />
+                <UserRoundIcon size="48" class="text-gray-400" />
 
                 <h2 class="text-2xl font-bold text-gray-800">No Users Yet</h2>
                 <p class="text-sm text-gray-500">Add your first user to start managing the platform.</p>
@@ -203,13 +193,13 @@
     import DeleteUserModal from '@Pages/users/components/DeleteUserModal.vue';
     import DeleteUsersModal from '@Pages/users/components/DeleteUsersModal.vue';
     import { formattedDatetime, formattedRelativeDate } from '@Utils/dateUtils.js';
-    import { Plus, Pencil, Trash2, UserIcon, Building, ExternalLink } from 'lucide-vue-next';
+    import { Plus, Pencil, Trash2, UserRoundIcon, Building, ExternalLink } from 'lucide-vue-next';
 
     export default {
         inject: ['formState', 'notificationState'],
         components: {
             Pill, Modal, Input, Button, Popover, Dropdown, Table, Building,
-            AddUserModal, UpdateUserModal, DeleteUserModal, DeleteUsersModal, UserIcon
+            AddUserModal, UpdateUserModal, DeleteUserModal, DeleteUsersModal, UserRoundIcon
         },
         data() {
             return {

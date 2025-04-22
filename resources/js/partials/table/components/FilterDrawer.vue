@@ -16,7 +16,7 @@
             :scrollOnContent="false">
             <template #content>
                 <!-- Header -->
-                <div class="flex justify-between items-center space-x-2 bg-gray-100 border-b shadow-sm p-4">
+                <div class="flex justify-between items-center space-x-2 bg-gray-100 border-b border-gray-300 shadow-sm p-4">
                     <div class="flex items-center space-x-2 text-gray-700">
                         <!-- Filter Icon -->
                         <Funnel size="20"></Funnel>
@@ -32,7 +32,7 @@
                     </svg>
                 </div>
 
-                <p class="p-4 text-sm bg-blue-100">
+                <p class="p-4 text-sm bg-indigo-100">
                     Find exactly what you need by applying filters to your data
                 </p>
 

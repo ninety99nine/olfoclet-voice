@@ -72,6 +72,7 @@ const routes = [
                 name: 'show-account',
                 component: () => import('@Pages/account/show/Show.vue'),
             },
+            /*
             {
                 path: 'call-flows',
                 children: [
@@ -91,7 +92,13 @@ const routes = [
                         component: () => import('@Pages/call-flows/edit/components/Builder.vue'),
                     }
                 ]
-            }
+            },
+            */
+            {
+                path: 'media-files',
+                name: 'show-media-files',
+                component: () => import('@Pages/media-files/show/Show.vue'),
+            },
         ]
     }
 ];

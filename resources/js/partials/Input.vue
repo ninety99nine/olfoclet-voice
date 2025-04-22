@@ -53,7 +53,7 @@
                             :href="externalLinkUrl"
                             v-if="externalLinkName"
                             v-bind="type === 'file' ? fileEventListeners : {}"
-                            class="inline-block text-xs text-blue-700 hover:underline hover:text-blue-90">
+                            class="inline-block text-xs text-indigo-700 hover:underline hover:text-indigo-90">
                             <span>{{ externalLinkName }}</span>
                             <svg class="w-3 h-3 inline-block ml-0.5 -mt-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"></path>
@@ -81,7 +81,7 @@
                         'flex',
                         wrapperAlignItems,
                         {
-                            'bg-slate-50 py-2.5 px-2.5 rounded-md border border-gray-300 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-blue-800':
+                            'bg-slate-50 py-2.5 px-2.5 rounded-md border border-gray-300 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-800':
                             [
                                 'text', 'password', 'email', 'number', 'tel', 'url', 'search', 'date',
                                 'datetime-local', 'month', 'week', 'time', 'money', 'percentage', 'textarea'
@@ -98,7 +98,7 @@
                         {
                             [height]: type == 'file',
                             'cursor-pointer': type == 'file' && !(disabled || !filesLeftToUpload),
-                            'select-none border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 text-sm hover:bg-blue-50 transition':
+                            'select-none border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-500 text-sm hover:bg-indigo-50 transition':
                             type == 'file'
                         },
                         {
@@ -201,11 +201,11 @@
                                 type == 'color'
                             },
                             {
-                                'shrink-0 mt-0.5 p-1.5 border-gray-300 rounded-[4px] text-blue-600 focus:ring-0 focus:ring-offset-0 checked:border-blue-500':
+                                'shrink-0 mt-0.5 p-1.5 border-gray-300 rounded-[4px] text-indigo-600 focus:ring-0 focus:ring-offset-0 checked:border-indigo-500':
                                 type == 'checkbox'
                             },
                             {
-                                'shrink-0 mt-0.5 p-1.5 border-gray-300 rounded-full text-blue-600 focus:ring-0 focus:ring-offset-0 checked:border-blue-500':
+                                'shrink-0 mt-0.5 p-1.5 border-gray-300 rounded-full text-indigo-600 focus:ring-0 focus:ring-offset-0 checked:border-indigo-500':
                                 type == 'radio'
                             },
                             {

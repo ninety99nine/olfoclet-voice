@@ -28,8 +28,7 @@ class UpdateNumberRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'number' => ['sometimes', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/', Rule::unique('numbers')->ignore($this->route('number')->id)],
             'provider' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'first_step' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'call_flow' => ['sometimes', 'nullable', 'array'],
+            'call_flow_id' => ['sometimes', 'nullable', 'uuid', 'exists:call_flows,id'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
@@ -50,9 +49,8 @@ class UpdateNumberRequest extends FormRequest
             'number.unique' => 'The phone number is already in use.',
             'provider.string' => 'The provider must be a string.',
             'provider.max' => 'The provider must not exceed 100 characters.',
-            'first_step.string' => 'The first step must be a string.',
-            'first_step.max' => 'The first step must not exceed 100 characters.',
-            'call_flow.array' => 'The call flow must be a valid JSON array.',
+            'call_flow_id.uuid' => 'The call flow ID must be a valid UUID.',
+            'call_flow_id.exists' => 'The specified call flow does not exist.',
             'is_active.boolean' => 'The is_active field must be a boolean.',
         ];
     }

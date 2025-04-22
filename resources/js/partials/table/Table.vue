@@ -72,21 +72,21 @@
         <!-- Below Toolbar -->
         <slot name="belowToolbar"></slot>
 
-        <div class="w-full overflow-x-auto border border-gray-200 rounded-lg">
+        <div class="w-full overflow-x-auto border border-indigo-200 rounded-lg">
 
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+            <table class="w-full text-left rtl:text-right">
 
                 <!-- Table Head -->
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <thead class="text-sm bg-indigo-50">
                     <slot name="head"></slot>
                 </thead>
 
                 <!-- Pulsing Placeholder Rows -->
-                <tbody v-if="!pagination && isLoading && totalActiveColumns > 0">
+                <tbody v-if="!pagination && !isLoading && totalActiveColumns > 0">
 
                     <tr v-for="(row, index) in [1,2,3]" :key="index" class="animate-pulse">
                         <td v-for="(column, index) in totalActiveColumns" :key="index">
-                            <div class="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mx-4 my-4"></div>
+                            <div class="h-2 bg-indigo-200 rounded-full mx-4 my-4"></div>
                         </td>
                     </tr>
 

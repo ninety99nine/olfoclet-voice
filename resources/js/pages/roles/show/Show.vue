@@ -1,17 +1,18 @@
 <template>
 
-    <div class="min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
+    <div class="select-none min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
 
         <template v-if="showTable">
 
             <!-- Page Header -->
-            <div class="space-y-1">
+            <div class="flex justify-between">
 
                 <div class="flex items-end space-x-2">
+
                     <Lock size="48" stroke-width="1" class="text-gray-400" />
 
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Role Management</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Roles</h2>
                         <p class="text-sm text-gray-600 dark:text-neutral-400">
                             Manage roles for your organization
                         </p>
@@ -26,148 +27,157 @@
 
             </div>
 
-            <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl">
+            <!-- Roles Table -->
+            <Table
+                resource="roles"
+                @search="search"
+                :columns="columns"
+                :perPage="perPage"
+                @paginate="paginate"
+                @refresh="fetchRoles"
+                :searchTerm="searchTerm"
+                :pagination="pagination"
+                :isLoading="isLoadingRoles"
+                @updatedColumns="updatedColumns"
+                @updatedFilters="updatedFilters"
+                @updatedSorting="updatedSorting"
+                @updatedPerPage="updatedPerPage"
+                :filterExpressions="filterExpressions"
+                :sortingExpressions="sortingExpressions">
 
-                <div class="p-4 sm:p-6">
+                <!-- Select Action -->
+                <template #belowToolbar>
 
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">All Roles</h3>
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">
-                                View and manage roles within this organization
-                            </p>
-                        </div>
+                    <div :class="[{ 'hidden': totalCheckedRows === 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
+
+                        <span class="text-sm">Actions: </span>
+
+                        <Dropdown
+                            triggerSize="sm"
+                            :options="dropdownOptions"
+                            :triggerText="`Select Action (${totalCheckedRows} selected)`" />
+
                     </div>
 
-                    <!-- Roles Table -->
-                    <Table
-                        resource="roles"
-                        @search="search"
-                        :columns="columns"
-                        :perPage="perPage"
-                        @paginate="paginate"
-                        @refresh="fetchRoles"
-                        :searchTerm="searchTerm"
-                        :pagination="pagination"
-                        :isLoading="isLoadingRoles"
-                        @updatedColumns="updatedColumns"
-                        @updatedFilters="updatedFilters"
-                        @updatedSorting="updatedSorting"
-                        @updatedPerPage="updatedPerPage"
-                        :filterExpressions="filterExpressions"
-                        :sortingExpressions="sortingExpressions">
+                </template>
 
-                        <template #belowToolbar>
-                            <div :class="[{ 'hidden': totalCheckedRows === 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
-                                <span class="text-sm">Actions: </span>
-                                <Dropdown
-                                    triggerSize="sm"
-                                    :options="dropdownOptions"
-                                    :triggerText="`Select Action (${totalCheckedRows} selected)`" />
-                            </div>
+                <!-- Table Head -->
+                <template #head>
+
+                    <tr class="border-b border-indigo-200">
+
+                        <!-- Checkbox -->
+                        <th scope="col" class="whitespace-nowrap align-top font-semibold px-4 py-2.5">
+
+                            <Input
+                                type="checkbox"
+                                v-model="selectAll">
+                            </Input>
+
+                        </th>
+
+                        <!-- Table Column Names -->
+                        <template v-for="(column, index) in columns" :key="index">
+
+                            <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top font-semibold pr-4 py-2.5', { 'text-center' : ['Users'].includes(column.name) }]">
+                                {{ column.name }}
+                            </th>
+
                         </template>
 
-                        <template #head>
-                            <tr class="border-b border-gray-200">
-                                <th class="whitespace-nowrap align-top px-4 py-4">
-                                    <Input type="checkbox" v-model="selectAll" />
-                                </th>
-                                <template v-for="(column, index) in columns" :key="index">
-                                    <th v-if="column.active" scope="col" class="whitespace-nowrap align-top pr-4 py-4">
-                                        {{ column.name }}
-                                    </th>
-                                </template>
-                                <th scope="col" class="whitespace-nowrap align-top pr-4 py-4">Actions</th>
-                            </tr>
-                        </template>
+                        <!-- Actions -->
+                        <th scope="col" class="whitespace-nowrap align-top font-semibold pr-4 py-2.5">Actions</th>
 
-                        <template #body>
+                    </tr>
 
-                            <tr @click.stop="onView(role)" v-for="role in roles" :key="role.id" :class="[checkedRows[role.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
+                </template>
 
-                                <!-- Checkbox -->
-                                <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
+                <template #body>
 
-                                    <Input
-                                        type="checkbox"
-                                        v-model="checkedRows[role.id]">
-                                    </Input>
+                    <tr @click.stop="onView(role)" v-for="role in roles" :key="role.id" :class="[checkedRows[role.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer text-sm border-b border-gray-200']">
 
+                        <!-- Checkbox -->
+                        <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
+
+                            <Input
+                                type="checkbox"
+                                v-model="checkedRows[role.id]">
+                            </Input>
+
+                        </td>
+
+                        <template v-for="(column, columnIndex) in columns" :key="columnIndex">
+
+                            <template v-if="column.name == 'Name'">
+                                <td class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div>{{ role.name }}</div>
                                 </td>
+                            </template>
 
-                                <template v-for="(column, columnIndex) in columns" :key="columnIndex">
-
-                                    <template v-if="column.name == 'Name'">
-                                        <td class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="font-medium text-sm">{{ role.name }}</div>
-                                        </td>
-                                    </template>
-
-                                    <template v-if="column.name == 'Oraganization'">
-                                        <td class="whitespace-nowrap align-center pr-4 py-4">
-                                            <!-- Country Flag -->
-                                            <div
-                                                v-if="role.organization"
-                                                class="flex items-center space-x-2">
-                                                <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
-                                                <div class="whitespace-nowrap font-medium text-sm">{{ role.organization.name }}</div>
-                                            </div>
-                                        </td>
-                                    </template>
-
-                                    <template v-if="column.name == 'Country'">
-                                        <td class="whitespace-nowrap align-center pr-4 py-4">
-                                            <!-- Country Flag -->
-                                            <div
-                                                v-if="role.organization"
-                                                class="flex items-center space-x-2">
-                                                <div class="flex items-center space-x-2">
-                                                    <img
-                                                        v-if="role.organization.country"
-                                                        :src="`/svgs/country-flags/${role.organization.country.toLowerCase()}.svg`"
-                                                        :alt="role.organization.country"
-                                                        class="w-5 h-4 rounded-sm object-cover"
-                                                    >
-                                                    <span>{{ getCountryName(role.organization.country) }}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </template>
-
-                                    <template v-if="column.name == 'Guard'">
-                                        <td class="whitespace-nowrap align-center pr-4 py-4">
-                                            <span>{{ role.guard_name }}</span>
-                                        </td>
-                                    </template>
-
-                                    <template v-if="column.name == 'Users'">
-                                        <td class="whitespace-nowrap align-center text-center pr-4 py-4">
-                                            <span>{{ role.users_count }}</span>
-                                        </td>
-                                    </template>
-
-                                    <template v-if="column.name == 'Created Date'">
-                                        <td class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="flex space-x-1 items-center">
-                                                <span>{{ formattedDatetime(role.createdAt) }}</span>
-                                                <Popover placement="top" class="opacity-0 group-hover:opacity-100" :content="formattedRelativeDate(role.createdAt)" />
-                                            </div>
-                                        </td>
-                                    </template>
-
-                                </template>
-
-                                <td class="align-top pr-4 py-4 flex items-center space-x-1">
-                                    <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateRoleModal(role)" />
-                                    <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteRoleModal(role)" />
+                            <template v-if="column.name == 'Oraganization'">
+                                <td class="whitespace-nowrap align-center pr-4 py-4">
+                                    <!-- Country Flag -->
+                                    <div
+                                        v-if="role.organization"
+                                        class="flex items-center space-x-2">
+                                        <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
+                                        <div class="whitespace-nowrap">{{ role.organization.name }}</div>
+                                    </div>
                                 </td>
-                            </tr>
+                            </template>
+
+                            <template v-if="column.name == 'Country'">
+                                <td class="whitespace-nowrap align-center pr-4 py-4">
+                                    <!-- Country Flag -->
+                                    <div
+                                        v-if="role.organization"
+                                        class="flex items-center space-x-2">
+                                        <div class="flex items-center space-x-2">
+                                            <img
+                                                v-if="role.organization.country"
+                                                :alt="role.organization.country"
+                                                class="w-5 h-4 rounded-sm object-cover"
+                                                :src="`/svgs/country-flags/${role.organization.country.toLowerCase()}.svg`"
+                                            >
+                                            <span>{{ getCountryName(role.organization.country) }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </template>
+
+                            <template v-if="column.name == 'Guard'">
+                                <td class="whitespace-nowrap align-center pr-4 py-4">
+                                    <span>{{ role.guard_name }}</span>
+                                </td>
+                            </template>
+
+                            <template v-if="column.name == 'Users'">
+                                <td class="whitespace-nowrap align-center text-center pr-4 py-4">
+                                    <span>{{ role.users_count }}</span>
+                                </td>
+                            </template>
+
+                            <template v-if="column.name == 'Created Date'">
+                                <td class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div class="flex space-x-1 items-center">
+                                        <span>{{ formattedDatetime(role.createdAt) }}</span>
+                                        <Popover placement="top" class="opacity-0 group-hover:opacity-100" :content="formattedRelativeDate(role.createdAt)" />
+                                    </div>
+                                </td>
+                            </template>
+
                         </template>
 
-                    </Table>
+                        <td class="h-16 pr-4 py-4 flex align-middle items-center space-x-2">
+                            <Button type="bare" size="xs" :leftIcon="Pencil" leftIconSize="16" :action="() => showUpdateRoleModal(role)" />
+                            <Button type="bareDanger" size="xs" :leftIcon="Trash2" leftIconSize="16" :action="() => showDeleteRoleModal(role)" />
+                        </td>
 
-                </div>
-            </div>
+                    </tr>
+
+                </template>
+
+            </Table>
 
         </template>
 

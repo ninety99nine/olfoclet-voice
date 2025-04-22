@@ -140,15 +140,17 @@ import Modal from '@Partials/Modal.vue';
 import Input from '@Partials/Input.vue';
 import Button from '@Partials/Button.vue';
 import Select from '@Partials/Select.vue';
-import SelectTags from '@Partials/SelectTags.vue';
 import { Plus, Trash2 } from 'lucide-vue-next';
+import SelectTags from '@Partials/SelectTags.vue';
 
 export default {
     name: 'UpdateContactModal',
     inject: ['formState', 'notificationState'],
-    components: { Modal, Input, Button, Select, SelectTags, Plus, Trash2 },
+    components: { Modal, Input, Button, Select, SelectTags },
     data() {
         return {
+            Plus,
+            Trash2,
             isUpdating: false,
             contact: null,
             form: {

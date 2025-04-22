@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Builder;
 
 class Number extends Model
 {
@@ -22,9 +21,8 @@ class Number extends Model
         'name',
         'number',
         'provider',
-        'first_step',
-        'call_flow',
         'organization_id',
+        'call_flow_id',
         'is_active',
     ];
 
@@ -35,7 +33,6 @@ class Number extends Model
      */
     protected $casts = [
         'is_active' => 'boolean',
-        'call_flow' => 'array',
     ];
 
     /**
@@ -45,7 +42,6 @@ class Number extends Model
      * @param string $searchTerm
      * @return void
      */
-    #[Scope]
     protected function search(Builder $query, string $searchTerm): void
     {
         $query->where(function ($q) use ($searchTerm) {
@@ -62,5 +58,15 @@ class Number extends Model
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    /**
+     * Get the call flow associated with the number.
+     *
+     * @return BelongsTo
+     */
+    public function callFlow(): BelongsTo
+    {
+        return $this->belongsTo(CallFlow::class);
     }
 }

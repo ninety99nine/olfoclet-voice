@@ -8,6 +8,9 @@ use App\Models\Call;
 use App\Models\Queue;
 use App\Models\Number;
 use App\Models\Contact;
+use App\Models\CallFlow;
+use App\Models\MediaFile;
+use App\Models\CallFlowNode;
 use App\Models\Permission;
 use App\Models\Department;
 use App\Models\Tag;
@@ -68,8 +71,17 @@ class SimulateSeeder extends Seeder
             // Create queues (3-5 per organization)
             $queues = $this->createQueues($organization);
 
-            // Create numbers (3-5 per organization)
-            $this->createNumbers($organization, $queues);
+            // Create call flows (2-3 per organization)
+            $callFlows = $this->createCallFlows($organization, $queues);
+
+            // Create numbers (3-5 per organization) and assign call flows
+            $this->createNumbers($organization, $callFlows);
+
+            // Create media files (3-5 per organization)
+            $mediaFiles = $this->createMediaFiles($organization);
+
+            // Create call flow nodes (2-5 per call flow) and associate with media files
+            $this->createCallFlowNodes($organization, $callFlows, $mediaFiles);
 
             // Create calls (5-10 per organization)
             $this->createCalls($organization, $users, $queues, $contacts);
@@ -84,7 +96,11 @@ class SimulateSeeder extends Seeder
         CallActivity::truncate();
         Call::truncate();
         Queue::truncate();
-        Number::truncate(); // Added to clear numbers table
+        Number::truncate();
+        CallFlow::truncate();
+        CallFlowNode::truncate();
+        DB::table('call_flow_node_media_file')->truncate();
+        MediaFile::truncate();
         ContactCustomAttribute::truncate();
         CustomAttribute::truncate();
         ContactIdentifier::truncate();
@@ -105,7 +121,9 @@ class SimulateSeeder extends Seeder
         $permissions = [
             'view calls', 'manage calls', 'view contacts', 'manage contacts',
             'view queues', 'manage queues', 'view departments', 'manage departments',
-            'manage users', 'view numbers', 'create numbers', 'edit numbers' // Added number permissions
+            'manage users', 'view numbers', 'create numbers', 'edit numbers',
+            'view call flows', 'create call flows', 'edit call flows',
+            'view media files', 'create media files', 'edit media files',
         ];
 
         return collect($permissions)->map(function ($name) {
@@ -119,12 +137,15 @@ class SimulateSeeder extends Seeder
             ['name' => 'Admin', 'permissions' => [
                 'view calls', 'manage calls', 'view contacts', 'manage contacts',
                 'view queues', 'manage queues', 'view departments', 'manage departments',
-                'manage users', 'view numbers', 'create numbers', 'edit numbers' // Added number permissions
+                'manage users', 'view numbers', 'create numbers', 'edit numbers',
+                'view call flows', 'create call flows', 'edit call flows',
+                'view media files', 'create media files', 'edit media files',
             ]],
             ['name' => 'Agent', 'permissions' => ['view calls', 'manage calls', 'view contacts']],
             ['name' => 'Supervisor', 'permissions' => [
                 'view calls', 'manage calls', 'view contacts', 'manage contacts',
-                'view queues', 'view departments', 'view numbers'
+                'view queues', 'view departments', 'view numbers', 'view call flows',
+                'view media files',
             ]]
         ];
 
@@ -350,11 +371,44 @@ class SimulateSeeder extends Seeder
         return $queues->toArray();
     }
 
-    private function createNumbers(Organization $organization, array $queues): void
+    private function createCallFlows(Organization $organization, array $queues): array
+    {
+        $numCallFlows = rand(2, 3); // 2-3 call flows per organization
+
+        // Define possible call flow names
+        $callFlowNames = [
+            'Customer Support Flow',
+            'Sales Flow',
+            'Technical Support Flow',
+            'Billing Flow',
+            'General Inquiry Flow'
+        ];
+
+        // Shuffle and select names
+        shuffle($callFlowNames);
+        $selectedNames = array_slice($callFlowNames, 0, $numCallFlows);
+
+        // Create call flows
+        $callFlows = [];
+        for ($i = 0; $i < $numCallFlows; $i++) {
+            $callFlows[] = CallFlow::create([
+                'id' => $this->faker->uuid,
+                'name' => $selectedNames[$i],
+                'is_active' => $this->faker->boolean(90), // 90% chance of being active
+                'organization_id' => $organization->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $callFlows;
+    }
+
+    private function createNumbers(Organization $organization, array $callFlows): array
     {
         $numNumbers = rand(3, 5); // 3-5 numbers per organization
 
-        // Define possible number names and types
+        // Define possible number names
         $numberNames = [
             'Customer Support Line',
             'Sales Hotline',
@@ -369,22 +423,83 @@ class SimulateSeeder extends Seeder
         $selectedNames = array_slice($numberNames, 0, $numNumbers);
 
         // Create numbers
+        $numbers = [];
         for ($i = 0; $i < $numNumbers; $i++) {
-            $callFlow = null;
-            $firstStep = null;
-
-            Number::create([
+            $callFlow = $this->faker->boolean(70) ? $callFlows[array_rand($callFlows)] : null; // 70% chance of having a call flow
+            $numbers[] = Number::create([
                 'id' => $this->faker->uuid,
                 'is_active' => $this->faker->boolean(90), // 90% chance of being active
                 'name' => $selectedNames[$i],
                 'number' => $this->faker->unique()->e164PhoneNumber,
                 'provider' => 'AfricasTalking',
-                'first_step' => $firstStep,
-                'call_flow' => $callFlow,
+                'call_flow_id' => $callFlow ? $callFlow->id : null,
                 'organization_id' => $organization->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+        }
+
+        return $numbers;
+    }
+
+    private function createMediaFiles(Organization $organization): array
+    {
+        $numMediaFiles = rand(3, 5); // 3-5 media files per organization
+
+        $mediaFileNames = [
+            'Welcome Audio',
+            'Support Greeting',
+            'Sales Pitch',
+            'Billing Info',
+            'After-Hours Message'
+        ];
+
+        shuffle($mediaFileNames);
+        $selectedNames = array_slice($mediaFileNames, 0, $numMediaFiles);
+
+        $mediaFiles = [];
+        for ($i = 0; $i < $numMediaFiles; $i++) {
+            $fileName = $selectedNames[$i] . '.mp3';
+            $mediaFiles[] = MediaFile::create([
+                'id' => $this->faker->uuid,
+                'name' => $selectedNames[$i],
+                'file_name' => $fileName,
+                'mime_type' => 'audio/mpeg',
+                'path' => "media/{$organization->id}/{$fileName}",
+                'size' => $this->faker->numberBetween(100000, 5000000), // 100KB to 5MB
+                'organization_id' => $organization->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $mediaFiles;
+    }
+
+    private function createCallFlowNodes(Organization $organization, array $callFlows, array $mediaFiles): void
+    {
+        foreach ($callFlows as $callFlow) {
+            $numNodes = rand(2, 5); // 2-5 nodes per call flow
+            $nodeTypes = ['Playback', 'IVR', 'Forward', 'Voicemail', 'Hangup'];
+
+            for ($i = 0; $i < $numNodes; $i++) {
+                $node = CallFlowNode::create([
+                    'id' => $this->faker->uuid,
+                    'call_flow_id' => $callFlow->id,
+                    'type' => $nodeTypes[array_rand($nodeTypes)],
+                    'next_step' => null,
+                    'metadata' => ['message' => $this->faker->sentence],
+                    'position' => ['x' => rand(0, 500), 'y' => rand(0, 500)],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Associate 0-2 media files with this node
+                $randomMediaFiles = array_slice($mediaFiles, 0, rand(0, 2));
+                if (!empty($randomMediaFiles)) {
+                    $node->mediaFiles()->attach(array_column($randomMediaFiles, 'id'));
+                }
+            }
         }
     }
 

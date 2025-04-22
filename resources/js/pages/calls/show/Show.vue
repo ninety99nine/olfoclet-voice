@@ -6,7 +6,7 @@
                 <div class="flex items-end space-x-2">
                     <PhoneCall size="48" stroke-width="1" class="text-gray-400" />
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Call Management</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Calls</h2>
                         <p class="text-sm text-gray-600 dark:text-neutral-400">
                             Manage all calls within your organization
                         </p>

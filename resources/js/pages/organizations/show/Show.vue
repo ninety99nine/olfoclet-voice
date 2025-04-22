@@ -1,6 +1,6 @@
 <template>
 
-    <div class="min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
+    <div class="select-none min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
 
         <template v-if="showTable">
 
@@ -34,172 +34,157 @@
 
             </div>
 
-            <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl">
+            <!-- Organizations Table -->
+            <Table
+                @search="search"
+                :columns="columns"
+                :perPage="perPage"
+                @paginate="paginate"
+                :searchTerm="searchTerm"
+                :pagination="pagination"
+                resource="organizations"
+                @refresh="fetchOrganizations"
+                @updatedColumns="updatedColumns"
+                @updatedFilters="updatedFilters"
+                @updatedSorting="updatedSorting"
+                @updatedPerPage="updatedPerPage"
+                :isLoading="isLoadingOrganizations"
+                :filterExpressions="filterExpressions"
+                :sortingExpressions="sortingExpressions">
 
-                <div class="p-4 sm:p-6">
+                <!-- Select Action -->
+                <template #belowToolbar>
 
-                    <div class="flex justify-between items-center mb-4">
+                    <div :class="[{ 'hidden' : totalCheckedRows == 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
 
-                        <div>
-                            <h3 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">All Organizations</h3>
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">
-                                View and manage all organizations using the Telcoflo platform
-                            </p>
-                        </div>
+                        <span class="text-sm">Actions: </span>
+
+                        <Dropdown
+                            triggerSize="sm"
+                            :options="dropdownOptions"
+                            :triggerText="`Select Action (${totalCheckedRows} selected)`">
+                        </Dropdown>
 
                     </div>
 
-                    <!-- Organizations Table -->
-                    <Table
-                        @search="search"
-                        :columns="columns"
-                        :perPage="perPage"
-                        @paginate="paginate"
-                        :searchTerm="searchTerm"
-                        :pagination="pagination"
-                        resource="organizations"
-                        @refresh="fetchOrganizations"
-                        @updatedColumns="updatedColumns"
-                        @updatedFilters="updatedFilters"
-                        @updatedSorting="updatedSorting"
-                        @updatedPerPage="updatedPerPage"
-                        :isLoading="isLoadingOrganizations"
-                        :filterExpressions="filterExpressions"
-                        :sortingExpressions="sortingExpressions">
+                </template>
 
-                        <!-- Select Action -->
-                        <template #belowToolbar>
+                <!-- Table Head -->
+                <template #head>
 
-                            <div :class="[{ 'hidden' : totalCheckedRows == 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
+                    <tr class="border-b border-indigo-200">
 
-                                <span class="text-sm">Actions: </span>
+                        <!-- Checkbox -->
+                        <th scope="col" class="whitespace-nowrap align-top font-semibold px-4 py-2.5">
 
-                                <Dropdown
-                                    triggerSize="sm"
-                                    :options="dropdownOptions"
-                                    :triggerText="`Select Action (${totalCheckedRows} selected)`">
-                                </Dropdown>
+                            <Input
+                                type="checkbox"
+                                v-model="selectAll">
+                            </Input>
 
-                            </div>
+                        </th>
+
+                        <!-- Table Column Names -->
+                        <template v-for="(column, index) in columns" :key="index">
+
+                            <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top font-semibold pr-4 py-2.5', { 'text-center' : ['Users'].includes(column.name) }]">
+                                {{ column.name }}
+                            </th>
 
                         </template>
 
-                        <!-- Table Head -->
-                        <template #head>
+                        <!-- Actions -->
+                        <th scope="col" class="whitespace-nowrap align-top font-semibold pr-4 py-2.5">Actions</th>
 
-                            <tr class="border-b border-gray-200">
+                    </tr>
 
-                                <!-- Checkbox -->
-                                <th scope="col" class="whitespace-nowrap align-top px-4 py-4">
+                </template>
 
-                                    <Input
-                                        type="checkbox"
-                                        v-model="selectAll">
-                                    </Input>
+                <!-- Table Body -->
+                <template #body>
 
-                                </th>
+                    <tr
+                        :key="organization.id"
+                        @click.stop="onView(organization)"
+                        v-for="organization in organizations"
+                        :class="[checkedRows[organization.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer text-sm border-b border-gray-200']">
 
-                                <!-- Table Column Names -->
-                                <template v-for="(column, index) in columns" :key="index">
+                        <!-- Checkbox -->
+                        <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
 
-                                    <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top pr-4 py-4', { 'text-center' : ['Users'].includes(column.name) }]">
-                                        {{ column.name }}
-                                    </th>
+                            <Input
+                                type="checkbox"
+                                v-model="checkedRows[organization.id]">
+                            </Input>
 
-                                </template>
+                        </td>
 
-                                <!-- Actions -->
-                                <th scope="col" class="whitespace-nowrap align-top pr-4 py-4">Actions</th>
+                        <template v-for="(column, columnIndex) in columns" :key="columnIndex">
 
-                            </tr>
+                            <template v-if="column.active">
 
-                        </template>
-
-                        <!-- Table Body -->
-                        <template #body>
-
-                            <tr @click.stop="onView(organization)" v-for="organization in organizations" :key="organization.id" :class="[checkedRows[organization.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
-
-                                <!-- Checkbox -->
-                                <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
-
-                                    <Input
-                                        type="checkbox"
-                                        v-model="checkedRows[organization.id]">
-                                    </Input>
-
+                                <!-- Organization -->
+                                <td v-if="column.name == 'Organization'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div class="flex items-center space-x-2">
+                                        <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
+                                        <div class="whitespace-nowrap">{{ organization.name }}</div>
+                                    </div>
                                 </td>
 
-                                <template v-for="(column, columnIndex) in columns" :key="columnIndex">
-
-                                    <template v-if="column.active">
-
-                                        <!-- Organization -->
-                                        <td v-if="column.name == 'Organization'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
-                                                <div class="whitespace-nowrap font-medium text-sm">{{ organization.name }}</div>
-                                            </div>
-                                        </td>
-
-                                        <!-- Country -->
-                                        <td v-if="column.name == 'Country'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="flex items-center space-x-2">
-                                                <img
-                                                    v-if="organization.country"
-                                                    :src="`/svgs/country-flags/${organization.country.toLowerCase()}.svg`"
-                                                    :alt="organization.country"
-                                                    class="w-5 h-4 rounded-sm object-cover"
-                                                >
-                                                <span>{{ getCountryName(organization.country) }}</span>
-                                            </div>
-                                        </td>
-
-                                        <!-- Status -->
-                                        <td v-if="column.name == 'Status'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <Pill :type="organization.active ? 'success' : 'warning'" size="xs">{{ organization.active ? 'Active' : 'Inactive' }}</Pill>
-                                        </td>
-
-                                        <!-- Users -->
-                                        <td v-if="column.name == 'Users'" class="whitespace-nowrap align-center text-center pr-4 py-4">
-                                            <span>{{ organization.users_count }}/{{ organization.seats }}</span>
-                                        </td>
-
-                                        <!-- Created Date -->
-                                        <td v-else-if="column.name == 'Created Date'" class="whitespace-nowrap align-center pr-4 py-4">
-                                            <div class="flex space-x-1 items-center">
-                                                <span>{{ formattedDatetime(organization.createdAt) }}</span>
-                                                <Popover
-                                                    placement="top"
-                                                    class="opacity-0 group-hover:opacity-100"
-                                                    :content="formattedRelativeDate(organization.createdAt)">
-                                                </Popover>
-                                            </div>
-                                        </td>
-
-                                    </template>
-
-                                </template>
-
-                                <!-- Actions -->
-                                <td class="align-top pr-4 py-4 flex items-center space-x-1">
-
-                                    <Button type="outline" size="xs" :leftIcon="ExternalLink" leftIconSize="12" :action="() => onViewLogin(organization)"></Button>
-                                    <Button type="outline" size="xs" :leftIcon="UserPlus" leftIconSize="12"></Button>
-                                    <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateOrganizationModal(organization)"></Button>
-                                    <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteOrganizationModal(organization)"></Button>
-
+                                <!-- Country -->
+                                <td v-if="column.name == 'Country'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div class="flex items-center space-x-2">
+                                        <img
+                                            v-if="organization.country"
+                                            :src="`/svgs/country-flags/${organization.country.toLowerCase()}.svg`"
+                                            :alt="organization.country"
+                                            class="w-5 h-4 rounded-sm object-cover"
+                                        >
+                                        <span>{{ getCountryName(organization.country) }}</span>
+                                    </div>
                                 </td>
 
-                            </tr>
+                                <!-- Status -->
+                                <td v-if="column.name == 'Status'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <Pill :type="organization.active ? 'success' : 'warning'" size="xs">{{ organization.active ? 'Active' : 'Inactive' }}</Pill>
+                                </td>
+
+                                <!-- Users -->
+                                <td v-if="column.name == 'Users'" class="whitespace-nowrap align-center text-center pr-4 py-4">
+                                    <span>{{ organization.users_count }}/{{ organization.seats }}</span>
+                                </td>
+
+                                <!-- Created Date -->
+                                <td v-else-if="column.name == 'Created Date'" class="whitespace-nowrap align-center pr-4 py-4">
+                                    <div class="flex space-x-1 items-center">
+                                        <span>{{ formattedDatetime(organization.createdAt) }}</span>
+                                        <Popover
+                                            placement="top"
+                                            class="opacity-0 group-hover:opacity-100"
+                                            :content="formattedRelativeDate(organization.createdAt)">
+                                        </Popover>
+                                    </div>
+                                </td>
+
+                            </template>
 
                         </template>
 
-                    </Table>
+                        <!-- Actions -->
+                        <td class="h-16 pr-4 py-4 flex align-middle items-center space-x-2">
 
-                </div>
+                            <Button type="bare" size="xs" :leftIcon="ExternalLink" leftIconSize="16" :action="() => onViewLogin(organization)"></Button>
+                            <Button type="bare" size="xs" :leftIcon="UserPlus" leftIconSize="16"></Button>
+                            <Button type="bare" size="xs" :leftIcon="Pencil" leftIconSize="16" :action="() => showUpdateOrganizationModal(organization)"></Button>
+                            <Button type="bareDanger" size="xs" :leftIcon="Trash2" leftIconSize="16" :action="() => showDeleteOrganizationModal(organization)"></Button>
 
-            </div>
+                        </td>
+
+                    </tr>
+
+                </template>
+
+            </Table>
 
         </template>
 
