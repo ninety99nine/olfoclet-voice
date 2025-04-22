@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRoleRequest extends FormRequest
 {
@@ -14,7 +14,7 @@ class UpdateRoleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->role);
+        return $this->user()->can('update', $this->route('role'));
     }
 
     /**
@@ -30,9 +30,24 @@ class UpdateRoleRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('roles')->where(function ($query) {
-                    return $query->when($this->role->organization_id, fn($q) => $q->where('organization_id', $this->role->organization_id));
-                })->ignore($this->role->id),
+                    return $query->when($this->route('role')->organization_id, fn($q) => $q->where('organization_id', $this->route('role')->organization_id));
+                })->ignore($this->route('role')->id),
             ],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'name.string' => 'The name must be a string.',
+            'name.max' => 'The name must not exceed 255 characters.',
+            'name.unique' => 'The name is already in use for this organization.',
         ];
     }
 }

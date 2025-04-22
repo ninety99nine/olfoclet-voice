@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
         async login(payload) {
-            const response = await axios.post('/api/login', payload);
+            const response = await axios.post('/api/auth/login', payload);
 
             this.token = response.data.token;
             this.setTokenOnRequest(this.token);
@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async logout () {
             try {
-                await axios.post('/api/logout');
+                await axios.post('/api/auth/logout');
             } catch (error) {
                 this.isLoggingOut = false;
                 useNotificationStore().showWarningNotification(
@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', {
         },
         async fetchUser() {
             this.isLoadingUser = true;
-            const response = await axios.get('/api/user');
+            const response = await axios.get('/api/auth/user');
             this.user = response.data;
             this.isLoadingUser = false;
         },

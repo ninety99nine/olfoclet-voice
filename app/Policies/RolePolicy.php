@@ -16,7 +16,7 @@ class RolePolicy extends BasePolicy
      */
     public function before(User $user, string $ability): bool|null
     {
-        if (!in_array($ability, ['update', 'delete'])) {
+        if (!in_array($ability, ['update', 'delete', 'deleteAny'])) {
             return $this->authService->isSuperAdmin($user);
         }
         return null;
@@ -30,7 +30,6 @@ class RolePolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        // Super admins can view all roles; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'view roles', $organizationId) : false;
     }
@@ -55,7 +54,6 @@ class RolePolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
-        // Super admins can create roles; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'create roles', $organizationId) : false;
     }
@@ -87,6 +85,21 @@ class RolePolicy extends BasePolicy
         return $role->organization_id && (
             $this->authService->isSuperAdmin($user) ||
             $this->isOrgUserWithPermission($user, 'edit roles', $role->organization_id)
+        );
+    }
+
+    /**
+     * Determine whether the user can delete any roles.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId && (
+            $this->authService->isSuperAdmin($user) ||
+            $this->isOrgUserWithPermission($user, 'edit roles', $organizationId)
         );
     }
 }

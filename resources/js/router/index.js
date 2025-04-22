@@ -48,6 +48,11 @@ const routes = [
                 component: () => import('@Pages/users/show/Show.vue'),
             },
             {
+                path: 'contacts',
+                name: 'show-contacts',
+                component: () => import('@Pages/contacts/show/Show.vue'),
+            },
+            {
                 path: 'organizations',
                 name: 'show-organizations',
                 component: () => import('@Pages/organizations/show/Show.vue'),
@@ -58,10 +63,35 @@ const routes = [
                 component: () => import('@Pages/roles/show/Show.vue'),
             },
             {
+                path: 'departments',
+                name: 'show-departments',
+                component: () => import('@Pages/departments/show/Show.vue'),
+            },
+            {
                 path: 'account',
                 name: 'show-account',
                 component: () => import('@Pages/account/show/Show.vue'),
             },
+            {
+                path: 'call-flows',
+                children: [
+                    {
+                        path: '',
+                        name: 'show-call-flows',
+                        component: () => import('@Pages/call-flows/show/Show.vue'),
+                    },
+                    {
+                        path: 'create',
+                        name: 'create-call-flow',
+                        component: () => import('@Pages/call-flows/edit/components/Builder.vue'),
+                    },
+                    {
+                        path: ':call_flow_id',
+                        name: 'edit-call-flow',
+                        component: () => import('@Pages/call-flows/edit/components/Builder.vue'),
+                    }
+                ]
+            }
         ]
     }
 ];

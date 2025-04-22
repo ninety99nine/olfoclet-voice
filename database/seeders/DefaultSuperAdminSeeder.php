@@ -19,7 +19,7 @@ class DefaultSuperAdminSeeder extends Seeder
             'id' => Str::uuid(),
             'name' => 'Julian Tabona',
             'email' => 'brandontabona@gmail.com',
-            'password' => Hash::make('QWEasd'),     // 🔐 Use a secure password
+            'password' => Hash::make('QWEasd456'),     // 🔐 Use a secure password
         ]);
 
         // Create system-level super admin role (no organization_id)

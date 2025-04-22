@@ -47,8 +47,9 @@ class QueueService extends BaseService
     public function showQueue(string $queueId): QueueResource
     {
         $queue = Queue::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
             ->findOrFail($queueId);
-
         return $this->showResource($queue);
     }
 

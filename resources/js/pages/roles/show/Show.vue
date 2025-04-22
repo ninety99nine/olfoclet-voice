@@ -82,67 +82,79 @@
                         </template>
 
                         <template #body>
-                            <tr v-for="role in roles" :key="role.id" :class="[checkedRows[role.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
-                                <td class="whitespace-nowrap align-top px-4 py-4">
-                                    <Input type="checkbox" v-model="checkedRows[role.id]" />
+
+                            <tr @click.stop="onView(role)" v-for="role in roles" :key="role.id" :class="[checkedRows[role.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
+
+                                <!-- Checkbox -->
+                                <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
+
+                                    <Input
+                                        type="checkbox"
+                                        v-model="checkedRows[role.id]">
+                                    </Input>
+
                                 </td>
 
-                                <template v-if="columns.find(col => col.name === 'Name')?.active">
-                                    <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <div class="font-medium text-sm">{{ role.name }}</div>
-                                    </td>
-                                </template>
+                                <template v-for="(column, columnIndex) in columns" :key="columnIndex">
 
-                                <template v-if="columns.find(col => col.name === 'Oraganization')?.active">
-                                    <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <!-- Country Flag -->
-                                        <div
-                                            v-if="role.organization"
-                                            class="flex items-center space-x-2">
-                                            <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
-                                            <div class="whitespace-nowrap font-medium text-sm">{{ role.organization.name }}</div>
-                                        </div>
-                                    </td>
-                                </template>
+                                    <template v-if="column.name == 'Name'">
+                                        <td class="whitespace-nowrap align-center pr-4 py-4">
+                                            <div class="font-medium text-sm">{{ role.name }}</div>
+                                        </td>
+                                    </template>
 
-                                <template v-if="columns.find(col => col.name === 'Oraganization')?.active">
-                                    <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <!-- Country Flag -->
-                                         <div
-                                            v-if="role.organization"
-                                            class="flex items-center space-x-2">
-                                            <div class="flex items-center space-x-2">
-                                                <img
-                                                    v-if="role.organization.country"
-                                                    :src="`/svgs/country-flags/${role.organization.country.toLowerCase()}.svg`"
-                                                    :alt="role.organization.country"
-                                                    class="w-5 h-4 rounded-sm object-cover"
-                                                >
-                                                <span>{{ getCountryName(role.organization.country) }}</span>
+                                    <template v-if="column.name == 'Oraganization'">
+                                        <td class="whitespace-nowrap align-center pr-4 py-4">
+                                            <!-- Country Flag -->
+                                            <div
+                                                v-if="role.organization"
+                                                class="flex items-center space-x-2">
+                                                <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
+                                                <div class="whitespace-nowrap font-medium text-sm">{{ role.organization.name }}</div>
                                             </div>
-                                        </div>
-                                    </td>
-                                </template>
+                                        </td>
+                                    </template>
 
-                                <template v-if="columns.find(col => col.name === 'Guard')?.active">
-                                    <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <span>{{ role.guard_name }}</span>
-                                    </td>
-                                </template>
+                                    <template v-if="column.name == 'Country'">
+                                        <td class="whitespace-nowrap align-center pr-4 py-4">
+                                            <!-- Country Flag -->
+                                            <div
+                                                v-if="role.organization"
+                                                class="flex items-center space-x-2">
+                                                <div class="flex items-center space-x-2">
+                                                    <img
+                                                        v-if="role.organization.country"
+                                                        :src="`/svgs/country-flags/${role.organization.country.toLowerCase()}.svg`"
+                                                        :alt="role.organization.country"
+                                                        class="w-5 h-4 rounded-sm object-cover"
+                                                    >
+                                                    <span>{{ getCountryName(role.organization.country) }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </template>
 
-                                <template v-if="columns.find(col => col.name === 'Users')?.active">
-                                    <td class="whitespace-nowrap align-center text-center pr-4 py-4">
-                                        <span>{{ role.users_count }}</span>
-                                    </td>
-                                </template>
+                                    <template v-if="column.name == 'Guard'">
+                                        <td class="whitespace-nowrap align-center pr-4 py-4">
+                                            <span>{{ role.guard_name }}</span>
+                                        </td>
+                                    </template>
 
-                                <template v-if="columns.find(col => col.name === 'Created Date')?.active">
-                                    <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <div class="flex space-x-1 items-center">
-                                            <span>{{ formattedDatetime(role.createdAt) }}</span>
-                                            <Popover placement="top" class="opacity-0 group-hover:opacity-100" :content="formattedRelativeDate(role.createdAt)" />
-                                        </div>
-                                    </td>
+                                    <template v-if="column.name == 'Users'">
+                                        <td class="whitespace-nowrap align-center text-center pr-4 py-4">
+                                            <span>{{ role.users_count }}</span>
+                                        </td>
+                                    </template>
+
+                                    <template v-if="column.name == 'Created Date'">
+                                        <td class="whitespace-nowrap align-center pr-4 py-4">
+                                            <div class="flex space-x-1 items-center">
+                                                <span>{{ formattedDatetime(role.createdAt) }}</span>
+                                                <Popover placement="top" class="opacity-0 group-hover:opacity-100" :content="formattedRelativeDate(role.createdAt)" />
+                                            </div>
+                                        </td>
+                                    </template>
+
                                 </template>
 
                                 <td class="align-top pr-4 py-4 flex items-center space-x-1">

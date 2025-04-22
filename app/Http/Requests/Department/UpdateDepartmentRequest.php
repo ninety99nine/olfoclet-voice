@@ -13,7 +13,7 @@ class UpdateDepartmentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->department);
+        return $this->user()->can('update', $this->route('department'));
     }
 
     /**
@@ -24,7 +24,7 @@ class UpdateDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'sometimes|string|max:255',
+            'name' => ['sometimes', 'string', 'max:255'],
         ];
     }
 
@@ -36,6 +36,7 @@ class UpdateDepartmentRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.string' => 'The name must be a string.',
             'name.max' => 'The name must not exceed 255 characters.',
         ];
     }

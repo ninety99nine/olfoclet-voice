@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use Illuminate\Http\JsonResponse;
 use App\Services\OrganizationService;
 use App\Http\Controllers\BaseController;
 use App\Http\Resources\OrganizationResources;
+use App\Http\Requests\Organization\ShowOrganizationRequest;
+use App\Http\Requests\Organization\ShowOrganizationsRequest;
 use App\Http\Requests\Organization\CreateOrganizationRequest;
 use App\Http\Requests\Organization\UpdateOrganizationRequest;
-use App\Models\Organization;
+use App\Http\Requests\Organization\DeleteOrganizationRequest;
+use App\Http\Requests\Organization\DeleteOrganizationsRequest;
+use App\Http\Requests\Organization\ShowOrganizationByAliasRequest;
 
 class OrganizationController extends BaseController
 {
@@ -30,9 +35,10 @@ class OrganizationController extends BaseController
     /**
      * Show organizations.
      *
+     * @param ShowOrganizationsRequest $request
      * @return OrganizationResources|JsonResponse
      */
-    public function showOrganizations(): OrganizationResources|JsonResponse
+    public function showOrganizations(ShowOrganizationsRequest $request): OrganizationResources|JsonResponse
     {
         return $this->prepareOutput($this->service->showOrganizations());
     }
@@ -45,15 +51,16 @@ class OrganizationController extends BaseController
      */
     public function createOrganization(CreateOrganizationRequest $request): JsonResponse
     {
-        return $this->prepareOutput($this->service->createOrganization($request->validated()));
+        return $this->prepareOutput($this->service->createOrganization($request->validated()), 201);
     }
 
     /**
      * Delete multiple organizations.
      *
+     * @param DeleteOrganizationsRequest $request
      * @return JsonResponse
      */
-    public function deleteOrganizations(): JsonResponse
+    public function deleteOrganizations(DeleteOrganizationsRequest $request): JsonResponse
     {
         $organizationIds = request()->input('organization_ids', []);
         return $this->prepareOutput($this->service->deleteOrganizations($organizationIds));
@@ -62,10 +69,11 @@ class OrganizationController extends BaseController
     /**
      * Show organization by alias.
      *
+     * @param ShowOrganizationByAliasRequest $request
      * @param string $alias
      * @return JsonResponse
      */
-    public function showOrganizationByAlias(string $alias): JsonResponse
+    public function showOrganizationByAlias(ShowOrganizationByAliasRequest $request, string $alias): JsonResponse
     {
         return $this->prepareOutput($this->service->showOrganizationByAlias($alias));
     }
@@ -73,10 +81,11 @@ class OrganizationController extends BaseController
     /**
      * Show single organization.
      *
+     * @param ShowOrganizationRequest $request
      * @param Organization $organization
      * @return JsonResponse
      */
-    public function showOrganization(Organization $organization): JsonResponse
+    public function showOrganization(ShowOrganizationRequest $request, Organization $organization): JsonResponse
     {
         return $this->prepareOutput($this->service->showOrganization($organization->id));
     }
@@ -96,10 +105,11 @@ class OrganizationController extends BaseController
     /**
      * Delete organization.
      *
+     * @param DeleteOrganizationRequest $request
      * @param Organization $organization
      * @return JsonResponse
      */
-    public function deleteOrganization(Organization $organization): JsonResponse
+    public function deleteOrganization(DeleteOrganizationRequest $request, Organization $organization): JsonResponse
     {
         return $this->prepareOutput($this->service->deleteOrganization($organization->id));
     }

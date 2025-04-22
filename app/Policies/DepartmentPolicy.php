@@ -27,7 +27,6 @@ class DepartmentPolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        // Super admins can view all departments; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'view departments', $organizationId) : false;
     }
@@ -52,7 +51,6 @@ class DepartmentPolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
-        // Super admins can create departments; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'create departments', $organizationId) : false;
     }
@@ -79,5 +77,17 @@ class DepartmentPolicy extends BasePolicy
     public function delete(User $user, Department $department): bool
     {
         return $this->isOrgUserWithPermission($user, 'edit departments', $department->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete any departments.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit departments', $organizationId) : false;
     }
 }

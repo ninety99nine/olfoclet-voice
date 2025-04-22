@@ -27,7 +27,6 @@ class OrganizationPolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        // Super admins can view all organizations; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'view organizations', $organizationId) : false;
     }
@@ -52,7 +51,6 @@ class OrganizationPolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
-        // Only super admins can create organizations
         return $this->authService->isSuperAdmin($user);
     }
 
@@ -78,5 +76,17 @@ class OrganizationPolicy extends BasePolicy
     public function delete(User $user, Organization $organization): bool
     {
         return $this->isOrgUserWithPermission($user, 'edit organizations', $organization->id);
+    }
+
+    /**
+     * Determine whether the user can delete any organizations.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit organizations', $organizationId) : false;
     }
 }

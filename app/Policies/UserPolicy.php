@@ -7,7 +7,7 @@ use App\Models\User;
 class UserPolicy extends BasePolicy
 {
     /**
-     * Grant all permissions to super admins who have roles not tied to any organization.
+     * Grant all permissions to super admins who have roles not tied to any organization, except for update and delete.
      *
      * @param User $user
      * @param string $ability
@@ -15,7 +15,10 @@ class UserPolicy extends BasePolicy
      */
     public function before(User $user, string $ability): bool|null
     {
-        return $this->authService->isSuperAdmin($user);
+        if (!in_array($ability, ['update', 'delete', 'deleteAny'])) {
+            return $this->authService->isSuperAdmin($user);
+        }
+        return null;
     }
 
     /**
@@ -26,20 +29,23 @@ class UserPolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $this->isOrgUserWithPermission($user, 'view users', request('organization_id'));
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'view users', $organizationId) : false;
     }
 
     /**
      * Determine whether the user can view the user.
      *
-     * @param User $user
-     * @param User $model
+     * @param User $authUser
+     * @param User $targetUser
      * @return bool
      */
-    public function view(User $user, User $model): bool
+    public function view(User $authUser, User $targetUser): bool
     {
-        return $this->isOrgUserWithPermission($user, 'view users', $model->organization_id)
-            || $user->id === $model->id; // Allow users to view their own profile
+        return $targetUser->organization_id && (
+            $this->authService->isSuperAdmin($authUser) ||
+            $this->isOrgUserWithPermission($authUser, 'view users', $targetUser->organization_id)
+        );
     }
 
     /**
@@ -50,31 +56,52 @@ class UserPolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
-        return $this->isOrgUserWithPermission($user, 'create users', request('organization_id'));
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'create users', $organizationId) : false;
     }
 
     /**
      * Determine whether the user can update the user.
      *
-     * @param User $user
-     * @param User $model
+     * @param User $authUser
+     * @param User $targetUser
      * @return bool
      */
-    public function update(User $user, User $model): bool
+    public function update(User $authUser, User $targetUser): bool
     {
-        return $this->isOrgUserWithPermission($user, 'edit users', $model->organization_id)
-            || $user->id === $model->id; // Allow users to update their own profile
+        return $targetUser->organization_id && (
+            $this->authService->isSuperAdmin($authUser) ||
+            $this->isOrgUserWithPermission($authUser, 'edit users', $targetUser->organization_id)
+        );
     }
 
     /**
      * Determine whether the user can delete the user.
      *
-     * @param User $user
-     * @param User $model
+     * @param User $authUser
+     * @param User $targetUser
      * @return bool
      */
-    public function delete(User $user, User $model): bool
+    public function delete(User $authUser, User $targetUser): bool
     {
-        return $this->isOrgUserWithPermission($user, 'edit users', $model->organization_id);
+        return $targetUser->organization_id && (
+            $this->authService->isSuperAdmin($authUser) ||
+            $this->isOrgUserWithPermission($authUser, 'edit users', $targetUser->organization_id)
+        );
+    }
+
+    /**
+     * Determine whether the user can delete any users.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId && (
+            $this->authService->isSuperAdmin($user) ||
+            $this->isOrgUserWithPermission($user, 'edit users', $organizationId)
+        );
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Call;
 
 use App\Models\Call;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CreateCallRequest extends FormRequest
 {

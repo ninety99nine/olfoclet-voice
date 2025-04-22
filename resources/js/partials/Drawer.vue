@@ -14,7 +14,7 @@
         <div
             :id="uniqueId"
             :class="[
-                'hs-overlay hidden fixed inset-y-0 z-50 w-full max-w-xs bg-white shadow-lg border-r border-gray-200 transition-transform duration-300 ease-in-out dark:bg-neutral-800 dark:border-neutral-700',
+                maxWidth, 'hs-overlay hidden fixed inset-y-0 z-50 w-full bg-white shadow-lg border-r border-gray-200 transition-transform duration-300 ease-in-out dark:bg-neutral-800 dark:border-neutral-700',
                 positionClass,
                 { '[--overlay-backdrop:static]' : !dismissable }
             ]">
@@ -159,6 +159,10 @@ export default {
         dismissable: {
             type: Boolean,
             default: true
+        },
+        maxWidth: {
+            type: String,
+            default: 'max-w-xs'
         },
         onShow: {
             type: [Function, null],

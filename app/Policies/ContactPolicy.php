@@ -27,7 +27,6 @@ class ContactPolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        // Super admins can view all contacts; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'view contacts', $organizationId) : false;
     }
@@ -52,7 +51,6 @@ class ContactPolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
-        // Super admins can create contacts; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'create contacts', $organizationId) : false;
     }
@@ -79,5 +77,17 @@ class ContactPolicy extends BasePolicy
     public function delete(User $user, Contact $contact): bool
     {
         return $this->isOrgUserWithPermission($user, 'edit contacts', $contact->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete any contacts.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit contacts', $organizationId) : false;
     }
 }

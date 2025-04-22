@@ -112,7 +112,10 @@ class UserService extends BaseService
      */
     public function showUser(string $userId): UserResource
     {
-        $user = User::findOrFail($userId);
+        $user = User::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
+            ->findOrFail($userId);
         return $this->showResource($user);
     }
 

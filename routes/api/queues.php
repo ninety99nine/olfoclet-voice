@@ -8,7 +8,6 @@ Route::middleware(['auth:sanctum', OrganisationPermission::class])
     ->prefix('queues')
     ->controller(QueueController::class)
     ->group(function () {
-
         Route::get('/', 'showQueues')->name('show-queues');
         Route::post('/', 'createQueue')->name('create-queue');
         Route::delete('/', 'deleteQueues')->name('delete-queues');

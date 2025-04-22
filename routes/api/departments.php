@@ -8,7 +8,6 @@ Route::middleware(['auth:sanctum', OrganisationPermission::class])
     ->prefix('departments')
     ->controller(DepartmentController::class)
     ->group(function () {
-
         Route::get('/', 'showDepartments')->name('show-departments');
         Route::post('/', 'createDepartment')->name('create-department');
         Route::delete('/', 'deleteDepartments')->name('delete-departments');

@@ -107,11 +107,11 @@
 
                             <tr @click.stop="onView(user)" v-for="user in users" :key="user.id" :class="[checkedRows[user.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
 
-                                <template v-for="(column, columnIndex) in columns" :key="columnIndex">
+                                <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
+                                    <Input type="checkbox" v-model="checkedRows[user.id]" />
+                                </td>
 
-                                    <td v-if="columnIndex == 0" @click.stop class="whitespace-nowrap align-top px-4 py-4">
-                                        <Input type="checkbox" v-model="checkedRows[user.id]" />
-                                    </td>
+                                <template v-for="(column, columnIndex) in columns" :key="columnIndex">
 
                                     <template v-if="column.active">
 
@@ -140,12 +140,12 @@
 
                                     </template>
 
-                                    <td v-if="columnIndex == (columns.length - 1)" class="align-top pr-4 py-4 flex items-center space-x-1">
-                                        <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateUserModal(user)" />
-                                        <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteUserModal(user)" />
-                                    </td>
-
                                 </template>
+
+                                <td class="align-top pr-4 py-4 flex items-center space-x-1">
+                                    <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateUserModal(user)" />
+                                    <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteUserModal(user)" />
+                                </td>
 
                             </tr>
 

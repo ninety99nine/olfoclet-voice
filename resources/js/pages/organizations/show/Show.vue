@@ -120,17 +120,17 @@
 
                             <tr @click.stop="onView(organization)" v-for="organization in organizations" :key="organization.id" :class="[checkedRows[organization.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
 
+                                <!-- Checkbox -->
+                                <td @click.stop class="whitespace-nowrap align-top px-4 py-4">
+
+                                    <Input
+                                        type="checkbox"
+                                        v-model="checkedRows[organization.id]">
+                                    </Input>
+
+                                </td>
+
                                 <template v-for="(column, columnIndex) in columns" :key="columnIndex">
-
-                                    <!-- Checkbox -->
-                                    <td v-if="columnIndex == 0" @click.stop class="whitespace-nowrap align-top px-4 py-4">
-
-                                        <Input
-                                            type="checkbox"
-                                            v-model="checkedRows[organization.id]">
-                                        </Input>
-
-                                    </td>
 
                                     <template v-if="column.active">
 
@@ -179,17 +179,17 @@
 
                                     </template>
 
-                                    <!-- Actions -->
-                                    <td v-if="columnIndex == (columns.length - 1)" class="align-top pr-4 py-4 flex items-center space-x-1">
-
-                                        <Button type="outline" size="xs" :leftIcon="ExternalLink" leftIconSize="12" :action="() => onViewLogin(organization)"></Button>
-                                        <Button type="outline" size="xs" :leftIcon="UserPlus" leftIconSize="12"></Button>
-                                        <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateOrganizationModal(organization)"></Button>
-                                        <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteOrganizationModal(organization)"></Button>
-
-                                    </td>
-
                                 </template>
+
+                                <!-- Actions -->
+                                <td class="align-top pr-4 py-4 flex items-center space-x-1">
+
+                                    <Button type="outline" size="xs" :leftIcon="ExternalLink" leftIconSize="12" :action="() => onViewLogin(organization)"></Button>
+                                    <Button type="outline" size="xs" :leftIcon="UserPlus" leftIconSize="12"></Button>
+                                    <Button type="outline" size="xs" :leftIcon="Pencil" leftIconSize="12" :action="() => showUpdateOrganizationModal(organization)"></Button>
+                                    <Button type="outlineDanger" size="xs" :leftIcon="Trash2" leftIconSize="12" :action="() => showDeleteOrganizationModal(organization)"></Button>
+
+                                </td>
 
                             </tr>
 

@@ -7,8 +7,12 @@ use App\Services\QueueService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\QueueResources;
 use App\Http\Controllers\BaseController;
+use App\Http\Requests\Queue\ShowQueuesRequest;
 use App\Http\Requests\Queue\CreateQueueRequest;
+use App\Http\Requests\Queue\ShowQueueRequest;
 use App\Http\Requests\Queue\UpdateQueueRequest;
+use App\Http\Requests\Queue\DeleteQueueRequest;
+use App\Http\Requests\Queue\DeleteQueuesRequest;
 
 class QueueController extends BaseController
 {
@@ -30,9 +34,10 @@ class QueueController extends BaseController
     /**
      * Show queues.
      *
+     * @param ShowQueuesRequest $request
      * @return QueueResources|JsonResponse
      */
-    public function showQueues(): QueueResources|JsonResponse
+    public function showQueues(ShowQueuesRequest $request): QueueResources|JsonResponse
     {
         return $this->prepareOutput($this->service->showQueues(request('organization_id')));
     }
@@ -51,10 +56,11 @@ class QueueController extends BaseController
     /**
      * Show single queue.
      *
+     * @param ShowQueueRequest $request
      * @param Queue $queue
      * @return JsonResponse
      */
-    public function showQueue(Queue $queue): JsonResponse
+    public function showQueue(ShowQueueRequest $request, Queue $queue): JsonResponse
     {
         return $this->prepareOutput($this->service->showQueue($queue->id));
     }
@@ -74,10 +80,11 @@ class QueueController extends BaseController
     /**
      * Delete queue.
      *
+     * @param DeleteQueueRequest $request
      * @param Queue $queue
      * @return JsonResponse
      */
-    public function deleteQueue(Queue $queue): JsonResponse
+    public function deleteQueue(DeleteQueueRequest $request, Queue $queue): JsonResponse
     {
         return $this->prepareOutput($this->service->deleteQueue($queue->id));
     }
@@ -85,9 +92,10 @@ class QueueController extends BaseController
     /**
      * Delete multiple queues.
      *
+     * @param DeleteQueuesRequest $request
      * @return JsonResponse
      */
-    public function deleteQueues(): JsonResponse
+    public function deleteQueues(DeleteQueuesRequest $request): JsonResponse
     {
         $queueIds = request()->input('queue_ids', []);
         return $this->prepareOutput($this->service->deleteQueues(request('organization_id'), $queueIds));

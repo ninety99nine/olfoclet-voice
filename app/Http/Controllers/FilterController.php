@@ -6,7 +6,7 @@ use App\Services\FilterService;
 use App\Enums\FilterResourceType;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\BaseController;
-use App\Http\Requests\Filter\ShowFiltersRequest;
+use App\Http\Requests\Filtering\ShowFilterOptionsRequest;
 
 class FilterController extends BaseController
 {
@@ -16,7 +16,7 @@ class FilterController extends BaseController
     protected $service;
 
     /**
-     * OrganizationController constructor.
+     * FilterController constructor.
      *
      * @param FilterService $service
      */
@@ -26,12 +26,12 @@ class FilterController extends BaseController
     }
 
     /**
-     * Show filters.
+     * Show filter options.
      *
-     * @param ShowFiltersRequest $request
+     * @param ShowFilterOptionsRequest $request
      * @return JsonResponse
      */
-    public function showFilters(ShowFiltersRequest $request): JsonResponse
+    public function showFilterOptions(ShowFilterOptionsRequest $request): JsonResponse
     {
         $type = FilterResourceType::tryFrom($request->input('type'));
         return $this->prepareOutput($this->service->getFiltersByResourceType($type));

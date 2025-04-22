@@ -1,9 +1,7 @@
 <template>
 
     <div
-        class="hs-tooltip inline-block"
-        :class="[triggerClass, positionClass]"
-        :style="`--trigger:${trigger}; --placement:${position};`">
+        :class="[`hs-tooltip [--placement:${position}] inline-block`]">
 
         <div class="hs-tooltip-toggle">
 
@@ -14,8 +12,8 @@
             </slot>
 
             <span
-                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible hidden opacity-0 transition-opacity absolute invisible z-50 w-auto max-w-xs bg-gray-900 text-white text-xs px-2 py-1 rounded-lg shadow-md dark:bg-gray-700"
-                role="tooltip">
+                role="tooltip"
+                class="hs-tooltip-content hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible opacity-0 transition-opacity inline-block absolute invisible z-10 py-1 px-2 bg-gray-900 text-xs font-medium text-white rounded-md shadow-2xs dark:bg-neutral-700">
 
                 <slot name="content">
                     <p class="text-xs leading-5 px-4 py-2 whitespace-normal">{{ content }}</p>
@@ -32,27 +30,14 @@
 <script>
 export default {
     props: {
-        trigger: {
-            type: String,
-            default: "hover",
-            validator: (value) => ["click", "hover"].includes(value),
-        },
         position: {
             type: String,
             default: "top",
-            validator: (value) => ["top", "bottom", "left", "right"].includes(value),
+            validator: (value) => ["top", "bottom", "left", "right"].includes(value)
         },
         content: {
             type: String,
             default: "This is a tooltip.",
-        }
-    },
-    computed: {
-        triggerClass() {
-            return `[--trigger:${this.trigger}]`;
-        },
-        positionClass() {
-            return `[--placement:${this.position}]`;
         }
     },
     mounted() {

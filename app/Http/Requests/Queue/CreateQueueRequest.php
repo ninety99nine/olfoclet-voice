@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Queue;
 
 use App\Models\Queue;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CreateQueueRequest extends FormRequest
 {

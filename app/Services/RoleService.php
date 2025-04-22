@@ -73,10 +73,10 @@ class RoleService extends BaseService
      */
     public function showRole(string $roleId): RoleResource
     {
-        $query = Role::query();
-
-        $role = $query->findOrFail($roleId);
-
+        $role = Role::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
+            ->findOrFail($roleId);
         return $this->showResource($role);
     }
 

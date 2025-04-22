@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
+use App\Models\Call;
 use App\Models\CallActivity;
 
 class CallActivityPolicy extends BasePolicy
@@ -27,9 +28,8 @@ class CallActivityPolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        // Super admins can view all call activities; others need permission within an organization
-        $organizationId = request('organization_id');
-        return $organizationId ? $this->isOrgUserWithPermission($user, 'view call activities', $organizationId) : false;
+        // Delegate to CallPolicy's viewAny, as call activities are tied to calls
+        return $user->can('viewAny', Call::class);
     }
 
     /**
@@ -41,43 +41,7 @@ class CallActivityPolicy extends BasePolicy
      */
     public function view(User $user, CallActivity $callActivity): bool
     {
-        return $this->isOrgUserWithPermission($user, 'view call activities', $callActivity->call->organization_id);
-    }
-
-    /**
-     * Determine whether the user can create call activities.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function create(User $user): bool
-    {
-        // Super admins can create call activities; others need permission within an organization
-        $organizationId = request('organization_id');
-        return $organizationId ? $this->isOrgUserWithPermission($user, 'create call activities', $organizationId) : false;
-    }
-
-    /**
-     * Determine whether the user can update the call activity.
-     *
-     * @param User $user
-     * @param CallActivity $callActivity
-     * @return bool
-     */
-    public function update(User $user, CallActivity $callActivity): bool
-    {
-        return $this->isOrgUserWithPermission($user, 'edit call activities', $callActivity->call->organization_id);
-    }
-
-    /**
-     * Determine whether the user can delete the call activity.
-     *
-     * @param User $user
-     * @param CallActivity $callActivity
-     * @return bool
-     */
-    public function delete(User $user, CallActivity $callActivity): bool
-    {
-        return $this->isOrgUserWithPermission($user, 'edit call activities', $callActivity->call->organization_id);
+        // Delegate to CallPolicy's view, checking the associated call
+        return $user->can('view', $callActivity->call);
     }
 }

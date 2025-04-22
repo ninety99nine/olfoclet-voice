@@ -34,14 +34,14 @@ class CreateUserRequest extends FormRequest
             'password' => [
                 'required',
                 'string',
-                'confirmed', // Requires password_confirmation field
+            //  'confirmed',
                 \Illuminate\Validation\Rules\Password::min(8)
                     ->mixedCase() // Requires both uppercase and lowercase
                     ->letters()   // Requires at least one letter
                     ->numbers()   // Requires at least one number
                     ->symbols(),  // Requires at least one special character
             ],
-            'password_confirmation' => 'required|string',
+            //  'password_confirmation' => 'required|string',
             'type' => ['required', 'string', Rule::in(collect(SystemRole::cases())->pluck('value')->toArray())],
             'organization_id' => "required_if:type,{$systemRole}|nullable|uuid|exists:organizations,id",
             'active' => 'sometimes|boolean',

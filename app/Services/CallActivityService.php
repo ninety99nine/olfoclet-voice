@@ -52,8 +52,9 @@ class CallActivityService extends BaseService
     public function showCallActivity(string $callActivityId): CallActivityResource
     {
         $callActivity = CallActivity::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
             ->findOrFail($callActivityId);
-
         return $this->showResource($callActivity);
     }
 

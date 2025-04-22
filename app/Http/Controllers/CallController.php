@@ -7,8 +7,12 @@ use App\Services\CallService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\CallResources;
 use App\Http\Controllers\BaseController;
+use App\Http\Requests\Call\ShowCallRequest;
+use App\Http\Requests\Call\ShowCallsRequest;
 use App\Http\Requests\Call\CreateCallRequest;
 use App\Http\Requests\Call\UpdateCallRequest;
+use App\Http\Requests\Call\DeleteCallRequest;
+use App\Http\Requests\Call\DeleteCallsRequest;
 
 class CallController extends BaseController
 {
@@ -30,9 +34,10 @@ class CallController extends BaseController
     /**
      * Show calls.
      *
+     * @param ShowCallsRequest $request
      * @return CallResources|JsonResponse
      */
-    public function showCalls(): CallResources|JsonResponse
+    public function showCalls(ShowCallsRequest $request): CallResources|JsonResponse
     {
         return $this->prepareOutput($this->service->showCalls(request('organization_id')));
     }
@@ -49,12 +54,25 @@ class CallController extends BaseController
     }
 
     /**
+     * Delete multiple calls.
+     *
+     * @param DeleteCallsRequest $request
+     * @return JsonResponse
+     */
+    public function deleteCalls(DeleteCallsRequest $request): JsonResponse
+    {
+        $callIds = request()->input('call_ids', []);
+        return $this->prepareOutput($this->service->deleteCalls(request('organization_id'), $callIds));
+    }
+
+    /**
      * Show single call.
      *
+     * @param ShowCallRequest $request
      * @param Call $call
      * @return JsonResponse
      */
-    public function showCall(Call $call): JsonResponse
+    public function showCall(ShowCallRequest $request, Call $call): JsonResponse
     {
         return $this->prepareOutput($this->service->showCall($call->id));
     }
@@ -74,22 +92,12 @@ class CallController extends BaseController
     /**
      * Delete call.
      *
+     * @param DeleteCallRequest $request
      * @param Call $call
      * @return JsonResponse
      */
-    public function deleteCall(Call $call): JsonResponse
+    public function deleteCall(DeleteCallRequest $request, Call $call): JsonResponse
     {
         return $this->prepareOutput($this->service->deleteCall($call->id));
-    }
-
-    /**
-     * Delete multiple calls.
-     *
-     * @return JsonResponse
-     */
-    public function deleteCalls(): JsonResponse
-    {
-        $callIds = request()->input('call_ids', []);
-        return $this->prepareOutput($this->service->deleteCalls(request('organization_id'), $callIds));
     }
 }

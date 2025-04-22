@@ -8,7 +8,6 @@ Route::middleware(['auth:sanctum', OrganisationPermission::class])
     ->prefix('calls')
     ->controller(CallController::class)
     ->group(function () {
-
         Route::get('/', 'showCalls')->name('show-calls');
         Route::post('/', 'createCall')->name('create-call');
         Route::delete('/', 'deleteCalls')->name('delete-calls');

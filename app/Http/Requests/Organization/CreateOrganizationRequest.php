@@ -3,8 +3,8 @@
 namespace App\Http\Requests\Organization;
 
 use App\Models\Organization;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
 
 class CreateOrganizationRequest extends FormRequest
 {

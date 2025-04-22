@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use App\Services\UserService;
-use App\Http\Controllers\BaseController;
+use Illuminate\Http\JsonResponse;
 use App\Http\Resources\UserResources;
+use App\Http\Controllers\BaseController;
+use App\Http\Requests\User\ShowUsersRequest;
 use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\ShowUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\User\DeleteUserRequest;
+use App\Http\Requests\User\DeleteUsersRequest;
 
 class UserController extends BaseController
 {
@@ -30,9 +34,10 @@ class UserController extends BaseController
     /**
      * Show users.
      *
-     * @return UserResources
+     * @param ShowUsersRequest $request
+     * @return UserResources|JsonResponse
      */
-    public function showUsers(): UserResources
+    public function showUsers(ShowUsersRequest $request): UserResources|JsonResponse
     {
         return $this->prepareOutput($this->service->showUsers());
     }
@@ -45,15 +50,16 @@ class UserController extends BaseController
      */
     public function createUser(CreateUserRequest $request): JsonResponse
     {
-        return $this->prepareOutput($this->service->createUser($request->validated()));
+        return $this->prepareOutput($this->service->createUser($request->validated()), 201);
     }
 
     /**
      * Delete multiple users.
      *
+     * @param DeleteUsersRequest $request
      * @return JsonResponse
      */
-    public function deleteUsers(): JsonResponse
+    public function deleteUsers(DeleteUsersRequest $request): JsonResponse
     {
         $userIds = request()->input('user_ids', []);
         return $this->prepareOutput($this->service->deleteUsers($userIds));
@@ -62,10 +68,11 @@ class UserController extends BaseController
     /**
      * Show single user.
      *
+     * @param ShowUserRequest $request
      * @param User $user
      * @return JsonResponse
      */
-    public function showUser(User $user): JsonResponse
+    public function showUser(ShowUserRequest $request, User $user): JsonResponse
     {
         return $this->prepareOutput($this->service->showUser($user->id));
     }
@@ -85,10 +92,11 @@ class UserController extends BaseController
     /**
      * Delete user.
      *
+     * @param DeleteUserRequest $request
      * @param User $user
      * @return JsonResponse
      */
-    public function deleteUser(User $user): JsonResponse
+    public function deleteUser(DeleteUserRequest $request, User $user): JsonResponse
     {
         return $this->prepareOutput($this->service->deleteUser($user->id));
     }

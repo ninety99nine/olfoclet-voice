@@ -6,7 +6,7 @@ use App\Enums\SortResourceType;
 use App\Services\SortingService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\BaseController;
-use App\Http\Requests\Sorting\ShowSortingRequest;
+use App\Http\Requests\Sorting\ShowSortOptionsRequest;
 
 class SortingController extends BaseController
 {
@@ -16,7 +16,7 @@ class SortingController extends BaseController
     protected $service;
 
     /**
-     * OrganizationController constructor.
+     * SortingController constructor.
      *
      * @param SortingService $service
      */
@@ -26,12 +26,12 @@ class SortingController extends BaseController
     }
 
     /**
-     * Show sorting.
+     * Show sort options.
      *
-     * @param ShowSortingRequest $request
+     * @param ShowSortOptionsRequest $request
      * @return JsonResponse
      */
-    public function showSorting(ShowSortingRequest $request): JsonResponse
+    public function showSortOptions(ShowSortOptionsRequest $request): JsonResponse
     {
         $type = SortResourceType::tryFrom($request->input('type'));
         return $this->prepareOutput($this->service->getSortingOptionsByResourceType($type));

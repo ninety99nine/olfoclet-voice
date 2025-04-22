@@ -888,39 +888,4 @@ abstract class BaseService
         $resourceClassName = $this->getResourceClassName();
         return (new $resourceClassName($model));
     }
-
-    /**
-     * Show bulk created resources.
-     *
-     * @param array $models
-     * @param string $status
-     * @return array
-     */
-    protected function showBulkCreatedResources(array $models, string $status = 'created'): Collection|array
-    {
-        $totalModels = count($models);
-        $resourseName = $this->getResourceName();
-        $resourseNameInPlural = Str::plural($resourseName);
-        $message = $totalModels == 1 ? "$resourseName $status" : $totalModels ." $resourseNameInPlural $status";
-
-        if($this->checkIfShouldReturnResource()) {
-
-            $resourceKeyName = Str::snake($resourseNameInPlural);
-
-            if($this->hasRequestRelationships() || $this->hasRequestCountableRelationships()) {
-                foreach($models as $key => $model) {
-                    $models[$key] = $this->applyEagerLoadingOnModel($model);
-                }
-            }
-
-            return [
-                $status => true,
-                'message' => $message,
-                $resourceKeyName => $models
-            ];
-
-        }else{
-            return [$status => true, 'message' => $message];
-        }
-    }
 }

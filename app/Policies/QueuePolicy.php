@@ -27,7 +27,6 @@ class QueuePolicy extends BasePolicy
      */
     public function viewAny(User $user): bool
     {
-        // Super admins can view all queues; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'view queues', $organizationId) : false;
     }
@@ -52,7 +51,6 @@ class QueuePolicy extends BasePolicy
      */
     public function create(User $user): bool
     {
-        // Super admins can create queues; others need permission within an organization
         $organizationId = request('organization_id');
         return $organizationId ? $this->isOrgUserWithPermission($user, 'create queues', $organizationId) : false;
     }
@@ -79,5 +77,17 @@ class QueuePolicy extends BasePolicy
     public function delete(User $user, Queue $queue): bool
     {
         return $this->isOrgUserWithPermission($user, 'edit queues', $queue->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete any queues.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit queues', $organizationId) : false;
     }
 }

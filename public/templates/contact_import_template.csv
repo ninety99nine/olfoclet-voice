@@ -1,0 +1,5 @@
+name,phone,email,country,language
+John Doe,+1234567890:+9876543210,john.doe@example.com:jane.doe@example.com,US,en
+Jane Smith,+1112223333:+4445556666,jane.smith@example.com:support@company.com,BW,fr
+Bob Jones,+7778889999,,UK,es
+Alice Brown,+9990001111,alice.brown@example.com,FR,de

@@ -140,6 +140,7 @@
                     </textarea>
 
                     <input
+                        ref="input"
                         class="hidden"
                         :id="uniqueId"
                         :type="inputType"
@@ -236,7 +237,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0-3-3m3 3 3-3m-8.25 6a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
                         </svg>
                         <p v-if="disabled" class="text-gray-400 cursor-not-allowed">File upload is disabled</p>
-                        <p v-else-if="!filesLeftToUpload" class="text-gray-400 cursor-not-allowed">Upload limit reached</p>
+                        <p v-else-if="!filesLeftToUpload" class="text-gray-400 cursor-not-allowed">Upload limit reached ({{ filesLeftToUpload }} | {{ currentFileCount }})</p>
                         <p v-else-if="!currentFileCount">Click or Drag & Drop Images</p>
                         <p v-else>Upload More Images</p>
                     </template>
@@ -337,11 +338,18 @@
                                 <span class="text-white text-xs font-bold">Uploading...</span>
                             </div>
 
-                            <!-- Image -->
-                            <img
-                                :src="file.filePath"
-                                class="w-full h-24 p-4 object-contain rounded-lg border border-gray-300 dark:border-gray-700"
-                            />
+                            <!-- File Preview -->
+                            <div class="w-full h-24 p-4 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center">
+
+                                <img v-if="file.type == 'image'" :src="file.filePath" class="w-full h-full object-contain" />
+
+                                <div v-else class="space-y-2">
+                                    <svg v-if="file.type == 'csv'" class="w-10 h-10 mx-auto" viewBox="0 0 56 64" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="m5.106 0c-2.802 0-5.073 2.272-5.073 5.074v53.841c0 2.803 2.271 5.074 5.073 5.074h45.774c2.801 0 5.074-2.271 5.074-5.074v-38.605l-18.903-20.31h-31.945z" fill="#45b058" fill-rule="evenodd"/><path d="m20.306 43.197c.126.144.198.324.198.522 0 .378-.306.72-.703.72-.18 0-.378-.072-.504-.234-.702-.846-1.891-1.387-3.007-1.387-2.629 0-4.627 2.017-4.627 4.88 0 2.845 1.999 4.879 4.627 4.879 1.134 0 2.25-.486 3.007-1.369.125-.144.324-.233.504-.233.415 0 .703.359.703.738 0 .18-.072.36-.198.504-.937.972-2.215 1.693-4.015 1.693-3.457 0-6.176-2.521-6.176-6.212s2.719-6.212 6.176-6.212c1.8.001 3.096.721 4.015 1.711zm6.802 10.714c-1.782 0-3.187-.594-4.213-1.495-.162-.144-.234-.342-.234-.54 0-.361.27-.757.702-.757.144 0 .306.036.432.144.828.739 1.98 1.314 3.367 1.314 2.143 0 2.827-1.152 2.827-2.071 0-3.097-7.112-1.386-7.112-5.672 0-1.98 1.764-3.331 4.123-3.331 1.548 0 2.881.467 3.853 1.278.162.144.252.342.252.54 0 .36-.306.72-.703.72-.144 0-.306-.054-.432-.162-.882-.72-1.98-1.044-3.079-1.044-1.44 0-2.467.774-2.467 1.909 0 2.701 7.112 1.152 7.112 5.636.001 1.748-1.187 3.531-4.428 3.531zm16.994-11.254-4.159 10.335c-.198.486-.685.81-1.188.81h-.036c-.522 0-1.008-.324-1.207-.81l-4.142-10.335c-.036-.09-.054-.18-.054-.288 0-.36.323-.793.81-.793.306 0 .594.18.72.486l3.889 9.992 3.889-9.992c.108-.288.396-.486.72-.486.468 0 .81.378.81.793.001.09-.017.198-.052.288z" fill="#fff"/><g clip-rule="evenodd" fill-rule="evenodd"><path d="m56.001 20.357v1h-12.8s-6.312-1.26-6.128-6.707c0 0 .208 5.707 6.003 5.707z" fill="#349c42"/><path d="m37.098.006v14.561c0 1.656 1.104 5.791 6.104 5.791h12.8l-18.904-20.352z" fill="#fff" opacity=".5"/></g></svg>
+                                    <svg v-else-if="file.type == 'excel'" class="w-10 h-10 mx-auto" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><linearGradient id="a" gradientUnits="userSpaceOnUse" x1="4.494" x2="13.832" y1="7.914" y2="24.086"><stop offset="0" stop-color="#18884f"/><stop offset=".5" stop-color="#117e43"/><stop offset="1" stop-color="#0b6631"/></linearGradient><path d="m19.581 15.35-11.069-1.95v14.409a1.192 1.192 0 0 0 1.193 1.191h19.1a1.192 1.192 0 0 0 1.195-1.191v-5.309z" fill="#185c37"/><path d="m19.581 3h-9.876a1.192 1.192 0 0 0 -1.193 1.191v5.309l11.069 6.5 5.861 1.95 4.558-1.95v-6.5z" fill="#21a366"/><path d="m8.512 9.5h11.069v6.5h-11.069z" fill="#107c41"/><path d="m16.434 8.2h-7.922v16.25h7.922a1.2 1.2 0 0 0 1.194-1.191v-13.868a1.2 1.2 0 0 0 -1.194-1.191z" opacity=".1"/><path d="m15.783 8.85h-7.271v16.25h7.271a1.2 1.2 0 0 0 1.194-1.191v-13.868a1.2 1.2 0 0 0 -1.194-1.191z" opacity=".2"/><path d="m15.783 8.85h-7.271v14.95h7.271a1.2 1.2 0 0 0 1.194-1.191v-12.568a1.2 1.2 0 0 0 -1.194-1.191z" opacity=".2"/><path d="m15.132 8.85h-6.62v14.95h6.62a1.2 1.2 0 0 0 1.194-1.191v-12.568a1.2 1.2 0 0 0 -1.194-1.191z" opacity=".2"/><path d="m3.194 8.85h11.938a1.193 1.193 0 0 1 1.194 1.191v11.918a1.193 1.193 0 0 1 -1.194 1.191h-11.938a1.192 1.192 0 0 1 -1.194-1.191v-11.918a1.192 1.192 0 0 1 1.194-1.191z" fill="url(#a)"/><path d="m5.7 19.873 2.511-3.884-2.3-3.862h1.847l1.255 2.473c.116.234.2.408.238.524h.017c.082-.188.169-.369.26-.546l1.342-2.447h1.7l-2.359 3.84 2.419 3.905h-1.809l-1.45-2.711a2.355 2.355 0 0 1 -.171-.365h-.024a1.688 1.688 0 0 1 -.168.351l-1.493 2.722z" fill="#fff"/><path d="m28.806 3h-9.225v6.5h10.419v-5.309a1.192 1.192 0 0 0 -1.194-1.191z" fill="#33c481"/><path d="m19.581 16h10.419v6.5h-10.419z" fill="#107c41"/></svg>
+                                    <p class="text-sm text-gray-700 truncate">{{ file.name }}</p>
+                                </div>
+
+                            </div>
 
                         </div>
 
@@ -820,12 +828,36 @@
                         const reader = new FileReader();
                         reader.onload = async (e) => {
 
+                            // Determine file type based on MIME type or extension
+                            const isImage = file.type.startsWith('image/');
+                            const isCsv = file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv');
+                            const isExcel =
+                                file.type === 'application/vnd.ms-excel' || // .xls
+                                file.name.toLowerCase().endsWith('.xls') ||
+                                file.name.toLowerCase().endsWith('.xlsx') ||
+                                file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
+
+                            // Set type based on file
+                            let type = null;
+
+                            if (isImage) {
+                                type = 'image';
+                            } else if (isCsv) {
+                                type = 'csv';
+                            } else if (isExcel) {
+                                type = 'excel';
+                            } else {
+                                type = 'other';
+                            }
+
                             let newFile = {
-                                filePath: URL.createObjectURL(file),
+                                filePath: type == 'image' ? null : URL.createObjectURL(file),
                                 uploading: false,
                                 deleting: false,
+                                name: file.name,
                                 uploaded: null,
                                 fileRef: file,
+                                type: type
                             }
 
                             if (this.validateQRCode) {

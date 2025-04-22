@@ -8,7 +8,6 @@ Route::middleware(['auth:sanctum', OrganisationPermission::class])
     ->prefix('roles')
     ->controller(RoleController::class)
     ->group(function () {
-
         Route::get('/', 'showRoles')->name('show-roles');
         Route::post('/', 'createRole')->name('create-role');
         Route::delete('/', 'deleteRoles')->name('delete-roles');
@@ -18,5 +17,4 @@ Route::middleware(['auth:sanctum', OrganisationPermission::class])
             Route::put('/', 'updateRole')->name('update-role');
             Route::delete('/', 'deleteRole')->name('delete-role');
         });
-
     });

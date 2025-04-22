@@ -62,7 +62,7 @@
 
   <script>
 
-    import { Lock, PhoneCall, HouseIcon, BuildingIcon, UsersRoundIcon } from 'lucide-vue-next';
+    import { Lock, Contact, PhoneCall, HouseIcon, BuildingIcon, Building2, UsersRoundIcon } from 'lucide-vue-next';
 
     export default {
         data() {
@@ -72,6 +72,8 @@
                     { name: 'Calls', route: 'show-calls', icon: PhoneCall },
                     { name: 'Users', route: 'show-users', icon: UsersRoundIcon },
                     { name: 'Roles', route: 'show-roles', icon: Lock },
+                    { name: 'Contacts', route: 'show-contacts', icon: Contact },
+                    { name: 'Departments', route: 'show-departments', icon: Building2 },
                     { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
                 ],
             };

@@ -9,6 +9,12 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/* Required styles for Vue Flow */
+@import '@vue-flow/core/dist/style.css';
+
+/* Optional: Default theme for Vue Flow (includes basic styling for nodes and edges) */
+@import '@vue-flow/core/dist/theme-default.css';
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';

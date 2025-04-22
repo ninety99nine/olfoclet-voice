@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Role;
 use App\Models\Organization;
+use App\Models\CustomAttribute;
 use App\Http\Resources\OrganizationResource;
 use App\Http\Resources\OrganizationResources;
 
@@ -29,8 +30,27 @@ class OrganizationService extends BaseService
     public function createOrganization(array $data): array
     {
         $organization = Organization::create($data);
+
+        // Create default roles
         Role::create(['name' => 'admin', 'organization_id' => $organization->id]);
         Role::create(['name' => 'agent', 'organization_id' => $organization->id]);
+
+        // Create default contact attributes
+        $defaultAttributes = [
+            ['name' => 'name', 'type' => 'string'],
+            ['name' => 'website', 'type' => 'url'],
+            ['name' => 'title', 'type' => 'string'],
+            ['name' => 'industry', 'type' => 'string'],
+            ['name' => 'address', 'type' => 'string']
+        ];
+
+        foreach ($defaultAttributes as $attr) {
+            CustomAttribute::create([
+                'organization_id' => $organization->id,
+                'name' => $attr['name'],
+                'type' => $attr['type'],
+            ]);
+        }
 
         return $this->showCreatedResource($organization);
     }
@@ -103,7 +123,10 @@ class OrganizationService extends BaseService
      */
     public function showOrganization(string $organizationId): OrganizationResource
     {
-        $organization = Organization::findOrFail($organizationId);
+        $organization = Organization::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
+            ->findOrFail($organizationId);
         return $this->showResource($organization);
     }
 

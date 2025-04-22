@@ -79,4 +79,10 @@ class Call extends Model
     {
         return $this->hasMany(CallActivity::class);
     }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'call_tag')
+                    ->withTimestamps();
+    }
 }

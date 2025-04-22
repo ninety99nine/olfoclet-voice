@@ -47,8 +47,9 @@ class DepartmentService extends BaseService
     public function showDepartment(string $departmentId): DepartmentResource
     {
         $department = Department::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
             ->findOrFail($departmentId);
-
         return $this->showResource($department);
     }
 
