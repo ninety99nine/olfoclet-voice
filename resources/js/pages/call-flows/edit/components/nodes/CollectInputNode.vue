@@ -28,7 +28,7 @@
 
         <CirclePlus
             size="20"
-            @click="data.openDrawer"
+            @click="data.showDrawer"
             class="text-blue-500 cursor-pointer hover:scale-125 active:scale-100 transition-transform duration-300 mr-2">
         </CirclePlus>
 

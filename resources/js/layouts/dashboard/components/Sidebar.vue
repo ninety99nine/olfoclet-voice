@@ -41,15 +41,13 @@
                 :to="{ name: menu.route }"
                 :class="[
                   'flex items-center gap-x-2.5 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden',
-                  $route.name === menu.route
+                  isActive(menu)
                     ? 'bg-indigo-500 shadow-sm text-white border border-indigo-400'
                     : 'hover:bg-indigo-50 hover:shadow-sm hover:text-indigo-500 border border-transparent hover:border-indigo-300 transition-all duration-300'
-                ]">
-
+                ]"
+              >
                 <component v-if="menu.icon" :is="menu.icon" :size="16" />
-
                 <span>{{ menu.name }}</span>
-
               </router-link>
             </li>
           </ul>
@@ -58,26 +56,39 @@
       </div>
     </div>
     <!-- End Sidebar -->
-  </template>
+</template>
 
-  <script>
+<script>
+import { Lock, Contact, PhoneCall, CirclePlay, Workflow, HouseIcon, BuildingIcon, UserRoundIcon, UsersRoundIcon } from 'lucide-vue-next';
 
-    import { Lock, Contact, PhoneCall, CirclePlay, HouseIcon, BuildingIcon, UserRoundIcon, UsersRoundIcon } from 'lucide-vue-next';
-
-    export default {
-        data() {
-            return {
-                menus: [
-                    { name: 'Home', route: 'show-home', icon: HouseIcon },
-                    { name: 'Calls', route: 'show-calls', icon: PhoneCall },
-                    { name: 'Users', route: 'show-users', icon: UserRoundIcon },
-                    { name: 'Roles', route: 'show-roles', icon: Lock },
-                    { name: 'Contacts', route: 'show-contacts', icon: Contact },
-                    { name: 'Departments', route: 'show-departments', icon: UsersRoundIcon },
-                    { name: 'Media Files', route: 'show-media-files', icon: CirclePlay },
-                    { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
-                ],
-            };
-        }
-    };
-  </script>
+export default {
+    data() {
+        return {
+            menus: [
+                { name: 'Home', route: 'show-home', icon: HouseIcon },
+                { name: 'Calls', route: 'show-calls', icon: PhoneCall },
+                { name: 'Users', route: 'show-users', icon: UserRoundIcon },
+                { name: 'Roles', route: 'show-roles', icon: Lock },
+                { name: 'Contacts', route: 'show-contacts', icon: Contact },
+                { name: 'Call Flows', route: 'show-call-flows', relatedRoutes: ['create-call-flow', 'edit-call-flow'], icon: Workflow },
+                { name: 'Departments', route: 'show-departments', icon: UsersRoundIcon },
+                { name: 'Media Files', route: 'show-media-files', icon: CirclePlay },
+                { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
+            ],
+        };
+    },
+    methods: {
+        isActive(menu) {
+            // Check if the current route matches the menu's primary route
+            if (this.$route.name === menu.route) {
+                return true;
+            }
+            // Check if the current route is in the menu's relatedRoutes
+            if (menu.relatedRoutes && menu.relatedRoutes.includes(this.$route.name)) {
+                return true;
+            }
+            return false;
+        },
+    },
+};
+</script>

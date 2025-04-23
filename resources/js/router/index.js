@@ -72,7 +72,6 @@ const routes = [
                 name: 'show-account',
                 component: () => import('@Pages/account/show/Show.vue'),
             },
-            /*
             {
                 path: 'call-flows',
                 children: [
@@ -84,16 +83,15 @@ const routes = [
                     {
                         path: 'create',
                         name: 'create-call-flow',
-                        component: () => import('@Pages/call-flows/edit/components/Builder.vue'),
+                        component: () => import('@Pages/call-flows/edit/Builder.vue'),
                     },
                     {
                         path: ':call_flow_id',
                         name: 'edit-call-flow',
-                        component: () => import('@Pages/call-flows/edit/components/Builder.vue'),
+                        component: () => import('@Pages/call-flows/edit/Builder.vue'),
                     }
                 ]
             },
-            */
             {
                 path: 'media-files',
                 name: 'show-media-files',

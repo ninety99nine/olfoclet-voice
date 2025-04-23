@@ -2,23 +2,20 @@
 
     <div class="flex items-center space-x-1">
 
-        <div class="w-48 bg-white border border-gray-500 rounded-sm py-4 space-y-2 hover:shadow hover:border-blue-500 transition-all">
+        <div class="w-48 bg-white border-2 border-green-500 rounded-sm py-4 space-y-2">
 
-            <div class="flex items-center justify-between border-b border-gray-300 pb-2 mb-2 px-4">
+            <div class="flex items-center justify-between px-4">
                 <div class="flex items-center space-x-2">
-                    <UserRound size="20"></UserRound>
-                    <span class="text-sm">Call Agent</span>
+                    <div class="rounded-full bg-green-500 text-white p-2">
+                        <PhoneCall size="16" class="animate-pulse"></PhoneCall>
+                    </div>
+                    <span class="text-sm">Incoming Call</span>
                 </div>
                 <Settings
                     size="20"
                     @click="() => data.showDrawer(data)"
                     class="text-gray-500 cursor-pointer hover:scale-125 active:scale-100 transition-transform duration-300">
                 </Settings>
-            </div>
-
-            <div class="flex justify-between items-center px-4">
-                <span class="text-sm truncate">Julian</span>
-                <span class="text-sm">(20s)</span>
             </div>
 
         </div>
@@ -29,7 +26,6 @@
             class="text-blue-500 cursor-pointer hover:scale-125 active:scale-100 transition-transform duration-300 mr-2">
         </CirclePlus>
 
-        <Handle type="target" position="left" />
         <Handle type="source" position="right" />
 
     </div>
@@ -39,10 +35,10 @@
 <script>
 
     import { Handle } from '@vue-flow/core';
-    import { UserRound, Settings, CirclePlus } from 'lucide-vue-next';
+    import { PhoneCall, Settings, CirclePlus } from 'lucide-vue-next';
 
     export default {
-        components: { Handle, UserRound, Settings, CirclePlus },
+        components: { Handle, PhoneCall, Settings, CirclePlus },
         props: {
             data: {
                 type: Object

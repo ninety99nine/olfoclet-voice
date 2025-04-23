@@ -107,7 +107,7 @@
 
                                 <template v-if="column.name === 'File Name'">
                                     <td class="whitespace-nowrap align-center pr-4 py-4 max-w-60">
-                                        <span class="truncate">{{ mediaFile.file_name }}</span>
+                                        <div class="truncate">{{ mediaFile.file_name }}</div>
                                     </td>
                                 </template>
 
@@ -221,10 +221,10 @@
     import { Plus, Pencil, Trash2, Play, CirclePlay } from 'lucide-vue-next';
     import { formattedDatetime, formattedRelativeDate } from '@Utils/dateUtils.js';
     import AddMediaFileModal from '@Pages/media-files/components/AddMediaFileModal.vue';
+    import PlayMediaFileModal from '@Pages/media-files/components/PlayMediaFileModal.vue';
     import UpdateMediaFileModal from '@Pages/media-files/components/UpdateMediaFileModal.vue';
     import DeleteMediaFileModal from '@Pages/media-files/components/DeleteMediaFileModal.vue';
     import DeleteMediaFilesModal from '@Pages/media-files/components/DeleteMediaFilesModal.vue';
-    import PlayMediaFileModal from '@Pages/media-files/components/PlayMediaFileModal.vue';
 
     export default {
         inject: ['formState', 'notificationState'],
