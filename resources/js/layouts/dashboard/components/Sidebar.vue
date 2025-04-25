@@ -12,7 +12,7 @@
 
     <!-- Sidebar -->
     <div id="hs-sidebar-basic-usage"
-         class="hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 w-64 hs-overlay-open:translate-x-0 -translate-x-full transition-all duration-300 transform h-full hidden fixed top-0 start-0 bottom-0 z-40 bg-indigo-50 border-e border-gray-200"
+         class="hs-overlay [--auto-close:lg] lg:block lg:translate-x-0 lg:end-auto lg:bottom-0 w-60 hs-overlay-open:translate-x-0 -translate-x-full transition-all duration-300 transform h-full hidden fixed top-0 start-0 bottom-0 z-40 bg-indigo-50 border-e border-gray-200"
          role="dialog"
          tabindex="-1"
          aria-label="Sidebar">
@@ -59,21 +59,25 @@
 </template>
 
 <script>
-import { Lock, Contact, PhoneCall, CirclePlay, Workflow, HouseIcon, BuildingIcon, UserRoundIcon, UsersRoundIcon } from 'lucide-vue-next';
+import { Lock, Atom, Route, Contact, PhoneCall, CirclePlay, Workflow, HouseIcon, Puzzle, BuildingIcon, UserRoundIcon, UsersRoundIcon, MessageCircleMore } from 'lucide-vue-next';
 
 export default {
     data() {
         return {
             menus: [
                 { name: 'Home', route: 'show-home', icon: HouseIcon },
+                { name: 'Flow', route: 'show-flow', icon: MessageCircleMore },
                 { name: 'Calls', route: 'show-calls', icon: PhoneCall },
                 { name: 'Users', route: 'show-users', icon: UserRoundIcon },
                 { name: 'Roles', route: 'show-roles', icon: Lock },
+                { name: 'Numbers', route: 'show-numbers', icon: Route },
                 { name: 'Contacts', route: 'show-contacts', icon: Contact },
                 { name: 'Call Flows', route: 'show-call-flows', relatedRoutes: ['create-call-flow', 'edit-call-flow'], icon: Workflow },
                 { name: 'Departments', route: 'show-departments', icon: UsersRoundIcon },
                 { name: 'Media Files', route: 'show-media-files', icon: CirclePlay },
+                { name: 'Integrations', route: 'show-integrations', icon: Puzzle },
                 { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
+                { name: 'NexFlow AI', route: 'show-nexflow', icon: Atom },
             ],
         };
     },

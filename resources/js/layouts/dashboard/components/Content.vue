@@ -1,6 +1,6 @@
 <template>
 
-    <div class="w-full lg:ps-64">
+    <div class="w-full lg:ps-60">
 
         <router-view></router-view>
 

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Http\Kernel;
 use App\Observers\OrganizationObserver;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Middleware\OrganisationPermission;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        JsonResource::withoutWrapping();
+
         //  Events
         Event::subscribe(RoleEventListener::class);
 

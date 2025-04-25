@@ -38,6 +38,11 @@ const routes = [
                 component: () => import('@Pages/home/show/Show.vue'),
             },
             {
+                path: 'flow',
+                name: 'show-flow',
+                component: () => import('@Pages/flow/show/Show.vue'),
+            },
+            {
                 path: 'calls',
                 name: 'show-calls',
                 component: () => import('@Pages/calls/show/Show.vue'),
@@ -51,6 +56,11 @@ const routes = [
                 path: 'contacts',
                 name: 'show-contacts',
                 component: () => import('@Pages/contacts/show/Show.vue'),
+            },
+            {
+                path: 'numbers',
+                name: 'show-numbers',
+                component: () => import('@Pages/numbers/Show.vue'),
             },
             {
                 path: 'organizations',
@@ -96,6 +106,16 @@ const routes = [
                 path: 'media-files',
                 name: 'show-media-files',
                 component: () => import('@Pages/media-files/show/Show.vue'),
+            },
+            {
+                path: 'integrations',
+                name: 'show-integrations',
+                component: () => import('@Pages/integrations/show/Show.vue'),
+            },
+            {
+                path: 'nexflow',
+                name: 'show-nexflow',
+                component: () => import('@Pages/nexflow/show/Show.vue'),
             },
         ]
     }

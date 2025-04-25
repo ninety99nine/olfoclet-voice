@@ -2,12 +2,12 @@
 
     <div class="flex items-center space-x-1">
 
-        <div class="w-48 bg-white border-2 border-green-500 rounded-sm py-4 space-y-2">
+        <div class="w-52 bg-white border-2 border-green-500 rounded-sm py-4 space-y-2">
 
             <div class="flex items-center justify-between px-4">
                 <div class="flex items-center space-x-2">
                     <div class="rounded-full bg-green-500 text-white p-2">
-                        <PhoneCall size="16" class="animate-pulse"></PhoneCall>
+                        <img :src="'/images/calling.gif'" class="w-5" />
                     </div>
                     <span class="text-sm">Incoming Call</span>
                 </div>

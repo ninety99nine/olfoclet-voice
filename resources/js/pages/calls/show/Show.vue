@@ -1,22 +1,32 @@
 <template>
-    <div class="min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
+
+    <div class="select-none min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
+
         <template v-if="showTable">
+
             <!-- Page Header -->
-            <div class="space-y-1">
+            <div class="flex justify-between">
+
                 <div class="flex items-end space-x-2">
+
                     <PhoneCall size="48" stroke-width="1" class="text-gray-400" />
+
                     <div>
                         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Calls</h2>
+
                         <p class="text-sm text-gray-600 dark:text-neutral-400">
                             Manage all calls within your organization
                         </p>
                     </div>
+
                 </div>
+
                 <div class="flex justify-end">
-                    <Button type="primary" size="md" :leftIcon="Plus" leftIconSize="20" :action="showAddCallModal">
-                        <span>Add Call</span>
+                    <Button type="primary" size="md" :leftIcon="Phone" leftIconSize="20" :action="showAddCallModal">
+                        <span class="ml-2">Make Call</span>
                     </Button>
                 </div>
+
             </div>
 
             <div class="bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 rounded-xl">
@@ -47,51 +57,76 @@
                         @updatedPerPage="updatedPerPage"
                         :filterExpressions="filterExpressions"
                         :sortingExpressions="sortingExpressions">
+
+                        <!-- Select Action -->
                         <template #belowToolbar>
+
                             <div :class="[{ 'hidden': totalCheckedRows === 0 }, 'bg-gray-50 border flex items-center mb-2 p-4 rounded-lg shadow space-x-2']">
+
                                 <span class="text-sm">Actions: </span>
+
                                 <Dropdown
                                     triggerSize="sm"
                                     :options="dropdownOptions"
                                     :triggerText="`Select Action (${totalCheckedRows} selected)`" />
+
                             </div>
+
                         </template>
 
+                        <!-- Table Head -->
                         <template #head>
-                            <tr class="border-b border-gray-200">
-                                <th scope="col" class="whitespace-nowrap align-top px-4 py-4">
-                                    <Input type="checkbox" v-model="selectAll" />
+
+                            <tr class="border-b border-indigo-200">
+
+                                <!-- Checkbox -->
+                                <th scope="col" class="whitespace-nowrap align-top font-semibold px-4 py-2.5">
+
+                                    <Input
+                                        type="checkbox"
+                                        v-model="selectAll">
+                                    </Input>
+
                                 </th>
+
+                                <!-- Table Column Names -->
                                 <template v-for="(column, index) in columns" :key="index">
-                                    <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top pr-4 py-4', { 'text-center' : ['Activities'].includes(column.name) }]">
+
+                                    <th v-if="column.active" scope="col" :class="['whitespace-nowrap align-top font-semibold pr-4 py-2.5', { 'text-center' : ['Users'].includes(column.name) }]">
                                         {{ column.name }}
                                     </th>
+
                                 </template>
-                                <th scope="col" class="whitespace-nowrap align-top pr-4 py-4">Actions</th>
+
+                                <!-- Actions -->
+                                <th scope="col" class="whitespace-nowrap align-top font-semibold pr-4 py-2.5">Actions</th>
+
                             </tr>
+
                         </template>
 
                         <template #body>
-                            <tr v-for="call in calls" :key="call.id" :class="[checkedRows[call.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer border-b border-gray-200']">
+                            <tr v-for="call in calls" :key="call.id" :class="[checkedRows[call.id] ? 'bg-blue-50' : 'bg-white hover:bg-gray-50', 'group cursor-pointer text-sm border-b border-gray-200']">
                                 <td class="whitespace-nowrap align-top px-4 py-4">
                                     <Input type="checkbox" v-model="checkedRows[call.id]" />
                                 </td>
 
                                 <template v-if="columns.find(col => col.name === 'From')?.active">
                                     <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <div class="font-medium text-sm">{{ call.from }}</div>
+                                        <div class="text-sm">{{ call.from }}</div>
                                     </td>
                                 </template>
 
                                 <template v-if="columns.find(col => col.name === 'To')?.active">
                                     <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <div class="font-medium text-sm">{{ call.to }}</div>
+                                        <div class="text-sm">{{ call.to }}</div>
                                     </td>
                                 </template>
 
                                 <template v-if="columns.find(col => col.name === 'Direction')?.active">
                                     <td class="whitespace-nowrap align-center pr-4 py-4">
-                                        <span>{{ call.direction }}</span>
+                                        <PhoneIncoming v-if="call.direction == 'inbound'" size="16" class="text-indigo-500 mx-auto">{{ call.direction }}</PhoneIncoming>
+                                        <PhoneOutgoing v-else size="16" class="text-orange-500 mx-auto">{{ call.direction }}</PhoneOutgoing>
                                     </td>
                                 </template>
 
@@ -145,7 +180,7 @@
                 <PhoneCall size="48" class="text-gray-400" />
                 <h2 class="text-2xl font-bold text-gray-800">No Calls Yet</h2>
                 <p class="text-sm text-gray-500">Add a call to start managing communications.</p>
-                <Button type="primary" size="md" :leftIcon="Plus" leftIconSize="20" :action="showAddCallModal">
+                <Button type="primary" size="md" :leftIcon="Phone" leftIconSize="20" :action="showAddCallModal">
                     <span>Add Call</span>
                 </Button>
             </div>
@@ -174,17 +209,17 @@ import UpdateCallModal from '@Pages/calls/components/UpdateCallModal.vue';
 import DeleteCallModal from '@Pages/calls/components/DeleteCallModal.vue';
 import DeleteCallsModal from '@Pages/calls/components/DeleteCallsModal.vue';
 import { formattedDatetime, formattedRelativeDate } from '@Utils/dateUtils.js';
-import { Plus, Pencil, Trash2, PhoneCall } from 'lucide-vue-next';
+import { Phone, Pencil, Trash2, PhoneCall, PhoneIncoming, PhoneOutgoing } from 'lucide-vue-next';
 
 export default {
     inject: ['formState', 'notificationState'],
     components: {
         Pill, Modal, Input, Button, Popover, Dropdown, Table,
-        AddCallModal, UpdateCallModal, DeleteCallModal, DeleteCallsModal, PhoneCall
+        AddCallModal, UpdateCallModal, DeleteCallModal, DeleteCallsModal, PhoneCall, PhoneIncoming, PhoneOutgoing
     },
     data() {
         return {
-            Plus,
+            Phone,
             Pencil,
             Trash2,
             PhoneCall,

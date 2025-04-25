@@ -3,9 +3,9 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Number;
+use App\Models\Call;
 
-class NumberPolicy extends BasePolicy
+class CallPolicy extends BasePolicy
 {
     /**
      * Grant all permissions to super admins who have roles not tied to any organization.
@@ -20,7 +20,7 @@ class NumberPolicy extends BasePolicy
     }
 
     /**
-     * Determine whether the user can view any numbers.
+     * Determine whether the user can view any calls.
      *
      * @param User $user
      * @return bool
@@ -28,23 +28,23 @@ class NumberPolicy extends BasePolicy
     public function viewAny(User $user): bool
     {
         $organizationId = request('organization_id');
-        return $organizationId ? $this->isOrgUserWithPermission($user, 'view numbers', $organizationId) : false;
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'view calls', $organizationId) : false;
     }
 
     /**
-     * Determine whether the user can view the number.
+     * Determine whether the user can view the call.
      *
      * @param User $user
-     * @param Number $number
+     * @param Call $call
      * @return bool
      */
-    public function view(User $user, Number $number): bool
+    public function view(User $user, Call $call): bool
     {
-        return $this->isOrgUserWithPermission($user, 'view numbers', $number->organization_id);
+        return $this->isOrgUserWithPermission($user, 'view calls', $call->organization_id);
     }
 
     /**
-     * Determine whether the user can create numbers.
+     * Determine whether the user can create calls.
      *
      * @param User $user
      * @return bool
@@ -52,35 +52,35 @@ class NumberPolicy extends BasePolicy
     public function create(User $user): bool
     {
         $organizationId = request('organization_id');
-        return $organizationId ? $this->isOrgUserWithPermission($user, 'create numbers', $organizationId) : false;
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'create calls', $organizationId) : false;
     }
 
     /**
-     * Determine whether the user can update the number.
+     * Determine whether the user can update the call.
      *
      * @param User $user
-     * @param Number $number
+     * @param Call $call
      * @return bool
      */
-    public function update(User $user, Number $number): bool
+    public function update(User $user, Call $call): bool
     {
-        return $this->isOrgUserWithPermission($user, 'edit numbers', $number->organization_id);
+        return $this->isOrgUserWithPermission($user, 'edit calls', $call->organization_id);
     }
 
     /**
-     * Determine whether the user can delete the number.
+     * Determine whether the user can delete the call.
      *
      * @param User $user
-     * @param Number $number
+     * @param Call $call
      * @return bool
      */
-    public function delete(User $user, Number $number): bool
+    public function delete(User $user, Call $call): bool
     {
-        return $this->isOrgUserWithPermission($user, 'edit numbers', $number->organization_id);
+        return $this->isOrgUserWithPermission($user, 'edit calls', $call->organization_id);
     }
 
     /**
-     * Determine whether the user can delete any numbers.
+     * Determine whether the user can delete any calls.
      *
      * @param User $user
      * @return bool
@@ -88,6 +88,6 @@ class NumberPolicy extends BasePolicy
     public function deleteAny(User $user): bool
     {
         $organizationId = request('organization_id');
-        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit numbers', $organizationId) : false;
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit calls', $organizationId) : false;
     }
 }
