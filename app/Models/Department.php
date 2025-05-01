@@ -12,16 +12,16 @@ class Department extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = [
-        'name', 'description', 'active', 'organization_id'
-    ];
-
     protected function casts(): array
     {
         return [
             'active' => 'boolean',
         ];
     }
+
+    protected $fillable = [
+        'name', 'description', 'active', 'organization_id'
+    ];
 
     #[Scope]
     protected function search(Builder $query, string $searchTerm): void

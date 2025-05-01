@@ -20,16 +20,16 @@
       <div class="relative flex flex-col h-full max-h-full">
         <!-- Header -->
         <header class="p-4 pb-8 flex justify-between items-center gap-x-2">
-          <h1 class="flex-none font-semibold text-xl px-2.5">Orange Botswana</h1>
-          <div class="lg:hidden -me-2">
-            <!-- Close Button -->
-            <button type="button"
-                    class="flex justify-center items-center size-6 bg-white border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 rounded-full focus:outline-hidden focus:bg-gray-100"
-                    data-hs-overlay="#hs-sidebar-basic-usage">
-              <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-          </div>
+            <h1 class="flex-none font-semibold text-xl px-2.5">Orange Botswana</h1>
+            <div class="lg:hidden -me-2">
+                <!-- Close Button -->
+                <button type="button"
+                        class="flex justify-center items-center size-6 bg-white border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 rounded-full focus:outline-hidden focus:bg-gray-100"
+                        data-hs-overlay="#hs-sidebar-basic-usage">
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
         </header>
         <!-- End Header -->
 
@@ -37,49 +37,146 @@
         <nav class="h-full overflow-y-auto px-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
           <ul class="space-y-1">
             <li v-for="(menu, index) in menus" :key="index">
-              <router-link
-                :to="{ name: menu.route }"
-                :class="[
-                  'flex items-center gap-x-2.5 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden',
-                  isActive(menu)
-                    ? 'bg-indigo-500 shadow-sm text-white border border-indigo-400'
-                    : 'hover:bg-indigo-50 hover:shadow-sm hover:text-indigo-500 border border-transparent hover:border-indigo-300 transition-all duration-300'
-                ]"
-              >
-                <component v-if="menu.icon" :is="menu.icon" :size="16" />
-                <span>{{ menu.name }}</span>
-              </router-link>
+              <!-- Main Menu Item (Expandable if it has subMenus) -->
+              <div>
+                <!-- Menu with Subitems -->
+                <button
+                  v-if="menu.subMenus"
+                  @click="toggleMenu(index)"
+                  :class="[
+                    'w-full flex items-center justify-between gap-x-2.5 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden cursor-pointer',
+                    (isActive(menu) || isSubMenuActive(menu))
+                      ? (menu.subMenus && expandedMenus[index] ? 'hover:bg-indigo-50 hover:shadow-sm hover:text-indigo-500 border border-transparent hover:border-indigo-300 transition-all duration-300' : 'bg-indigo-500 shadow-sm text-white border border-indigo-400')
+                      : 'hover:bg-indigo-50 hover:shadow-sm hover:text-indigo-500 border border-transparent hover:border-indigo-300 transition-all duration-300'
+                  ]"
+                >
+                  <div class="flex items-center gap-x-2.5">
+                    <component v-if="menu.icon" :is="menu.icon" :size="16" :class="{ 'text-red-600' : (menu.name == 'Virtual Agents' && !isActive(menu) && !isSubMenuActive(menu)) }" />
+                    <span :class="{ 'bg-gradient-to-r from-red-600 to-indigo-600 bg-clip-text text-transparent' : menu.name == 'Virtual Agents' && !isActive(menu) && !isSubMenuActive(menu) }">
+                      {{ menu.name }}
+                    </span>
+                  </div>
+                  <component :is="expandedMenus[index] ? ChevronUp : ChevronDown" :size="16" />
+                </button>
+                <!-- Menu without Subitems -->
+                <router-link
+                  v-else
+                  :to="{ name: menu.route }"
+                  @click="closeAllMultiMenus"
+                  :class="[
+                    'flex items-center gap-x-2.5 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden',
+                    isActive(menu)
+                      ? 'bg-indigo-500 shadow-sm text-white border border-indigo-400'
+                      : 'hover:bg-indigo-50 hover:shadow-sm hover:text-indigo-500 border border-transparent hover:border-indigo-300 transition-all duration-300'
+                  ]"
+                >
+                  <component v-if="menu.icon" :is="menu.icon" :size="16" :class="{ 'text-red-600' : (menu.name == 'Virtual Agents' && !isActive(menu)) }" />
+                  <span :class="{ 'bg-gradient-to-r from-red-600 to-indigo-600 bg-clip-text text-transparent' : menu.name == 'Virtual Agents' && !isActive(menu) }">
+                    {{ menu.name }}
+                  </span>
+                </router-link>
+
+                <!-- Nested Menu Items with Animation -->
+                <vue-slide-up-down :active="menu.subMenus && expandedMenus[index]">
+                  <ul v-if="menu.subMenus && expandedMenus[index]" class="pl-6 space-y-1 mt-1">
+                    <li v-for="(subMenu, subIndex) in menu.subMenus" :key="subIndex">
+                      <router-link
+                        :to="{ name: subMenu.route }"
+                        :class="[
+                          'flex items-center gap-x-2.5 py-2 px-2.5 text-sm rounded-lg focus:outline-hidden',
+                          isActive(subMenu)
+                            ? 'bg-indigo-500 shadow-sm text-white border border-indigo-400'
+                            : 'hover:bg-indigo-50 hover:shadow-sm hover:text-indigo-500 border border-transparent hover:border-indigo-300 transition-all duration-300'
+                        ]"
+                      >
+                        <component v-if="subMenu.icon" :is="subMenu.icon" :size="16" />
+                        <span>{{ subMenu.name }}</span>
+                      </router-link>
+                    </li>
+                  </ul>
+                </vue-slide-up-down>
+              </div>
             </li>
           </ul>
         </nav>
         <!-- End Body -->
+        <div class="flex items-end space-x-2 p-8">
+            <Logo height="h-6"></Logo>
+            <span class="text-blue-700">Telcoflo</span>
+        </div>
       </div>
     </div>
     <!-- End Sidebar -->
 </template>
 
 <script>
-import { Lock, Atom, Route, Contact, PhoneCall, CirclePlay, Workflow, HouseIcon, Puzzle, BuildingIcon, UserRoundIcon, UsersRoundIcon, MessageCircleMore } from 'lucide-vue-next';
+import Logo from '@Partials/Logo.vue';
+import VueSlideUpDown from 'vue-slide-up-down';
+import { Bot, Lock, Atom, Earth, Route, Contact, FileText, Settings, MessageSquareMore, Shapes, SquareDashedBottom, LibraryBig, ScrollText, PhoneCall, CirclePlay, Workflow, HouseIcon, Puzzle, BuildingIcon, UserRoundIcon, UsersRoundIcon, Shell, ChevronUp, ChevronDown } from 'lucide-vue-next';
 
 export default {
+    components: { Logo, VueSlideUpDown },
     data() {
         return {
+            ChevronUp,
+            ChevronDown,
+            expandedMenus: {}, // Track expanded state for each menu
             menus: [
                 { name: 'Home', route: 'show-home', icon: HouseIcon },
-                { name: 'Flow', route: 'show-flow', icon: MessageCircleMore },
+                { name: 'Flow', route: 'show-flow', icon: Shell },
                 { name: 'Calls', route: 'show-calls', icon: PhoneCall },
-                { name: 'Users', route: 'show-users', icon: UserRoundIcon },
-                { name: 'Roles', route: 'show-roles', icon: Lock },
-                { name: 'Numbers', route: 'show-numbers', icon: Route },
                 { name: 'Contacts', route: 'show-contacts', icon: Contact },
-                { name: 'Call Flows', route: 'show-call-flows', relatedRoutes: ['create-call-flow', 'edit-call-flow'], icon: Workflow },
-                { name: 'Departments', route: 'show-departments', icon: UsersRoundIcon },
+                { name: 'Conversations', route: 'show-conversation-threads', relatedRoutes: ['show-copilot-conversation-threads'], icon: MessageSquareMore },
+
                 { name: 'Media Files', route: 'show-media-files', icon: CirclePlay },
-                { name: 'Integrations', route: 'show-integrations', icon: Puzzle },
-                { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
-                { name: 'NexFlow AI', route: 'show-nexflow', icon: Atom },
+                {
+                    name: 'Automation',
+                    route: 'show-copilots',
+                    relatedRoutes: [],
+                    icon: Shapes,
+                    subMenus: [
+                        { name: 'Virtual Agents', route: 'show-nexflo', icon: Atom },
+                        { name: 'Workflows', route: 'show-call-flows', relatedRoutes: ['create-call-flow', 'edit-call-flow'], icon: Workflow },
+                        { name: 'Copilots', route: 'show-copilots', icon: Bot },
+                        { name: 'Numbers', route: 'show-numbers', icon: Route },
+                        { name: 'Scripts', route: 'show-scripts', icon: ScrollText },
+                    ]
+                },
+                {
+                    name: 'Knowledge',
+                    route: 'show-knowledge-bases',
+                    relatedRoutes: ['show-knowledge-bases', 'show-articles', 'show-snippets', 'show-websites'],
+                    icon: LibraryBig,
+                    subMenus: [
+                        { name: 'Bases', route: 'show-knowledge-bases', relatedRoutes: ['manage-knowledge-base'] },
+                        { name: 'Articles', route: 'show-articles', icon: FileText },
+                        { name: 'Snippets', route: 'show-snippets', icon: SquareDashedBottom },
+                        { name: 'Websites', route: 'show-websites', icon: Earth },
+                    ]
+                },
+                {
+                    name: 'Settings',
+                    route: 'show-users',
+                    relatedRoutes: [],
+                    icon: Settings,
+                    subMenus: [
+                        { name: 'Users', route: 'show-users', icon: UserRoundIcon },
+                        { name: 'Roles', route: 'show-roles', icon: Lock },
+                        { name: 'Departments', route: 'show-departments', icon: UsersRoundIcon },
+                        { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
+                        { name: 'Integrations', route: 'show-integrations', icon: Puzzle },
+                    ]
+                },
             ],
         };
+    },
+    computed: {
+        isSubMenuActive() {
+            return (menu) => {
+                if (!menu.subMenus) return false;
+                return menu.subMenus.some(subMenu => this.isActive(subMenu));
+            };
+        },
     },
     methods: {
         isActive(menu) {
@@ -93,6 +190,34 @@ export default {
             }
             return false;
         },
+        toggleMenu(index) {
+            // Toggle the expanded state for the menu at the given index
+            this.expandedMenus = {
+                ...this.expandedMenus,
+                [index]: !this.expandedMenus[index]
+            };
+            // If expanding and no submenu is active, navigate to the first submenu
+            const menu = this.menus[index];
+            if (this.expandedMenus[index] && !this.isSubMenuActive(menu) && menu.subMenus && menu.subMenus.length > 0) {
+                this.$router.push({ name: menu.subMenus[0].route });
+            }
+        },
+        closeAllMultiMenus() {
+            // Reset expanded state for all menus with subMenus
+            const newExpandedMenus = {};
+            this.menus.forEach((_, index) => {
+                newExpandedMenus[index] = false;
+            });
+            this.expandedMenus = newExpandedMenus;
+        },
+    },
+    created() {
+        // Initialize expanded state for each menu and expand if active
+        this.menus.forEach((menu, index) => {
+            // Check if the menu or any of its submenus are active
+            const isMenuActive = this.isActive(menu) || (menu.subMenus && this.isSubMenuActive(menu));
+            this.expandedMenus[index] = isMenuActive;
+        });
     },
 };
 </script>

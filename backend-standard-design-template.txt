@@ -1,0 +1,2493 @@
+Example migrations:
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('articles', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('title');
+            $table->text('content');
+            $table->boolean('ai_searchable')->default(true);
+            $table->foreignUuid('organization_id')->constrained('organizations')->onDelete('cascade');
+            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->onDelete('cascade');
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('articles');
+    }
+};
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('organization_user', function (Blueprint $table) {
+            $table->primary(['organization_id', 'user_id']);
+            $table->enum('status', ['available', 'on call', 'on break', 'unavailable'])->default('available');
+            $table->timestamp('last_seen_at')->nullable();
+            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+            $table->index('status');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('organization_user');
+    }
+};
+
+
+Example routes:
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CallController;
+use App\Http\Middleware\OrganisationPermission;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('calls')
+    ->controller(CallController::class)
+    ->group(function () {
+        Route::get('/', 'showCalls')->name('show-calls');
+        Route::post('/', 'createCall')->name('create-call');
+        Route::delete('/', 'deleteCalls')->name('delete-calls');
+
+        Route::prefix('{call}')->group(function () {
+            Route::get('/', 'showCall')->name('show-call');
+            Route::put('/', 'updateCall')->name('update-call');
+            Route::delete('/', 'deleteCall')->name('delete-call');
+        });
+    });
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\QueueController;
+use App\Http\Middleware\OrganisationPermission;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('queues')
+    ->controller(QueueController::class)
+    ->group(function () {
+        Route::get('/', 'showQueues')->name('show-queues');
+        Route::post('/', 'createQueue')->name('create-queue');
+        Route::delete('/', 'deleteQueues')->name('delete-queues');
+
+        Route::prefix('{queue}')->group(function () {
+            Route::get('/', 'showQueue')->name('show-queue');
+            Route::put('/', 'updateQueue')->name('update-queue');
+            Route::delete('/', 'deleteQueue')->name('delete-queue');
+        });
+    });
+
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrganizationController;
+use App\Http\Middleware\OrganisationPermission;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('organizations')
+    ->controller(OrganizationController::class)
+    ->group(function () {
+        Route::get('/', 'showOrganizations')->name('show-organizations');
+        Route::post('/', 'createOrganization')->name('create-organization');
+        Route::delete('/', 'deleteOrganizations')->name('delete-organizations');
+        Route::get('/alias/{alias}', 'showOrganizationByAlias')->name('show-organization-by-alias');
+
+        Route::prefix('{organization}')->group(function () {
+            Route::get('/', 'showOrganization')->name('show-organization');
+            Route::put('/', 'updateOrganization')->name('update-organization');
+            Route::delete('/', 'deleteOrganization')->name('delete-organization');
+        });
+    });
+
+Example controllers:
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Call;
+use App\Services\CallService;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\CallResources;
+use App\Http\Controllers\BaseController;
+use App\Http\Requests\Call\ShowCallRequest;
+use App\Http\Requests\Call\ShowCallsRequest;
+use App\Http\Requests\Call\CreateCallRequest;
+use App\Http\Requests\Call\UpdateCallRequest;
+use App\Http\Requests\Call\DeleteCallRequest;
+use App\Http\Requests\Call\DeleteCallsRequest;
+
+class CallController extends BaseController
+{
+    /**
+     * @var CallService
+     */
+    protected $service;
+
+    /**
+     * CallController constructor.
+     *
+     * @param CallService $service
+     */
+    public function __construct(CallService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * Show calls.
+     *
+     * @param ShowCallsRequest $request
+     * @return CallResources|JsonResponse
+     */
+    public function showCalls(ShowCallsRequest $request): CallResources|JsonResponse
+    {
+        return $this->prepareOutput($this->service->showCalls(request('organization_id')));
+    }
+
+    /**
+     * Create call.
+     *
+     * @param CreateCallRequest $request
+     * @return JsonResponse
+     */
+    public function createCall(CreateCallRequest $request): JsonResponse
+    {
+        return $this->prepareOutput($this->service->createCall(request('organization_id'), $request->validated()), 201);
+    }
+
+    /**
+     * Delete multiple calls.
+     *
+     * @param DeleteCallsRequest $request
+     * @return JsonResponse
+     */
+    public function deleteCalls(DeleteCallsRequest $request): JsonResponse
+    {
+        $callIds = request()->input('call_ids', []);
+        return $this->prepareOutput($this->service->deleteCalls(request('organization_id'), $callIds));
+    }
+
+    /**
+     * Show single call.
+     *
+     * @param ShowCallRequest $request
+     * @param Call $call
+     * @return JsonResponse
+     */
+    public function showCall(ShowCallRequest $request, Call $call): JsonResponse
+    {
+        return $this->prepareOutput($this->service->showCall($call->id));
+    }
+
+    /**
+     * Update call.
+     *
+     * @param UpdateCallRequest $request
+     * @param Call $call
+     * @return JsonResponse
+     */
+    public function updateCall(UpdateCallRequest $request, Call $call): JsonResponse
+    {
+        return $this->prepareOutput($this->service->updateCall($call->id, $request->validated()));
+    }
+
+    /**
+     * Delete call.
+     *
+     * @param DeleteCallRequest $request
+     * @param Call $call
+     * @return JsonResponse
+     */
+    public function deleteCall(DeleteCallRequest $request, Call $call): JsonResponse
+    {
+        return $this->prepareOutput($this->service->deleteCall($call->id));
+    }
+}
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Queue;
+use App\Services\QueueService;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\QueueResources;
+use App\Http\Controllers\BaseController;
+use App\Http\Requests\Queue\ShowQueuesRequest;
+use App\Http\Requests\Queue\CreateQueueRequest;
+use App\Http\Requests\Queue\ShowQueueRequest;
+use App\Http\Requests\Queue\UpdateQueueRequest;
+use App\Http\Requests\Queue\DeleteQueueRequest;
+use App\Http\Requests\Queue\DeleteQueuesRequest;
+
+class QueueController extends BaseController
+{
+    /**
+     * @var QueueService
+     */
+    protected $service;
+
+    /**
+     * QueueController constructor.
+     *
+     * @param QueueService $service
+     */
+    public function __construct(QueueService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * Show queues.
+     *
+     * @param ShowQueuesRequest $request
+     * @return QueueResources|JsonResponse
+     */
+    public function showQueues(ShowQueuesRequest $request): QueueResources|JsonResponse
+    {
+        return $this->prepareOutput($this->service->showQueues(request('organization_id')));
+    }
+
+    /**
+     * Create queue.
+     *
+     * @param CreateQueueRequest $request
+     * @return JsonResponse
+     */
+    public function createQueue(CreateQueueRequest $request): JsonResponse
+    {
+        return $this->prepareOutput($this->service->createQueue(request('organization_id'), $request->validated()), 201);
+    }
+
+    /**
+     * Show single queue.
+     *
+     * @param ShowQueueRequest $request
+     * @param Queue $queue
+     * @return JsonResponse
+     */
+    public function showQueue(ShowQueueRequest $request, Queue $queue): JsonResponse
+    {
+        return $this->prepareOutput($this->service->showQueue($queue->id));
+    }
+
+    /**
+     * Update queue.
+     *
+     * @param UpdateQueueRequest $request
+     * @param Queue $queue
+     * @return JsonResponse
+     */
+    public function updateQueue(UpdateQueueRequest $request, Queue $queue): JsonResponse
+    {
+        return $this->prepareOutput($this->service->updateQueue($queue->id, $request->validated()));
+    }
+
+    /**
+     * Delete queue.
+     *
+     * @param DeleteQueueRequest $request
+     * @param Queue $queue
+     * @return JsonResponse
+     */
+    public function deleteQueue(DeleteQueueRequest $request, Queue $queue): JsonResponse
+    {
+        return $this->prepareOutput($this->service->deleteQueue($queue->id));
+    }
+
+    /**
+     * Delete multiple queues.
+     *
+     * @param DeleteQueuesRequest $request
+     * @return JsonResponse
+     */
+    public function deleteQueues(DeleteQueuesRequest $request): JsonResponse
+    {
+        $queueIds = request()->input('queue_ids', []);
+        return $this->prepareOutput($this->service->deleteQueues(request('organization_id'), $queueIds));
+    }
+}
+
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Department;
+use Illuminate\Http\JsonResponse;
+use App\Services\DepartmentService;
+use App\Http\Controllers\BaseController;
+use App\Http\Resources\DepartmentResources;
+use App\Http\Requests\Department\ShowDepartmentRequest;
+use App\Http\Requests\Department\ShowDepartmentsRequest;
+use App\Http\Requests\Department\CreateDepartmentRequest;
+use App\Http\Requests\Department\UpdateDepartmentRequest;
+use App\Http\Requests\Department\DeleteDepartmentRequest;
+use App\Http\Requests\Department\DeleteDepartmentsRequest;
+
+class DepartmentController extends BaseController
+{
+    /**
+     * @var DepartmentService
+     */
+    protected $service;
+
+    /**
+     * DepartmentController constructor.
+     *
+     * @param DepartmentService $service
+     */
+    public function __construct(DepartmentService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * Show departments.
+     *
+     * @param ShowDepartmentsRequest $request
+     * @return DepartmentResources|JsonResponse
+     */
+    public function showDepartments(ShowDepartmentsRequest $request): DepartmentResources|JsonResponse
+    {
+        return $this->prepareOutput($this->service->showDepartments(request('organization_id')));
+    }
+
+    /**
+     * Create department.
+     *
+     * @param CreateDepartmentRequest $request
+     * @return JsonResponse
+     */
+    public function createDepartment(CreateDepartmentRequest $request): JsonResponse
+    {
+        return $this->prepareOutput($this->service->createDepartment(request('organization_id'), $request->validated()), 201);
+    }
+
+    /**
+     * Show single department.
+     *
+     * @param ShowDepartmentRequest $request
+     * @param Department $department
+     * @return JsonResponse
+     */
+    public function showDepartment(ShowDepartmentRequest $request, Department $department): JsonResponse
+    {
+        return $this->prepareOutput($this->service->showDepartment($department->id));
+    }
+
+    /**
+     * Update department.
+     *
+     * @param UpdateDepartmentRequest $request
+     * @param Department $department
+     * @return JsonResponse
+     */
+    public function updateDepartment(UpdateDepartmentRequest $request, Department $department): JsonResponse
+    {
+        return $this->prepareOutput($this->service->updateDepartment($department->id, $request->validated()));
+    }
+
+    /**
+     * Delete department.
+     *
+     * @param DeleteDepartmentRequest $request
+     * @param Department $department
+     * @return JsonResponse
+     */
+    public function deleteDepartment(DeleteDepartmentRequest $request, Department $department): JsonResponse
+    {
+        return $this->prepareOutput($this->service->deleteDepartment($department->id));
+    }
+
+    /**
+     * Delete multiple departments.
+     *
+     * @param DeleteDepartmentsRequest $request
+     * @return JsonResponse
+     */
+    public function deleteDepartments(DeleteDepartmentsRequest $request): JsonResponse
+    {
+        $departmentIds = request()->input('department_ids', []);
+        return $this->prepareOutput($this->service->deleteDepartments(request('organization_id'), $departmentIds));
+    }
+}
+
+Example form requests:
+
+    <?php
+
+    namespace App\Http\Requests\Call;
+
+    use App\Models\Call;
+    use Illuminate\Validation\Rule;
+    use Illuminate\Foundation\Http\FormRequest;
+
+    class CreateCallRequest extends FormRequest
+    {
+        /**
+         * Determine if the user is authorized to make this request.
+         *
+         * @return bool
+         */
+        public function authorize(): bool
+        {
+            return $this->user()->can('create', Call::class);
+        }
+
+        /**
+         * Get the validation rules that apply to the request.
+         *
+         * @return array
+         */
+        public function rules(): array
+        {
+            return [
+                'from' => 'required|string|max:20',
+                'to' => 'required|string|max:20',
+                'direction' => ['required', 'string', Rule::in(['inbound', 'outbound'])],
+                'status' => ['sometimes', 'string', Rule::in(['initiated', 'in-progress', 'completed', 'failed'])],
+                'session_id' => 'sometimes|nullable|string|max:255',
+                'organization_id' => 'required|uuid|exists:organizations,id',
+                'agent_id' => 'sometimes|nullable|uuid|exists:users,id',
+                'contact_id' => 'sometimes|nullable|uuid|exists:contacts,id',
+                'queue_id' => 'sometimes|nullable|uuid|exists:queues,id',
+                'department_id' => 'sometimes|nullable|uuid|exists:departments,id',
+            ];
+        }
+
+        /**
+         * Get custom messages for validation errors.
+         *
+         * @return array
+         */
+        public function messages(): array
+        {
+            return [
+                'from.required' => 'The from phone number is required.',
+                'from.max' => 'The from phone number must not exceed 20 characters.',
+                'to.required' => 'The to phone number is required.',
+                'to.max' => 'The to phone number must not exceed 20 characters.',
+                'direction.required' => 'The call direction is required.',
+                'direction.in' => 'The direction must be either inbound or outbound.',
+                'status.in' => 'The status must be one of: initiated, in-progress, completed, failed.',
+                'session_id.max' => 'The session ID must not exceed 255 characters.',
+                'organization_id.required' => 'The organization ID is required.',
+                'organization_id.exists' => 'The specified organization does not exist.',
+                'agent_id.exists' => 'The specified agent does not exist.',
+                'contact_id.exists' => 'The specified contact does not exist.',
+                'queue_id.exists' => 'The specified queue does not exist.',
+                'department_id.exists' => 'The specified department does not exist.',
+            ];
+        }
+    }
+
+<?php
+
+namespace App\Http\Requests\Call;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteCallRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('delete', $this->route('call'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Call;
+
+use App\Models\Call;
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteCallsRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('deleteAny', Call::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'call_ids' => ['required', 'array', 'min:1'],
+            'call_ids.*' => ['uuid', 'exists:calls,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'call_ids.required' => 'The call IDs are required.',
+            'call_ids.array' => 'The call IDs must be an array.',
+            'call_ids.min' => 'At least one call ID is required.',
+            'call_ids.*.uuid' => 'Each call ID must be a valid UUID.',
+            'call_ids.*.exists' => 'One or more call IDs do not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Call;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ShowCallRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('view', $this->route('call'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Call;
+
+use App\Models\Call;
+use Illuminate\Foundation\Http\FormRequest;
+
+class ShowCallsRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('viewAny', Call::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'organization_id' => ['sometimes', 'uuid', 'exists:organizations,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'organization_id.uuid' => 'The organization ID must be a valid UUID.',
+            'organization_id.exists' => 'The specified organization does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Call;
+
+use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateCallRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('update', $this->route('call'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'from' => ['sometimes', 'string', 'max:20'],
+            'to' => ['sometimes', 'string', 'max:20'],
+            'direction' => ['sometimes', 'string', Rule::in(['inbound', 'outbound'])],
+            'status' => ['sometimes', 'string', Rule::in(['initiated', 'in-progress', 'completed', 'failed'])],
+            'session_id' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'agent_id' => ['sometimes', 'nullable', 'uuid', 'exists:users,id'],
+            'contact_id' => ['sometimes', 'nullable', 'uuid', 'exists:contacts,id'],
+            'queue_id' => ['sometimes', 'nullable', 'uuid', 'exists:queues,id'],
+            'department_id' => ['sometimes', 'nullable', 'uuid', 'exists:departments,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'from.string' => 'The from phone number must be a string.',
+            'from.max' => 'The from phone number must not exceed 20 characters.',
+            'to.string' => 'The to phone number must be a string.',
+            'to.max' => 'The to phone number must not exceed 20 characters.',
+            'direction.in' => 'The direction must be either inbound or outbound.',
+            'status.in' => 'The status must be one of: initiated, in-progress, completed, failed.',
+            'session_id.string' => 'The session ID must be a string.',
+            'session_id.max' => 'The session ID must not exceed 255 characters.',
+            'agent_id.exists' => 'The specified agent does not exist.',
+            'contact_id.exists' => 'The specified contact does not exist.',
+            'queue_id.exists' => 'The specified queue does not exist.',
+            'department_id.exists' => 'The specified department does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Queue;
+
+use App\Models\Queue;
+use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class CreateQueueRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', Queue::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:100',
+            'description' => 'sometimes|nullable|string|max:255',
+            'active' => 'sometimes|boolean',
+            'organization_id' => 'required|uuid|exists:organizations,id',
+            'department_id' => 'sometimes|nullable|uuid|exists:departments,id',
+            'sla_threshold' => 'sometimes|nullable|integer|min:0',
+            'max_wait_time' => 'sometimes|nullable|integer|min:0',
+            'escalation_threshold' => 'sometimes|nullable|integer|min:0',
+            'avg_wait_time' => 'sometimes|nullable|integer|min:0',
+            'service_level' => 'sometimes|nullable|numeric|min:0|max:100',
+            'abandonment_rate' => 'sometimes|nullable|numeric|min:0|max:100',
+            'last_sla_review' => 'sometimes|nullable|date',
+            'call_volume_warning_threshold' => 'sometimes|nullable|integer|min:0',
+            'call_volume_critical_threshold' => 'sometimes|nullable|integer|min:0',
+            'record_calls' => 'sometimes|boolean',
+            'strategy' => ['sometimes', 'string', Rule::in(['round robin', 'ring all', 'least calls', 'longest idle', 'random'])],
+            'priority_level' => ['sometimes', 'string', Rule::in(['normal', 'vip'])],
+            'metadata' => 'sometimes|nullable|array',
+            'hold_music_url' => 'sometimes|nullable|string|max:255',
+            'greeting_message' => 'sometimes|nullable|string|max:1000',
+            'wait_message' => 'sometimes|nullable|string|max:1000',
+            'callback_enabled' => 'sometimes|boolean',
+            'fallback_queue_id' => 'sometimes|nullable|uuid|exists:queues,id',
+            'fallback_department_id' => 'sometimes|nullable|uuid|exists:departments,id',
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'name.max' => 'The name must not exceed 100 characters.',
+            'description.max' => 'The description must not exceed 255 characters.',
+            'active.boolean' => 'The active field must be a boolean.',
+            'organization_id.required' => 'The organization ID is required.',
+            'organization_id.exists' => 'The specified organization does not exist.',
+            'department_id.exists' => 'The specified department does not exist.',
+            'sla_threshold.integer' => 'The SLA threshold must be an integer.',
+            'sla_threshold.min' => 'The SLA threshold must be at least 0.',
+            'max_wait_time.integer' => 'The max wait time must be an integer.',
+            'max_wait_time.min' => 'The max wait time must be at least 0.',
+            'escalation_threshold.integer' => 'The escalation threshold must be an integer.',
+            'escalation_threshold.min' => 'The escalation threshold must be at least 0.',
+            'avg_wait_time.integer' => 'The average wait time must be an integer.',
+            'avg_wait_time.min' => 'The average wait time must be at least 0.',
+            'service_level.numeric' => 'The service level must be a number.',
+            'service_level.min' => 'The service level must be at least 0.',
+            'service_level.max' => 'The service level must not exceed 100.',
+            'abandonment_rate.numeric' => 'The abandonment rate must be a number.',
+            'abandonment_rate.min' => 'The abandonment rate must be at least 0.',
+            'abandonment_rate.max' => 'The abandonment rate must not exceed 100.',
+            'last_sla_review.date' => 'The last SLA review must be a valid date.',
+            'call_volume_warning_threshold.integer' => 'The call volume warning threshold must be an integer.',
+            'call_volume_warning_threshold.min' => 'The call volume warning threshold must be at least 0.',
+            'call_volume_critical_threshold.integer' => 'The call volume critical threshold must be an integer.',
+            'call_volume_critical_threshold.min' => 'The call volume critical threshold must be at least 0.',
+            'record_calls.boolean' => 'The record calls field must be a boolean.',
+            'strategy.in' => 'The strategy must be one of: round robin, ring all, least calls, longest idle, random.',
+            'priority_level.in' => 'The priority level must be either normal or vip.',
+            'metadata.array' => 'The metadata must be an array.',
+            'hold_music_url.max' => 'The hold music URL must not exceed 255 characters.',
+            'greeting_message.max' => 'The greeting message must not exceed 1000 characters.',
+            'wait_message.max' => 'The wait message must not exceed 1000 characters.',
+            'callback_enabled.boolean' => 'The callback enabled field must be a boolean.',
+            'fallback_queue_id.exists' => 'The specified fallback queue does not exist.',
+            'fallback_department_id.exists' => 'The specified fallback department does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Queue;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteQueueRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('delete', $this->route('queue'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Queue;
+
+use App\Models\Queue;
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteQueuesRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('deleteAny', Queue::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'queue_ids' => ['required', 'array', 'min:1'],
+            'queue_ids.*' => ['uuid', 'exists:queues,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'queue_ids.required' => 'The queue IDs are required.',
+            'queue_ids.array' => 'The queue IDs must be an array.',
+            'queue_ids.min' => 'At least one queue ID is required.',
+            'queue_ids.*.uuid' => 'Each queue ID must be a valid UUID.',
+            'queue_ids.*.exists' => 'One or more queue IDs do not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Queue;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ShowQueueRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('view', $this->route('queue'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Queue;
+
+use App\Models\Queue;
+use Illuminate\Foundation\Http\FormRequest;
+
+class ShowQueuesRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('viewAny', Queue::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'organization_id' => ['sometimes', 'uuid', 'exists:organizations,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'organization_id.uuid' => 'The organization ID must be a valid UUID.',
+            'organization_id.exists' => 'The specified organization does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Queue;
+
+use Illuminate\Validation\Rule;
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateQueueRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('update', $this->route('queue'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => ['sometimes', 'string', 'max:100'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'active' => ['sometimes', 'boolean'],
+            'department_id' => ['sometimes', 'nullable', 'uuid', 'exists:departments,id'],
+            'sla_threshold' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'max_wait_time' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'escalation_threshold' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'avg_wait_time' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'service_level' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'abandonment_rate' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'last_sla_review' => ['sometimes', 'nullable', 'date'],
+            'call_volume_warning_threshold' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'call_volume_critical_threshold' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            'record_calls' => ['sometimes', 'boolean'],
+            'strategy' => ['sometimes', 'string', Rule::in(['round robin', 'ring all', 'least calls', 'longest idle', 'random'])],
+            'priority_level' => ['sometimes', 'string', Rule::in(['normal', 'vip'])],
+            'metadata' => ['sometimes', 'nullable', 'array'],
+            'hold_music_url' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'greeting_message' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'wait_message' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'callback_enabled' => ['sometimes', 'boolean'],
+            'fallback_queue_id' => ['sometimes', 'nullable', 'uuid', 'exists:queues,id'],
+            'fallback_department_id' => ['sometimes', 'nullable', 'uuid', 'exists:departments,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.string' => 'The name must be a string.',
+            'name.max' => 'The name must not exceed 100 characters.',
+            'description.string' => 'The description must be a string.',
+            'description.max' => 'The description must not exceed 255 characters.',
+            'active.boolean' => 'The active field must be a boolean.',
+            'department_id.exists' => 'The specified department does not exist.',
+            'sla_threshold.integer' => 'The SLA threshold must be an integer.',
+            'sla_threshold.min' => 'The SLA threshold must be at least 0.',
+            'max_wait_time.integer' => 'The max wait time must be an integer.',
+            'max_wait_time.min' => 'The max wait time must be at least 0.',
+            'escalation_threshold.integer' => 'The escalation threshold must be an integer.',
+            'escalation_threshold.min' => 'The escalation threshold must be at least 0.',
+            'avg_wait_time.integer' => 'The average wait time must be an integer.',
+            'avg_wait_time.min' => 'The average wait time must be at least 0.',
+            'service_level.numeric' => 'The service level must be a number.',
+            'service_level.min' => 'The service level must be at least 0.',
+            'service_level.max' => 'The service level must not exceed 100.',
+            'abandonment_rate.numeric' => 'The abandonment rate must be a number.',
+            'abandonment_rate.min' => 'The abandonment rate must be at least 0.',
+            'abandonment_rate.max' => 'The abandonment rate must not exceed 100.',
+            'last_sla_review.date' => 'The last SLA review must be a valid date.',
+            'call_volume_warning_threshold.integer' => 'The call volume warning threshold must be an integer.',
+            'call_volume_warning_threshold.min' => 'The call volume warning threshold must be at least 0.',
+            'call_volume_critical_threshold.integer' => 'The call volume critical threshold must be an integer.',
+            'call_volume_critical_threshold.min' => 'The call volume critical threshold must be at least 0.',
+            'record_calls.boolean' => 'The record calls field must be a boolean.',
+            'strategy.in' => 'The strategy must be one of: round robin, ring all, least calls, longest idle, random.',
+            'priority_level.in' => 'The priority level must be either normal or vip.',
+            'metadata.array' => 'The metadata must be an array.',
+            'hold_music_url.string' => 'The hold music URL must be a string.',
+            'hold_music_url.max' => 'The hold music URL must not exceed 255 characters.',
+            'greeting_message.string' => 'The greeting message must be a string.',
+            'greeting_message.max' => 'The greeting message must not exceed 1000 characters.',
+            'wait_message.string' => 'The wait message must be a string.',
+            'wait_message.max' => 'The wait message must not exceed 1000 characters.',
+            'callback_enabled.boolean' => 'The callback enabled field must be a boolean.',
+            'fallback_queue_id.exists' => 'The specified fallback queue does not exist.',
+            'fallback_department_id.exists' => 'The specified fallback department does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Department;
+
+use App\Models\Department;
+use Illuminate\Foundation\Http\FormRequest;
+
+class CreateDepartmentRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('create', Department::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'organization_id' => 'required|uuid|exists:organizations,id',
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'The name field is required.',
+            'name.max' => 'The name must not exceed 255 characters.',
+            'organization_id.required' => 'The organization ID is required.',
+            'organization_id.exists' => 'The specified organization does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Department;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteDepartmentRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('delete', $this->route('department'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Department;
+
+use App\Models\Department;
+use Illuminate\Foundation\Http\FormRequest;
+
+class DeleteDepartmentsRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('deleteAny', Department::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'department_ids' => ['required', 'array', 'min:1'],
+            'department_ids.*' => ['uuid', 'exists:departments,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'department_ids.required' => 'The department IDs are required.',
+            'department_ids.array' => 'The department IDs must be an array.',
+            'department_ids.min' => 'At least one department ID is required.',
+            'department_ids.*.uuid' => 'Each department ID must be a valid UUID.',
+            'department_ids.*.exists' => 'One or more department IDs do not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Department;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ShowDepartmentRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('view', $this->route('department'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Department;
+
+use App\Models\Department;
+use Illuminate\Foundation\Http\FormRequest;
+
+class ShowDepartmentsRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('viewAny', Department::class);
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'organization_id' => ['sometimes', 'uuid', 'exists:organizations,id'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'organization_id.uuid' => 'The organization ID must be a valid UUID.',
+            'organization_id.exists' => 'The specified organization does not exist.',
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Requests\Department;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class UpdateDepartmentRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize(): bool
+    {
+        return $this->user()->can('update', $this->route('department'));
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            'name' => ['sometimes', 'string', 'max:255'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validation errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.string' => 'The name must be a string.',
+            'name.max' => 'The name must not exceed 255 characters.',
+        ];
+    }
+}
+
+Example models:
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Call extends Model
+{
+    use HasFactory, HasUuids;
+
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'answered_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'hold_time' => 'integer',
+            'duration' => 'integer',
+            'transfer_count' => 'integer',
+            'metadata' => 'array',
+            'ai_suggested_actions' => 'array',
+        ];
+    }
+
+    protected $fillable = [
+        'direction', 'status', 'from', 'to',
+        'started_at', 'answered_at', 'ended_at', 'hold_time', 'duration',
+        'disposition', 'transfer_count', 'recording_url', 'session_id',
+        'metadata', 'notes', 'ai_summary', 'ai_suggested_actions',
+        'organization_id', 'queue_id', 'department_id', 'agent_id', 'contact_id'
+    ];
+
+    #[Scope]
+    protected function search(Builder $query, string $searchTerm): void
+    {
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('from', 'like', '%' . $searchTerm . '%')
+              ->orWhere('to', 'like', '%' . $searchTerm . '%')
+              ->orWhere('notes', 'like', '%' . $searchTerm . '%')
+              ->orWhere('ai_summary', 'like', '%' . $searchTerm . '%')
+              ->orWhereHas('contact', fn ($contactQuery) =>
+                  $contactQuery->where('phone_number', 'like', '%' . $searchTerm . '%')
+                              ->orWhere('first_name', 'like', '%' . $searchTerm . '%')
+                              ->orWhere('last_name', 'like', '%' . $searchTerm . '%')
+              );
+        });
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    public function contact()
+    {
+        return $this->belongsTo(Contact::class);
+    }
+
+    public function queue()
+    {
+        return $this->belongsTo(Queue::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function callActivities()
+    {
+        return $this->hasMany(CallActivity::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'call_tag')
+                    ->withTimestamps();
+    }
+}
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Queue extends Model
+{
+    use HasFactory, HasUuids;
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+            'last_sla_review' => 'datetime',
+            'sla_threshold' => 'integer',
+            'max_wait_time' => 'integer',
+            'escalation_threshold' => 'integer',
+            'avg_wait_time' => 'integer',
+            'service_level' => 'decimal:2',
+            'abandonment_rate' => 'decimal:2',
+            'call_volume_warning_threshold' => 'integer',
+            'call_volume_critical_threshold' => 'integer',
+            'record_calls' => 'boolean',
+            'callback_enabled' => 'boolean',
+            'metadata' => 'array'
+        ];
+    }
+
+    protected $fillable = [
+        'name', 'description', 'active',
+        'organization_id', 'department_id',
+        'sla_threshold', 'max_wait_time', 'escalation_threshold',
+        'avg_wait_time', 'service_level', 'abandonment_rate', 'last_sla_review',
+        'call_volume_warning_threshold', 'call_volume_critical_threshold',
+        'record_calls', 'strategy', 'priority_level', 'metadata',
+        'hold_music_url', 'greeting_message', 'wait_message', 'callback_enabled',
+        'fallback_queue_id', 'fallback_department_id'
+    ];
+
+    #[Scope]
+    protected function search(Builder $query, string $searchTerm): void
+    {
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('name', 'like', '%' . $searchTerm . '%')
+              ->orWhere('description', 'like', '%' . $searchTerm . '%')
+              ->orWhereHas('organization', fn ($orgQuery) =>
+                  $orgQuery->search($searchTerm)
+              )
+              ->orWhereHas('department', fn ($deptQuery) =>
+                  $deptQuery->search($searchTerm)
+              );
+        });
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function calls()
+    {
+        return $this->hasMany(Call::class);
+    }
+
+    public function fallbackQueue()
+    {
+        return $this->belongsTo(Queue::class, 'fallback_queue_id');
+    }
+
+    public function fallbackDepartment()
+    {
+        return $this->belongsTo(Department::class, 'fallback_department_id');
+    }
+}
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Department extends Model
+{
+    use HasFactory, HasUuids;
+
+    protected function casts(): array
+    {
+        return [
+            'active' => 'boolean',
+        ];
+    }
+
+    protected $fillable = [
+        'name', 'description', 'active', 'organization_id'
+    ];
+
+    #[Scope]
+    protected function search(Builder $query, string $searchTerm): void
+    {
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('name', 'like', '%' . $searchTerm . '%')
+              ->orWhere('description', 'like', '%' . $searchTerm . '%')
+              ->orWhereHas('organization', fn ($orgQuery) =>
+                  $orgQuery->search($searchTerm)
+              );
+        });
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
+    }
+
+    public function calls()
+    {
+        return $this->hasMany(Call::class);
+    }
+
+    public function fallbackQueues()
+    {
+        return $this->hasMany(Queue::class, 'fallback_department_id');
+    }
+}
+
+Example policies:
+
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+use App\Models\Call;
+
+class CallPolicy extends BasePolicy
+{
+    /**
+     * Grant all permissions to super admins who have roles not tied to any organization.
+     *
+     * @param User $user
+     * @param string $ability
+     * @return bool|null
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        return $this->authService->isSuperAdmin($user);
+    }
+
+    /**
+     * Determine whether the user can view any calls.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function viewAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'view calls', $organizationId) : false;
+    }
+
+    /**
+     * Determine whether the user can view the call.
+     *
+     * @param User $user
+     * @param Call $call
+     * @return bool
+     */
+    public function view(User $user, Call $call): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'view calls', $call->organization_id);
+    }
+
+    /**
+     * Determine whether the user can create calls.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function create(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'create calls', $organizationId) : false;
+    }
+
+    /**
+     * Determine whether the user can update the call.
+     *
+     * @param User $user
+     * @param Call $call
+     * @return bool
+     */
+    public function update(User $user, Call $call): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'edit calls', $call->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete the call.
+     *
+     * @param User $user
+     * @param Call $call
+     * @return bool
+     */
+    public function delete(User $user, Call $call): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'edit calls', $call->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete any calls.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit calls', $organizationId) : false;
+    }
+}
+
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+use App\Models\Queue;
+
+class QueuePolicy extends BasePolicy
+{
+    /**
+     * Grant all permissions to super admins who have roles not tied to any organization.
+     *
+     * @param User $user
+     * @param string $ability
+     * @return bool|null
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        return $this->authService->isSuperAdmin($user);
+    }
+
+    /**
+     * Determine whether the user can view any queues.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function viewAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'view queues', $organizationId) : false;
+    }
+
+    /**
+     * Determine whether the user can view the queue.
+     *
+     * @param User $user
+     * @param Queue $queue
+     * @return bool
+     */
+    public function view(User $user, Queue $queue): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'view queues', $queue->organization_id);
+    }
+
+    /**
+     * Determine whether the user can create queues.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function create(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'create queues', $organizationId) : false;
+    }
+
+    /**
+     * Determine whether the user can update the queue.
+     *
+     * @param User $user
+     * @param Queue $queue
+     * @return bool
+     */
+    public function update(User $user, Queue $queue): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'edit queues', $queue->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete the queue.
+     *
+     * @param User $user
+     * @param Queue $queue
+     * @return bool
+     */
+    public function delete(User $user, Queue $queue): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'edit queues', $queue->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete any queues.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit queues', $organizationId) : false;
+    }
+}
+
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+use App\Models\Department;
+
+class DepartmentPolicy extends BasePolicy
+{
+    /**
+     * Grant all permissions to super admins who have roles not tied to any organization.
+     *
+     * @param User $user
+     * @param string $ability
+     * @return bool|null
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        return $this->authService->isSuperAdmin($user);
+    }
+
+    /**
+     * Determine whether the user can view any departments.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function viewAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'view departments', $organizationId) : false;
+    }
+
+    /**
+     * Determine whether the user can view the department.
+     *
+     * @param User $user
+     * @param Department $department
+     * @return bool
+     */
+    public function view(User $user, Department $department): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'view departments', $department->organization_id);
+    }
+
+    /**
+     * Determine whether the user can create departments.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function create(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'create departments', $organizationId) : false;
+    }
+
+    /**
+     * Determine whether the user can update the department.
+     *
+     * @param User $user
+     * @param Department $department
+     * @return bool
+     */
+    public function update(User $user, Department $department): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'edit departments', $department->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete the department.
+     *
+     * @param User $user
+     * @param Department $department
+     * @return bool
+     */
+    public function delete(User $user, Department $department): bool
+    {
+        return $this->isOrgUserWithPermission($user, 'edit departments', $department->organization_id);
+    }
+
+    /**
+     * Determine whether the user can delete any departments.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function deleteAny(User $user): bool
+    {
+        $organizationId = request('organization_id');
+        return $organizationId ? $this->isOrgUserWithPermission($user, 'edit departments', $organizationId) : false;
+    }
+}
+
+Example services:
+
+<?php
+
+namespace App\Services;
+
+use App\Models\Call;
+use App\Models\CallActivity;
+use App\Http\Resources\CallResource;
+use App\Http\Resources\CallResources;
+
+class CallService extends BaseService
+{
+    /**
+     * @var AfricasTalkingService
+     */
+    protected $africasTalkingService;
+
+    /**
+     * CallService constructor.
+     *
+     * @param AfricasTalkingService $africasTalkingService
+     */
+    public function __construct(AfricasTalkingService $africasTalkingService)
+    {
+        $this->africasTalkingService = $africasTalkingService;
+    }
+
+    /**
+     * Show calls.
+     *
+     * @param string|null $organizationId
+     * @return CallResources|array
+     */
+    public function showCalls(?string $organizationId = null): CallResources|array
+    {
+        $query = Call::query()
+            ->when($organizationId, fn($query) => $query->where('organization_id', $organizationId))
+            ->when(!request()->has('_sort'), fn($query) => $query->latest());
+
+        return $this->setQuery($query)->getOutput();
+    }
+
+    /**
+     * Create call.
+     *
+     * @param string $organizationId
+     * @param array $data
+     * @return array
+     */
+    public function createCall(string $organizationId, array $data): array
+    {
+        $data['organization_id'] = $organizationId;
+
+        // For outbound calls, initiate via Africa's Talking API
+        if ($data['direction'] === 'outbound') {
+            $response = $this->africasTalkingService->initiateOutboundCall($data['from'], $data['to']);
+            if (!$response['success']) {
+                return ['created' => false, 'message' => $response['message']];
+            }
+            $data['session_id'] = $response['sessionId'] ?? null;
+            $data['status'] = $response['status'] === 'Success' ? 'initiated' : 'failed';
+        }
+
+        $call = Call::create($data);
+
+        // Log the call creation activity
+        CallActivity::create([
+            'call_id' => $call->id,
+            'activity_type' => 'call started',
+            'description' => "Call {$call->direction} initiated from {$call->from} to {$call->to}",
+            'performed_by' => $data['agent_id'] ?? null,
+            'metadata' => ['session_id' => $call->session_id],
+        ]);
+
+        return $this->showCreatedResource($call);
+    }
+
+    /**
+     * Show call.
+     *
+     * @param string $callId
+     * @return CallResource
+     */
+    public function showCall(string $callId): CallResource
+    {
+        $call = Call::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
+            ->findOrFail($callId);
+        return $this->showResource($call);
+    }
+
+    /**
+     * Update call.
+     *
+     * @param string $callId
+     * @param array $data
+     * @return array
+     */
+    public function updateCall(string $callId, array $data): array
+    {
+        $call = Call::findOrFail($callId);
+
+        // Log status change if updated
+        if (isset($data['status']) && $data['status'] !== $call->status) {
+            CallActivity::create([
+                'call_id' => $call->id,
+                'activity_type' => 'status changed',
+                'description' => "Call status changed from {$call->status} to {$data['status']}",
+                'performed_by' => request()->user()->id ?? null,
+                'metadata' => ['old_status' => $call->status, 'new_status' => $data['status']],
+            ]);
+        }
+
+        $call->update($data);
+
+        return $this->showUpdatedResource($call);
+    }
+
+    /**
+     * Delete call.
+     *
+     * @param string $callId
+     * @return array
+     */
+    public function deleteCall(string $callId): array
+    {
+        $call = Call::findOrFail($callId);
+
+        $deleted = $call->delete();
+
+        if ($deleted) {
+            return ['deleted' => true, 'message' => 'Call deleted'];
+        }
+
+        return ['deleted' => false, 'message' => 'Call delete unsuccessful'];
+    }
+
+    /**
+     * Delete calls.
+     *
+     * @param string|null $organizationId
+     * @param array $callIds
+     * @return array
+     */
+    public function deleteCalls(?string $organizationId, array $callIds): array
+    {
+        $query = Call::query()
+            ->when($organizationId, fn($query) => $query->where('organization_id', $organizationId))
+            ->whereIn('id', $callIds);
+
+        $calls = $query->get();
+
+        if ($totalCalls = $calls->count()) {
+            $calls->each->delete();
+            return ['deleted' => true, 'message' => "$totalCalls call(s) deleted"];
+        }
+
+        return ['deleted' => false, 'message' => 'No calls deleted'];
+    }
+}
+<?php
+
+namespace App\Services;
+
+use App\Models\Queue;
+use App\Http\Resources\QueueResource;
+use App\Http\Resources\QueueResources;
+
+class QueueService extends BaseService
+{
+    /**
+     * Show queues.
+     *
+     * @param string|null $organizationId
+     * @return QueueResources|array
+     */
+    public function showQueues(?string $organizationId = null): QueueResources|array
+    {
+        $query = Queue::query()
+            ->when($organizationId, fn($query) => $query->where('organization_id', $organizationId))
+            ->when(!request()->has('_sort'), fn($query) => $query->latest());
+
+        return $this->setQuery($query)->getOutput();
+    }
+
+    /**
+     * Create queue.
+     *
+     * @param string $organizationId
+     * @param array $data
+     * @return array
+     */
+    public function createQueue(string $organizationId, array $data): array
+    {
+        $data['organization_id'] = $organizationId;
+        $queue = Queue::create($data);
+
+        return $this->showCreatedResource($queue);
+    }
+
+    /**
+     * Show queue.
+     *
+     * @param string $queueId
+     * @return QueueResource
+     */
+    public function showQueue(string $queueId): QueueResource
+    {
+        $queue = Queue::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
+            ->findOrFail($queueId);
+        return $this->showResource($queue);
+    }
+
+    /**
+     * Update queue.
+     *
+     * @param string $queueId
+     * @param array $data
+     * @return array
+     */
+    public function updateQueue(string $queueId, array $data): array
+    {
+        $queue = Queue::findOrFail($queueId);
+        $queue->update($data);
+
+        return $this->showUpdatedResource($queue);
+    }
+
+    /**
+     * Delete queue.
+     *
+     * @param string $queueId
+     * @return array
+     */
+    public function deleteQueue(string $queueId): array
+    {
+        $queue = Queue::findOrFail($queueId);
+
+        $deleted = $queue->delete();
+
+        if ($deleted) {
+            return ['deleted' => true, 'message' => 'Queue deleted'];
+        }
+
+        return ['deleted' => false, 'message' => 'Queue delete unsuccessful'];
+    }
+
+    /**
+     * Delete queues.
+     *
+     * @param string|null $organizationId
+     * @param array $queueIds
+     * @return array
+     */
+    public function deleteQueues(?string $organizationId, array $queueIds): array
+    {
+        $query = Queue::query()
+            ->when($organizationId, fn($query) => $query->where('organization_id', $organizationId))
+            ->whereIn('id', $queueIds);
+
+        $queues = $query->get();
+
+        if ($totalQueues = $queues->count()) {
+            $queues->each->delete();
+            return ['deleted' => true, 'message' => "$totalQueues queue(s) deleted"];
+        }
+
+        return ['deleted' => false, 'message' => 'No queues deleted'];
+    }
+}
+<?php
+
+namespace App\Services;
+
+use App\Models\Department;
+use App\Http\Resources\DepartmentResource;
+use App\Http\Resources\DepartmentResources;
+
+class DepartmentService extends BaseService
+{
+    /**
+     * Show departments.
+     *
+     * @param string|null $organizationId
+     * @return DepartmentResources|array
+     */
+    public function showDepartments(?string $organizationId = null): DepartmentResources|array
+    {
+        $query = Department::query()
+            ->when($organizationId, fn($query) => $query->where('organization_id', $organizationId))
+            ->when(!request()->has('_sort'), fn($query) => $query->latest());
+
+        return $this->setQuery($query)->getOutput();
+    }
+
+    /**
+     * Create department.
+     *
+     * @param string $organizationId
+     * @param array $data
+     * @return array
+     */
+    public function createDepartment(string $organizationId, array $data): array
+    {
+        $data['organization_id'] = $organizationId;
+        $department = Department::create($data);
+
+        return $this->showCreatedResource($department);
+    }
+
+    /**
+     * Show department.
+     *
+     * @param string $departmentId
+     * @return DepartmentResource
+     */
+    public function showDepartment(string $departmentId): DepartmentResource
+    {
+        $department = Department::query()
+            ->with($this->getRequestRelationships())
+            ->withCount($this->getRequestCountableRelationships())
+            ->findOrFail($departmentId);
+        return $this->showResource($department);
+    }
+
+    /**
+     * Update department.
+     *
+     * @param string $departmentId
+     * @param array $data
+     * @return array
+     */
+    public function updateDepartment(string $departmentId, array $data): array
+    {
+        $department = Department::findOrFail($departmentId);
+        $department->update($data);
+
+        return $this->showUpdatedResource($department);
+    }
+
+    /**
+     * Delete department.
+     *
+     * @param string $departmentId
+     * @return array
+     */
+    public function deleteDepartment(string $departmentId): array
+    {
+        $department = Department::findOrFail($departmentId);
+
+        $deleted = $department->delete();
+
+        if ($deleted) {
+            return ['deleted' => true, 'message' => 'Department deleted'];
+        }
+
+        return ['deleted' => false, 'message' => 'Department delete unsuccessful'];
+    }
+
+    /**
+     * Delete departments.
+     *
+     * @param string|null $organizationId
+     * @param array $departmentIds
+     * @return array
+     */
+    public function deleteDepartments(?string $organizationId, array $departmentIds): array
+    {
+        $query = Department::query()
+            ->when($organizationId, fn($query) => $query->where('organization_id', $organizationId))
+            ->whereIn('id', $departmentIds);
+
+        $departments = $query->get();
+
+        if ($totalDepartments = $departments->count()) {
+            $departments->each->delete();
+            return ['deleted' => true, 'message' => "$totalDepartments department(s) deleted"];
+        }
+
+        return ['deleted' => false, 'message' => 'No departments deleted'];
+    }
+}
+
+Example resources:
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class CallResources extends ResourceCollection
+{
+    public $collects = CallResource::class;
+}
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class QueueResources extends ResourceCollection
+{
+    public $collects = QueueResource::class;
+}
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
+class DepartmentResources extends ResourceCollection
+{
+    public $collects = DepartmentResource::class;
+}
+
+Example resource:
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class CallResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'from' => $this->from,
+            'to' => $this->to,
+            'direction' => $this->direction,
+            'status' => $this->status,
+            'session_id' => $this->session_id,
+            'organization_id' => $this->organization_id,
+            'agent_id' => $this->agent_id,
+            'contact_id' => $this->contact_id,
+            'queue_id' => $this->queue_id,
+            'department_id' => $this->department_id,
+            'created_at' => $this->created_at->toDateString(),
+            'updated_at' => $this->updated_at->toDateString(),
+            'activities_count' => $this->whenCounted('activities'),
+            'organization' => OrganizationResource::make($this->whenLoaded('organization')),
+            'agent' => UserResource::make($this->whenLoaded('agent')),
+            'contact' => ContactResource::make($this->whenLoaded('contact')),
+            'queue' => QueueResource::make($this->whenLoaded('queue')),
+            'department' => DepartmentResource::make($this->whenLoaded('department')),
+            '_links' => [
+                'self' => route('show-call', ['call' => $this->id]),
+                'update' => route('update-call', ['call' => $this->id]),
+                'delete' => route('delete-call', ['call' => $this->id]),
+            ],
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class QueueResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'organization_id' => $this->organization_id,
+            'department_id' => $this->department_id,
+            'fallback_queue_id' => $this->fallback_queue_id,
+            'fallback_department_id' => $this->fallback_department_id,
+            'created_at' => $this->created_at->toDateString(),
+            'updated_at' => $this->updated_at->toDateString(),
+            'calls_count' => $this->whenCounted('calls'),
+            'organization' => OrganizationResource::make($this->whenLoaded('organization')),
+            'department' => DepartmentResource::make($this->whenLoaded('department')),
+            'fallback_queue' => QueueResource::make($this->whenLoaded('fallbackQueue')),
+            'fallback_department' => DepartmentResource::make($this->whenLoaded('fallbackDepartment')),
+            '_links' => [
+                'self' => route('show-queue', ['queue' => $this->id]),
+                'update' => route('update-queue', ['queue' => $this->id]),
+                'delete' => route('delete-queue', ['queue' => $this->id]),
+            ],
+        ];
+    }
+}
+
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class DepartmentResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'organization_id' => $this->organization_id,
+            'created_at' => $this->created_at->toDateString(),
+            'updated_at' => $this->updated_at->toDateString(),
+            'queues_count' => $this->whenCounted('queues'),
+            'organization' => OrganizationResource::make($this->whenLoaded('organization')),
+            '_links' => [
+                'self' => route('show-department', ['department' => $this->id]),
+                'update' => route('update-department', ['department' => $this->id]),
+                'delete' => route('delete-department', ['department' => $this->id]),
+            ],
+        ];
+    }
+}
+
+Rules About Naming Conventions:
+-------------------------------
+Some resources will have a two part name e.g ConversationThread. In this case, we should make sure that the naming convention is always consistent e.g avoid some parts using "Threads" while other parts "ConversationThreads".
+The naming convension must match everywhere e.g since we call it ConversationThread as a model, we should then insure every place referencing the full name ConversationThread instead of just Thread. This also applies to route prefixes, route names, and so on. Therefore "threads" must be "conversation-threads", and "show-threads" must be "show-conversation-threads", etc. This should be the cause everywhere, routes, controllers, services, form requests, migrations, models, policies, etc. This will avoid inconsistencies in naming conventions.
+
+Rules About Coupling:
+---------------------
+
+Avoid coupling resources.
+
+Just because conversation threads are related to copilots does not mean we should couple them such as here:
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ConversationMessageController;
+use App\Http\Middleware\OrganisationPermission;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('conversation-threads/{conversationThread}/conversation-messages')
+    ->controller(ConversationMessageController::class)
+    ->group(function () {
+        Route::get('/', 'showConversationMessages')->name('show-conversation-messages');
+        Route::post('/', 'createConversationMessage')->name('create-conversation-message');
+        Route::delete('/', 'deleteConversationMessages')->name('delete-conversation-messages');
+
+        Route::prefix('{conversationMessage}')->group(function () {
+            Route::get('/', 'showConversationMessage')->name('show-conversation-message');
+            Route::put('/', 'updateConversationMessage')->name('update-conversation-message');
+            Route::delete('/', 'deleteConversationMessage')->name('delete-conversation-message');
+        });
+    });
+
+or just because conversation messages are related to conversation threads does not mean we should couple them such as here:
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\OrganisationPermission;
+use App\Http\Controllers\ConversationThreadController;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('copilots/{copilot}/conversation-threads')
+    ->controller(ConversationThreadController::class)
+    ->group(function () {
+        Route::get('/', 'showConversationThreads')->name('show-conversation-threads');
+        Route::post('/', 'createConversationThread')->name('create-conversation-thread');
+        Route::delete('/', 'deleteConversationThreads')->name('delete-conversation-threads');
+
+        Route::prefix('{conversationThread}')->group(function () {
+            Route::get('/', 'showConversationThread')->name('show-conversation-thread');
+            Route::put('/', 'updateConversationThread')->name('update-conversation-thread');
+            Route::delete('/', 'deleteConversationThread')->name('delete-conversation-thread');
+        });
+    });
+
+This is beacuse we want to be able to return conversation messages, conversation threads, and other resources without having to be forced to provide a relationship with another resource.
+This is important since we have other roles such as super-admins, admins and so fourth that may need to access all records e.g all conversation threads regardless of the copilot used,
+or all conversation messages regardless of the conversation thread. This should be the case for how we design our routes, controllers, form requests, services, etc. No coupling of any
+two resources that can be identified separately. So in the case of routes, we would have this instead:
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ConversationMessageController;
+use App\Http\Middleware\OrganisationPermission;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('conversation-messages')
+    ->controller(ConversationMessageController::class)
+    ->group(function () {
+        Route::get('/', 'showConversationMessages')->name('show-conversation-messages');
+        Route::post('/', 'createConversationMessage')->name('create-conversation-message');
+        Route::delete('/', 'deleteConversationMessages')->name('delete-conversation-messages');
+
+        Route::prefix('{conversationMessage}')->group(function () {
+            Route::get('/', 'showConversationMessage')->name('show-conversation-message');
+            Route::put('/', 'updateConversationMessage')->name('update-conversation-message');
+            Route::delete('/', 'deleteConversationMessage')->name('delete-conversation-message');
+        });
+    });
+
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\OrganisationPermission;
+use App\Http\Controllers\ConversationThreadController;
+
+Route::middleware(['auth:sanctum', OrganisationPermission::class])
+    ->prefix('conversation-threads')
+    ->controller(ConversationThreadController::class)
+    ->group(function () {
+        Route::get('/', 'showConversationThreads')->name('show-conversation-threads');
+        Route::post('/', 'createConversationThread')->name('create-conversation-thread');
+        Route::delete('/', 'deleteConversationThreads')->name('delete-conversation-threads');
+
+        Route::prefix('{conversationThread}')->group(function () {
+            Route::get('/', 'showConversationThread')->name('show-conversation-thread');
+            Route::put('/', 'updateConversationThread')->name('update-conversation-thread');
+            Route::delete('/', 'deleteConversationThread')->name('delete-conversation-thread');
+        });
+    });
+
+Help me create the migration, model, route, controller, form requests, policy, service, resources and resource for the Conversation Thread. Follow the structure, writing style, pattern, syntax, order or methods as seen by the examples above. Create these for the "conversation threads"
+
+Use the studio so that i can easily copy and paste.
+Do nothing else.

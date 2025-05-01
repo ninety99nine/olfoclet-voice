@@ -12,7 +12,10 @@
                         {{ organization.name }}
                     </h1>
 
-                    <Logo v-else />
+                    <div v-else class="flex items-end space-x-2">
+                        <Logo height="h-10"></Logo>
+                        <span class="text-2xl text-blue-700">Telcoflo</span>
+                    </div>
 
                 </div>
 

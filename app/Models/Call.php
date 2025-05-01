@@ -12,14 +12,6 @@ class Call extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = [
-        'direction', 'status', 'from', 'to',
-        'started_at', 'answered_at', 'ended_at', 'hold_time', 'duration',
-        'disposition', 'transfer_count', 'recording_url', 'session_id',
-        'metadata', 'notes', 'ai_summary', 'ai_suggested_actions',
-        'organization_id', 'queue_id', 'department_id', 'agent_id', 'contact_id'
-    ];
-
     protected function casts(): array
     {
         return [
@@ -33,6 +25,14 @@ class Call extends Model
             'ai_suggested_actions' => 'array',
         ];
     }
+
+    protected $fillable = [
+        'direction', 'status', 'from', 'to',
+        'started_at', 'answered_at', 'ended_at', 'hold_time', 'duration',
+        'disposition', 'transfer_count', 'recording_url', 'session_id',
+        'metadata', 'notes', 'ai_summary', 'ai_suggested_actions',
+        'organization_id', 'queue_id', 'department_id', 'agent_id', 'contact_id'
+    ];
 
     #[Scope]
     protected function search(Builder $query, string $searchTerm): void

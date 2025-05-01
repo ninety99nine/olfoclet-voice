@@ -8,15 +8,14 @@
 
     <!--
         Start: Favicon Generator Settings
-        Reference: https://realfavicongenerator.net/favicon_result?file_id=p1hk8amvff1cpt16ur1i4r87k10796
+        Reference: https://realfavicongenerator.net/
     -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-    <link rel="manifest" href="/favicon/site.webmanifest">
-    <link rel="mask-icon" href="/favicon/safari-pinned-tab.svg" color="#7a7a7a">
-    <meta name="msapplication-TileColor" content="#00aba9">
-    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg" />
+    <link rel="shortcut icon" href="favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Telcoflo" />
+    <link rel="manifest" href="/site.webmanifest" />
     <!-- End: Favicon Generator Settings  -->
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -12,17 +12,6 @@ class Queue extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $fillable = [
-        'name', 'description', 'active',
-        'organization_id', 'department_id',
-        'sla_threshold', 'max_wait_time', 'escalation_threshold',
-        'avg_wait_time', 'service_level', 'abandonment_rate', 'last_sla_review',
-        'call_volume_warning_threshold', 'call_volume_critical_threshold',
-        'record_calls', 'strategy', 'priority_level', 'metadata',
-        'hold_music_url', 'greeting_message', 'wait_message', 'callback_enabled',
-        'fallback_queue_id', 'fallback_department_id'
-    ];
-
     protected function casts(): array
     {
         return [
@@ -41,6 +30,17 @@ class Queue extends Model
             'metadata' => 'array'
         ];
     }
+
+    protected $fillable = [
+        'name', 'description', 'active',
+        'organization_id', 'department_id',
+        'sla_threshold', 'max_wait_time', 'escalation_threshold',
+        'avg_wait_time', 'service_level', 'abandonment_rate', 'last_sla_review',
+        'call_volume_warning_threshold', 'call_volume_critical_threshold',
+        'record_calls', 'strategy', 'priority_level', 'metadata',
+        'hold_music_url', 'greeting_message', 'wait_message', 'callback_enabled',
+        'fallback_queue_id', 'fallback_department_id'
+    ];
 
     #[Scope]
     protected function search(Builder $query, string $searchTerm): void

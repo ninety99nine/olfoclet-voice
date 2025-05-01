@@ -9,13 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('organization_user', function (Blueprint $table) {
-            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
+            $table->primary(['organization_id', 'user_id']);
             $table->enum('status', ['available', 'on call', 'on break', 'unavailable'])->default('available');
             $table->timestamp('last_seen_at')->nullable();
+            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-
-            $table->primary(['organization_id', 'user_id']);
             $table->index('status');
         });
     }

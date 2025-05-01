@@ -48,6 +48,11 @@ const routes = [
                 component: () => import('@Pages/calls/show/Show.vue'),
             },
             {
+                path: 'scripts',
+                name: 'show-scripts',
+                component: () => import('@Pages/scripts/show/Show.vue'),
+            },
+            {
                 path: 'users',
                 name: 'show-users',
                 component: () => import('@Pages/users/show/Show.vue'),
@@ -108,14 +113,82 @@ const routes = [
                 component: () => import('@Pages/media-files/show/Show.vue'),
             },
             {
+                path: 'knowledge-bases',
+                children: [
+                    {
+                        path: '',
+                        name: 'show-knowledge-bases',
+                        component: () => import('@Pages/knowledge-bases/show/Show.vue'),
+                    },
+                    {
+                        path: ':knowledgeBaseId',
+                        name: 'manage-knowledge-base',
+                        component: () => import('@Pages/knowledge-bases/manage/Manage.vue'),
+                        props: true
+                    }
+                ]
+            },
+            {
+                path: 'articles',
+                name: 'show-articles',
+                component: () => import('@Pages/articles/show/Show.vue'),
+            },
+            {
+                path: 'snippets',
+                name: 'show-snippets',
+                component: () => import('@Pages/snippets/show/Show.vue'),
+            },
+            {
+                path: 'websites',
+                name: 'show-websites',
+                component: () => import('@Pages/websites/show/Show.vue'),
+            },
+            {
+                path: 'copilots',
+                children: [
+                    {
+                        path: '',
+                        name: 'show-copilots',
+                        component: () => import('@Pages/copilots/show/Show.vue'),
+                    },
+                    {
+                        path: ':copilotId/conversation-threads',
+                        name: 'show-copilot-conversation-threads',
+                        component: () => import('@Pages/conversation-threads/Show/Show.vue'),
+                        props: true
+                    },
+                    {
+                        path: ':copilotId/conversation-threads/create',
+                        name: 'create-copilot-conversation-thread',
+                        component: () => import('@Pages/conversation-threads/chat/Chat.vue')
+                    },
+                    {
+                        path: ':copilotId/conversation-threads/:conversationThreadId',
+                        name: 'chat-copilot-conversation-thread',
+                        component: () => import('@Pages/conversation-threads/chat/Chat.vue'),
+                        props: true
+                    }
+                ]
+            },
+            {
+                path: 'conversation-threads',
+                children: [
+                    {
+                        path: '',
+                        name: 'show-conversation-threads',
+                        component: () => import('@Pages/conversation-threads/Show/Show.vue'),
+                    }
+                ]
+            },
+            {
                 path: 'integrations',
                 name: 'show-integrations',
                 component: () => import('@Pages/integrations/show/Show.vue'),
             },
             {
-                path: 'nexflow',
-                name: 'show-nexflow',
-                component: () => import('@Pages/nexflow/show/Show.vue'),
+                path: 'nexflo',
+                name: 'show-nexflo',
+                component: () => import('@Pages/nexflo/show/Show.vue'),
             },
         ]
     }
@@ -127,15 +200,12 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-
     const authState = useAuthStore();
 
     if (!authState.user) {
-
         const storedToken = authState.getTokenFromLocalStorage();
 
         if (storedToken) {
-
             authState.token = storedToken;
             authState.setTokenOnRequest(storedToken);
 
@@ -144,9 +214,7 @@ router.beforeEach(async (to, from, next) => {
             } catch (e) {
                 authState.logout();
             }
-
         }
-
     }
 
     // Protected route

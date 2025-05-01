@@ -42,4 +42,20 @@ return [
         'bucket' => env('AWS_BUCKET'),
     ],
 
+    'pinecone' => [
+        'index' => env('PINECONE_INDEX'),
+        'api_key' => env('PINECONE_API_KEY'),
+        'reranker_id' => env('PINECONE_RERANKER_ID')
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'embedding_model' => env('OPENAI_EMBEDDING_MODEL', 'text-embedding-ada-002'),
+        'prompt_model' => env('OPENAI_PROMPT_MODEL', 'gpt-3.5-turbo'),
+    ],
+
+    'firecrawl' => [
+        'api_key' => env('FIRECRAWL_API_KEY'),
+    ],
+
 ];
