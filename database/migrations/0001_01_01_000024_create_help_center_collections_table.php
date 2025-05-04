@@ -8,16 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('knowledge_bases', function (Blueprint $table) {
+        Schema::create('help_center_collections', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete()->index();
+            $table->string('name'); // Name of the collection (e.g., "General Help", "Billing")
+            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->onDelete('cascade')->index();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('knowledge_bases');
+        Schema::dropIfExists('help_center_collections');
     }
 };

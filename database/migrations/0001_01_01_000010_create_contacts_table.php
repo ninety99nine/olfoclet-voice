@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('contacts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('favorite_user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignUuid('favorite_user_id')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->timestamps();
             $table->softDeletes();
 

@@ -9,8 +9,8 @@ return new class extends Migration
     public function up()
     {
         Schema::create('contact_tag', function (Blueprint $table) {
-            $table->foreignUuid('contact_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('tag_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignUuid('tag_id')->constrained()->cascadeOnDelete()->index();
             $table->timestamps();
 
             $table->primary(['contact_id', 'tag_id']);

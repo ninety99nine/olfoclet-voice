@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('mime_type'); // e.g., "audio/mpeg"
             $table->string('path'); // S3 path (e.g., "media/welcome_message.mp3")
             $table->unsignedBigInteger('size'); // File size in bytes
-            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete()->index();
             $table->timestamps();
         });
     }

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('copilot_user', function (Blueprint $table) {
             $table->primary(['copilot_id', 'user_id']);
-            $table->foreignUuid('copilot_id')->constrained('copilots')->onDelete('cascade');
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('copilot_id')->constrained('copilots')->cascadeOnDelete()->index();
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete()->index();
             $table->timestamps();
         });
     }

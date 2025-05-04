@@ -12,7 +12,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name'); // e.g., "Customer Support Flow"
             $table->boolean('is_active')->default(true);
-            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete()->index();
             $table->timestamps();
         });
     }

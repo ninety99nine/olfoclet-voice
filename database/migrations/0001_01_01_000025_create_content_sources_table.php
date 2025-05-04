@@ -6,24 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('copilot_knowledge_base', function (Blueprint $table) {
-            $table->primary(['copilot_id', 'knowledge_base_id']);
-            $table->foreignUuid('copilot_id')->constrained('copilots')->cascadeOnDelete()->index();
+        Schema::create('content_sources', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type'); // "telcoflo", "zendesk", "guru", "notion", "confluence", "website"
+            $table->string('name'); // "Notion (Project A)", "help.example.io/en"
+            $table->timestamp('last_synced_at')->nullable();
             $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete()->index();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('copilot_knowledge_base');
+        Schema::dropIfExists('content_sources');
     }
 };

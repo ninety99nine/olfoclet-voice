@@ -13,8 +13,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('content');
             $table->boolean('ai_searchable')->default(true);
-            $table->foreignUuid('organization_id')->constrained('organizations')->onDelete('cascade');
-            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->onDelete('cascade');
+            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete()->index();
+            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete()->index();
             $table->timestamps();
         });
     }

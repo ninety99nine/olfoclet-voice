@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('contact_custom_attributes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('contact_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('custom_attribute_id')->constrained()->onDelete('cascade');
+            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignUuid('custom_attribute_id')->constrained()->cascadeOnDelete()->index();
             $table->string('name', 100);
             $table->enum('type', ['string', 'url', 'number', 'date']);
             $table->text('value')->nullable();

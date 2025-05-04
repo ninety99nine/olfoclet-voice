@@ -14,8 +14,8 @@ return new class extends Migration
             $table->boolean('ai_searchable')->default(true);
             $table->enum('sync_status', ['pending', 'syncing', 'completed', 'failed'])->default('pending');
             $table->timestamp('last_synced_at')->nullable();
-            $table->foreignUuid('organization_id')->constrained('organizations')->onDelete('cascade');
-            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->onDelete('cascade');
+            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete()->index();
+            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete()->index();
             $table->timestamps();
         });
     }

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('call_activities', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('call_id')->constrained('calls')->onDelete('cascade');
+            $table->foreignUuid('call_id')->constrained('calls')->cascadeOnDelete()->index();
             $table->enum('activity_type', [
                 'call started', 'call answered', 'call ended',
                 'status changed',
@@ -24,7 +24,7 @@ return new class extends Migration
                 'ivr interaction'
             ]);
             $table->text('description')->nullable();
-            $table->foreignUuid('performed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('performed_by')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->timestamp('performed_at')->useCurrent();
             $table->json('metadata')->nullable();
             $table->timestamps();
