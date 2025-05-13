@@ -52,7 +52,7 @@
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Omnichannel Inbox -->
-                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all">
+                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-500">
                         <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">Omnichannel Inbox</h3>
                         <p class="max-w-lg mx-auto text-gray-600 text-center mb-4">
                             Centralise your channels, including customer favourites like Calls, WhatsApp, Telegram, Instagram and more.
@@ -61,7 +61,7 @@
                     </div>
 
                     <!-- No Code, Just Build -->
-                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all">
+                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-500">
                         <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">No Code, Just Build</h3>
                         <p class="max-w-lg mx-auto text-gray-600 text-center mb-4">
                             Simplify your IVR call flows, WhatsApp bots, and more with an intuitive no-code builder, empowering your team to create powerful workflows without technical expertise.
@@ -70,7 +70,7 @@
                     </div>
 
                     <!-- AI Agents -->
-                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all">
+                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-500">
                         <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">AI Agents</h3>
                         <p class="max-w-lg mx-auto text-gray-600 text-center mb-4">
                             Empower your business with AI Agents that effortlessly handle calls, acting as virtual receptionists, customer support experts, or technical specialists—freeing your team to focus on what matters most.
@@ -79,7 +79,7 @@
                     </div>
 
                     <!-- Insights -->
-                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all">
+                    <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-500">
                         <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">Insights</h3>
                         <p class="max-w-lg mx-auto text-gray-600 text-center mb-4">
                             Gain actionable insights with every channel for simple to advanced analytics and reporting, helping you understand customer interactions, optimize workflows, and drive better business decisions.
@@ -99,11 +99,11 @@
                 <p class="text-gray-600 text-center mb-12">Connect once and always stay connected</p>
             </div>
 
-            <div class="max-w-4xl mx-auto rounded-lg overflow-hidden mb-20">
+            <div class="max-w-4xl mx-auto rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-500 mb-20">
                 <img :src="'/images/dashboard-channels.png'" alt="Channels" class="object-contain" />
             </div>
 
-            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-4">
                     We Support Most Loved Channels
                 </h2>
@@ -127,7 +127,7 @@
                 </p>
             </div>
 
-            <div class="max-w-4xl mx-auto rounded-lg overflow-hidden">
+            <div class="max-w-4xl mx-auto rounded-lg overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-500">
                 <img :src="'/images/dashboard-integrations.png'" alt="Integrations" class="object-contain" />
             </div>
 
