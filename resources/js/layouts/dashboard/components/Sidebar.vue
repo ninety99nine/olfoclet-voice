@@ -100,9 +100,8 @@
           </ul>
         </nav>
         <!-- End Body -->
-        <div class="flex items-end space-x-2 p-8">
+        <div class="p-8">
             <Logo height="h-6"></Logo>
-            <span class="text-blue-700">Telcoflo</span>
         </div>
       </div>
     </div>
@@ -112,7 +111,7 @@
 <script>
 import Logo from '@Partials/Logo.vue';
 import VueSlideUpDown from 'vue-slide-up-down';
-import { Bot, Lock, Atom, Earth, Route, Contact, FileText, Settings, MessageSquareMore, Shapes, SquareDashedBottom, LibraryBig, ScrollText, PhoneCall, CirclePlay, Workflow, HouseIcon, Puzzle, BuildingIcon, UserRoundIcon, UsersRoundIcon, Shell, ChevronUp, ChevronDown } from 'lucide-vue-next';
+import { Bot, Lock, Atom, Earth, Route, Slack, CircleUser, Contact, FileText, Settings, MessageSquareMore, Shapes, SquareDashedBottom, LibraryBig, ScrollText, PhoneCall, CirclePlay, Workflow, HouseIcon, Puzzle, BuildingIcon, UserRoundIcon, UsersRoundIcon, Shell, ChevronUp, ChevronDown } from 'lucide-vue-next';
 
 export default {
     components: { Logo, VueSlideUpDown },
@@ -129,6 +128,7 @@ export default {
                 { name: 'Conversations', route: 'show-conversation-threads', relatedRoutes: ['show-copilot-conversation-threads'], icon: MessageSquareMore },
 
                 { name: 'Media Files', route: 'show-media-files', icon: CirclePlay },
+                { name: 'Knowledge', route: 'show-knowledge-bases', icon: LibraryBig },
                 {
                     name: 'Automation',
                     route: 'show-copilots',
@@ -139,19 +139,7 @@ export default {
                         { name: 'Workflows', route: 'show-call-flows', relatedRoutes: ['create-call-flow', 'edit-call-flow'], icon: Workflow },
                         { name: 'Copilots', route: 'show-copilots', icon: Bot },
                         { name: 'Numbers', route: 'show-numbers', icon: Route },
-                        { name: 'Scripts', route: 'show-scripts', icon: ScrollText },
-                    ]
-                },
-                {
-                    name: 'Knowledge',
-                    route: 'show-knowledge-bases',
-                    relatedRoutes: ['show-knowledge-bases', 'show-articles', 'show-snippets', 'show-websites'],
-                    icon: LibraryBig,
-                    subMenus: [
-                        { name: 'Bases', route: 'show-knowledge-bases', relatedRoutes: ['manage-knowledge-base'] },
-                        { name: 'Articles', route: 'show-articles', icon: FileText },
-                        { name: 'Snippets', route: 'show-snippets', icon: SquareDashedBottom },
-                        { name: 'Websites', route: 'show-websites', icon: Earth },
+                        { name: 'Script Flows', route: 'create-script-flow', relatedRoutes: ['create-script-flow', 'edit-script-flow'], icon: ScrollText },
                     ]
                 },
                 {
@@ -165,6 +153,8 @@ export default {
                         { name: 'Departments', route: 'show-departments', icon: UsersRoundIcon },
                         { name: 'Organizations', route: 'show-organizations', icon: BuildingIcon },
                         { name: 'Integrations', route: 'show-integrations', icon: Puzzle },
+                        { name: 'Channels', route: 'show-channels', icon: Slack },
+                        { name: 'Account', route: 'show-account', relatedRoutes: ['show-account', 'update-account'], icon: CircleUser },
                     ]
                 },
             ],

@@ -20,8 +20,8 @@ return new class extends Migration
                   ->comment('Allows temporary deactivation of the queue without deleting it');
 
             // Ownership
-            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignUuid('department_id')->nullable()->constrained()->nullOnDelete()->index();
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('department_id')->nullable()->constrained()->nullOnDelete();
 
             // SLA Settings
             $table->unsignedInteger('sla_threshold')->nullable()
@@ -67,7 +67,7 @@ return new class extends Migration
 
             // Optional fallback handling
             $table->uuid('fallback_queue_id')->nullable(); // Define column without constraint
-            $table->foreignUuid('fallback_department_id')->nullable()->constrained('departments')->nullOnDelete()->index();
+            $table->foreignUuid('fallback_department_id')->nullable()->constrained('departments')->nullOnDelete();
 
             $table->timestamps();
 

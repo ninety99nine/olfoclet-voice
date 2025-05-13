@@ -21,6 +21,26 @@ use Ramsey\Uuid\Uuid;
 |
 */
 
+
+Route::get('/send-email', function () {
+
+    $user = \App\Models\User::find('0196bf95-7f71-72b2-8b2b-bd7255a44eae');
+
+    $user->update(['password' => null]);
+
+    $token = \Illuminate\Support\Str::random(60);
+
+    \Illuminate\Support\Facades\DB::table('password_reset_tokens')->updateOrInsert(
+        ['email' => $user->email],
+        ['token' => hash('sha256', $token), 'created_at' => now()]
+    );
+
+    $setupUrl = config('app.frontend_url') . '/setup-account?token=' . $token . '&email=' . urlencode($user->email);
+    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\UserAccountCreated($user->email, $setupUrl));
+
+    return 'Email send!';
+});
+
 // Route to create a knowledge base and articles for testing
 Route::get('/test-create-knowledge-base', function () {
     try {

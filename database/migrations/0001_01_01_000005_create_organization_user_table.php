@@ -12,8 +12,8 @@ return new class extends Migration
             $table->primary(['organization_id', 'user_id']);
             $table->enum('status', ['available', 'on call', 'on break', 'unavailable'])->default('available');
             $table->timestamp('last_seen_at')->nullable();
-            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade')->index();
-            $table->foreignUuid('user_id')->constrained()->onDelete('cascade')->index();
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->index('status');
         });

@@ -3,27 +3,60 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
     {
-        component: () => import('@Layouts/auth/Auth.vue'),
+        path: '/',
+        component: () => import('@Layouts/website/Website.vue'),
         children: [
             {
                 path: '/',
-                redirect: '/login',
+                name: 'landing',
+                component: () => import('@Pages/website/landing-page/LandingPage.vue'),
             },
             {
-                path: '/login',
+                path: '/privacy-policy',
+                name: 'privacy-policy',
+                component: () => import('@Pages/website/privacy-policy/PrivacyPolicy.vue'),
+            },
+            {
+                path: '/terms-of-service',
+                name: 'terms-of-service',
+                component: () => import('@Pages/website/terms-of-service/TermsOfService.vue'),
+            },
+            {
+                path: '/data-deletion-instructions',
+                name: 'data-deletion-instructions',
+                component: () => import('@Pages/website/data-deletion-instructions/DataDeletionInstructions.vue'),
+            }
+        ]
+    },
+    {
+        path: '/auth',
+        component: () => import('@Layouts/auth/Auth.vue'),
+        children: [
+            {
+                path: 'login',
                 name: 'login',
                 component: () => import('@Pages/auth/Login.vue'),
             },
             {
-                path: '/:alias/login',
+                path: ':alias/login',
                 name: 'organization-login',
                 component: () => import('@Pages/auth/Login.vue'),
                 props: true
             },
             {
-                path: '/:catchAll(.*)',
-                name: 'notFound',
-                component: () => import('@Pages/error/404.vue'),
+                path: 'setup-account',
+                name: 'setup-account',
+                component: () => import('@Pages/auth/SetupAccount.vue'),
+            },
+            {
+                path: 'forgot-password',
+                name: 'forgot-password',
+                component: () => import('@Pages/auth/ForgotPassword.vue'),
+            },
+            {
+                path: 'reset-password',
+                name: 'reset-password',
+                component: () => import('@Pages/auth/ResetPassword.vue'),
             }
         ]
     },
@@ -58,6 +91,11 @@ const routes = [
                 component: () => import('@Pages/users/show/Show.vue'),
             },
             {
+                path: 'channels',
+                name: 'show-channels',
+                component: () => import('@Pages/channels/show/Show.vue'),
+            },
+            {
                 path: 'contacts',
                 name: 'show-contacts',
                 component: () => import('@Pages/contacts/show/Show.vue'),
@@ -84,8 +122,18 @@ const routes = [
             },
             {
                 path: 'account',
-                name: 'show-account',
-                component: () => import('@Pages/account/show/Show.vue'),
+                children: [
+                    {
+                        path: '',
+                        name: 'show-account',
+                        component: () => import('@Pages/account/show/Show.vue'),
+                    },
+                    {
+                        path: 'update',
+                        name: 'update-account',
+                        component: () => import('@Pages/account/update/Update.vue'),
+                    }
+                ]
             },
             {
                 path: 'call-flows',
@@ -104,6 +152,26 @@ const routes = [
                         path: ':call_flow_id',
                         name: 'edit-call-flow',
                         component: () => import('@Pages/call-flows/edit/Builder.vue'),
+                    }
+                ]
+            },
+            {
+                path: 'script-flows',
+                children: [
+                    {
+                        path: '',
+                        name: 'show-script-flows',
+                        component: () => import('@Pages/script-flows/show/Show.vue'),
+                    },
+                    {
+                        path: 'create',
+                        name: 'create-script-flow',
+                        component: () => import('@Pages/script-flows/edit/Builder.vue'),
+                    },
+                    {
+                        path: ':script_flow_id',
+                        name: 'edit-script-flow',
+                        component: () => import('@Pages/script-flows/edit/Builder.vue'),
                     }
                 ]
             },
@@ -127,21 +195,6 @@ const routes = [
                         props: true
                     }
                 ]
-            },
-            {
-                path: 'articles',
-                name: 'show-articles',
-                component: () => import('@Pages/articles/show/Show.vue'),
-            },
-            {
-                path: 'snippets',
-                name: 'show-snippets',
-                component: () => import('@Pages/snippets/show/Show.vue'),
-            },
-            {
-                path: 'websites',
-                name: 'show-websites',
-                component: () => import('@Pages/websites/show/Show.vue'),
             },
             {
                 path: 'copilots',
@@ -191,12 +244,21 @@ const routes = [
                 component: () => import('@Pages/nexflo/show/Show.vue'),
             },
         ]
+    },
+    {
+        path: '/:catchAll(.*)',
+        name: 'notFound',
+        component: () => import('@Pages/error/404.vue'),
     }
 ];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
+    scrollBehavior(to, from, savedPosition) {
+        // Always scroll to the top on navigation
+        return { top: 0 };
+    },
 });
 
 router.beforeEach(async (to, from, next) => {

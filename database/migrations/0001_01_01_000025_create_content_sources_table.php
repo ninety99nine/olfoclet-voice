@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('type'); // "telcoflo", "zendesk", "guru", "notion", "confluence", "website"
             $table->string('name'); // "Notion (Project A)", "help.example.io/en"
             $table->timestamp('last_synced_at')->nullable();
-            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete()->index();
+            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete();
             $table->timestamps();
         });
     }

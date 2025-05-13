@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('call_flow_nodes', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('call_flow_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignUuid('call_flow_id')->constrained()->cascadeOnDelete();
             $table->string('type'); // e.g., "Playback", "IVR", "Forward"
             $table->string('next_step')->nullable(); // ID of the next node
             $table->json('metadata'); // Node-specific settings (e.g., message, options)

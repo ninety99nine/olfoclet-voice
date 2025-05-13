@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('knowledge_bases', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete()->index();
+            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete();
             $table->timestamps();
         });
     }

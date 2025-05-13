@@ -39,7 +39,7 @@ class UserController extends BaseController
      */
     public function showUsers(ShowUsersRequest $request): UserResources|JsonResponse
     {
-        return $this->prepareOutput($this->service->showUsers());
+        return $this->prepareOutput($this->service->showUsers($request->input('organization_id')));
     }
 
     /**

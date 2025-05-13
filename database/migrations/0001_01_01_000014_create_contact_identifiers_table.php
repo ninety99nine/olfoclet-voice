@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('contact_identifiers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete();
             $table->enum('type', ['phone', 'email', 'external id']);
             $table->string('value', 255); // e.g., +1234567890, john.doe@example.com, 1234-5678-9123
             $table->boolean('is_primary')->default(false);

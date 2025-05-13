@@ -21,8 +21,10 @@ class RoleResource extends JsonResource
             'organization_id' => $this->organization_id,
             'created_at' => $this->created_at->toDateString(),
             'updated_at' => $this->updated_at->toDateString(),
-            'permissions_count' => $this->whenCounted('permissions'),
             'organization' => OrganizationResource::make($this->whenLoaded('organization')),
+            'pivot' => [
+                'organization_id' => $this->pivot->organization_id ?? null,
+            ],
             '_links' => [
                 'self' => route('show-role', ['role' => $this->id]),
                 'update' => route('update-role', ['role' => $this->id]),

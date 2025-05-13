@@ -114,46 +114,15 @@
                                 </td>
                             </template>
 
-                            <template v-if="column.name == 'Oraganization'">
-                                <td class="whitespace-nowrap align-center pr-4 py-4">
-                                    <!-- Country Flag -->
-                                    <div
-                                        v-if="role.organization"
-                                        class="flex items-center space-x-2">
-                                        <img src="https://placehold.co/21x24" class="size-8 rounded-lg shrink-0" alt="Logo" />
-                                        <div class="whitespace-nowrap">{{ role.organization.name }}</div>
-                                    </div>
-                                </td>
-                            </template>
-
-                            <template v-if="column.name == 'Country'">
-                                <td class="whitespace-nowrap align-center pr-4 py-4">
-                                    <!-- Country Flag -->
-                                    <div
-                                        v-if="role.organization"
-                                        class="flex items-center space-x-2">
-                                        <div class="flex items-center space-x-2">
-                                            <img
-                                                v-if="role.organization.country"
-                                                :alt="role.organization.country"
-                                                class="w-5 h-4 rounded-sm object-cover"
-                                                :src="`/svgs/country-flags/${role.organization.country.toLowerCase()}.svg`"
-                                            >
-                                            <span>{{ getCountryName(role.organization.country) }}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                            </template>
-
-                            <template v-if="column.name == 'Guard'">
-                                <td class="whitespace-nowrap align-center pr-4 py-4">
-                                    <span>{{ role.guard_name }}</span>
+                            <template v-if="column.name == 'Permissions'">
+                                <td class="whitespace-nowrap align-center text-center pr-4 py-4">
+                                    <Pill type="light" size="xs">9</Pill>
                                 </td>
                             </template>
 
                             <template v-if="column.name == 'Users'">
                                 <td class="whitespace-nowrap align-center text-center pr-4 py-4">
-                                    <span>{{ role.users_count }}</span>
+                                    <span>3</span>
                                 </td>
                             </template>
 
@@ -282,8 +251,8 @@ export default {
         formattedDatetime,
         formattedRelativeDate,
         prepareColumns() {
-            const columnNames = ['Name', 'Oraganization', 'Country', 'Guard', 'Users', 'Created Date'];
-            const defaultColumnNames = ['Name', 'Oraganization', 'Country', 'Guard', 'Users', 'Created Date'];
+            const columnNames = ['Name', 'Permissions', 'Users', 'Created Date'];
+            const defaultColumnNames = ['Name', 'Permissions', 'Users', 'Created Date'];
             return columnNames.map(name => ({
                 name,
                 active: defaultColumnNames.includes(name),

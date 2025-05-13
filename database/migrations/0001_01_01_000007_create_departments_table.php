@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('description', 255)->nullable();
             $table->boolean('active')->default(true)
                   ->comment('Allows temporary deactivation of the department without deleting it');
-            $table->foreignUuid('organization_id')->constrained()->onDelete('cascade')->index();
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
 
             $table->index('organization_id');

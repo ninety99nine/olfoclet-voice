@@ -1,5 +1,5 @@
 <template>
-    <img :class="height" :src="`/images/logo-swirl.png`" alt="TelcoFlo Logo">
+    <img :class="height" :src="`/images/logo-swirl-text.png`" alt="TelcoFlo Logo">
 </template>
 
 <script>

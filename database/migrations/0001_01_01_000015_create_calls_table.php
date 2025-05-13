@@ -47,11 +47,11 @@ return new class extends Migration
             $table->json('ai_suggested_actions')->nullable()->comment('AI-suggested actions for the call');
 
             // Foreign keys
-            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignUuid('queue_id')->nullable()->constrained()->nullOnDelete()->index();
-            $table->foreignUuid('department_id')->nullable()->constrained()->nullOnDelete()->index();
-            $table->foreignUuid('agent_id')->nullable()->constrained('users')->nullOnDelete()->index();
-            $table->foreignUuid('contact_id')->nullable()->constrained('contacts')->nullOnDelete()->index();
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('queue_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('department_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('agent_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('contact_id')->nullable()->constrained('contacts')->nullOnDelete();
 
             $table->timestamps();
 

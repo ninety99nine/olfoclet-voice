@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('copilot_knowledge_base', function (Blueprint $table) {
             $table->primary(['copilot_id', 'knowledge_base_id']);
-            $table->foreignUuid('copilot_id')->constrained('copilots')->cascadeOnDelete()->index();
-            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete()->index();
+            $table->foreignUuid('copilot_id')->constrained('copilots')->cascadeOnDelete();
+            $table->foreignUuid('knowledge_base_id')->constrained('knowledge_bases')->cascadeOnDelete();
             $table->timestamps();
         });
     }

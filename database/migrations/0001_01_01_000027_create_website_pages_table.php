@@ -13,8 +13,8 @@ return new class extends Migration
             $table->string('page_url');
             $table->text('content');
             $table->boolean('ai_searchable')->default(true);
-            $table->foreignUuid('website_id')->constrained('websites')->cascadeOnDelete()->index();
-            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete()->index();
+            $table->foreignUuid('website_id')->constrained('websites')->cascadeOnDelete();
+            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete();
             $table->timestamps();
         });
     }

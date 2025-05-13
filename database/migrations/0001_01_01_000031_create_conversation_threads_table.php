@@ -11,8 +11,8 @@ class CreateConversationThreadsTable extends Migration
         Schema::create('conversation_threads', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title');
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete()->index();
-            $table->foreignUuid('copilot_id')->constrained()->cascadeOnDelete()->index();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('copilot_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
     }

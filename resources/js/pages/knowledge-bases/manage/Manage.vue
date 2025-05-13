@@ -1,5 +1,4 @@
 <template>
-    <!-- Navigation Toggle -->
     <div class="select-none min-h-screen bg-gray-50 pt-8 p-4 sm:p-8 space-y-4 sm:space-y-6">
         <!-- Page Header -->
         <div class="flex justify-between items-start">
@@ -8,7 +7,7 @@
                 <div>
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ knowledgeBase?.name || 'Knowledge Base' }}</h2>
                     <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        Manage articles, snippets, and websites for this knowledge base
+                        Manage sources and content for this knowledge base
                     </p>
                 </div>
             </div>
@@ -30,19 +29,14 @@
             </nav>
         </div>
 
-        <!-- Articles Tab -->
-        <div v-if="currentTab === 'Articles'">
-            <ArticleShow :knowledgeBaseId="knowledgeBaseId" />
+        <!-- Sources Tab -->
+        <div v-if="currentTab === 'Sources'">
+            <SourceManage :knowledgeBaseId="knowledgeBaseId" />
         </div>
 
-        <!-- Websites Tab -->
-        <div v-if="currentTab === 'Websites'">
-            <WebsiteShow :knowledgeBaseId="knowledgeBaseId" />
-        </div>
-
-        <!-- Snippets Tab -->
-        <div v-if="currentTab === 'Snippets'">
-            <SnippetShow :knowledgeBaseId="knowledgeBaseId" />
+        <!-- Content Tab -->
+        <div v-if="currentTab === 'Content'">
+            <ContentManage :knowledgeBaseId="knowledgeBaseId" />
         </div>
     </div>
 </template>
@@ -50,15 +44,14 @@
 <script>
 import axios from 'axios';
 import Button from '@Partials/Button.vue';
-import ArticleShow from '@Pages/articles/show/Show.vue';
-import SnippetShow from '@Pages/snippets/show/Show.vue';
-import WebsiteShow from '@Pages/websites/show/Show.vue';
 import { ArrowLeft, LibraryBig } from 'lucide-vue-next';
+import SourceManage from '@Pages/knowledge-bases/components/SourceManage.vue';
+import ContentManage from '@Pages/knowledge-bases/components/ContentManage.vue';
 
 export default {
     inject: ['notificationState'],
     components: {
-        Button, ArticleShow, SnippetShow, WebsiteShow, LibraryBig
+        Button, SourceManage, ContentManage, LibraryBig
     },
     props: {
         knowledgeBaseId: {
@@ -70,11 +63,10 @@ export default {
         return {
             ArrowLeft,
             knowledgeBase: null,
-            currentTab: 'Articles',
+            currentTab: 'Sources',
             tabs: [
-                { name: 'Articles', count: null },
-                { name: 'Snippets', count: null },
-                { name: 'Websites', count: null },
+                { name: 'Sources', count: null },
+                { name: 'Content', count: null },
             ],
         };
     },
@@ -86,13 +78,12 @@ export default {
             try {
                 const response = await axios.get(`/api/knowledge-bases/${this.knowledgeBaseId}`, {
                     params: {
-                        '_countable_relationships': 'articles,snippets,websites'
+                        '_countable_relationships': 'contentSources,contentItems'
                     }
                 });
                 this.knowledgeBase = response.data;
-                this.tabs.find(tab => tab.name === 'Articles').count = response.data.articles_count;
-                this.tabs.find(tab => tab.name === 'Snippets').count = response.data.snippets_count;
-                this.tabs.find(tab => tab.name === 'Websites').count = response.data.websites_count;
+                this.tabs.find(tab => tab.name === 'Sources').count = response.data.content_sources_count;
+                this.tabs.find(tab => tab.name === 'Content').count = response.data.content_items_count;
             } catch (error) {
                 const message = error?.response?.data?.message || error?.message || 'Something went wrong while fetching the knowledge base';
                 this.notificationState.showWarningNotification(message);

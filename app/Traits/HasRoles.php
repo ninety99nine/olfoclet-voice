@@ -13,14 +13,11 @@ trait HasRoles
     }
 
     /**
-     * Override the default Spatie `roles()` relationship to support team-based role assignments
-     * using UUIDs and organization scoping (via `organization_id` as `team_foreign_key`).
+     * Fetch roles associated with the user, with optional team-based filtering.
      *
-     * This method ensures:
-     * - Role relationships are pulled from the correct table (`model_has_roles`)
-     * - The pivot keys use UUIDs and match configured column names
-     * - System-level roles (where `organization_id` is NULL) are still supported
-     * - Roles scoped to an organization (via `organization_id`) are returned when applicable
+     * If a team ID is set (via getPermissionsTeamId()), applies team-based filtering using
+     * organization_id as the team_foreign_key. If no team ID is set, fetches all roles
+     * assigned to the user across all organizations.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -43,20 +40,29 @@ trait HasRoles
             $pivotRoleKey
         );
 
+        $relation->withPivot($teamsKey);
+
         if (! $teamsEnabled) {
             return $relation;
         }
 
-        $relation->withPivot($teamsKey);
+        // Check if a team ID is set
+        $teamId = app(PermissionRegistrar::class)->getPermissionsTeamId();
 
-        return $relation
-            ->where(function ($query) use ($teamsKey, $modelHasRolesTable) {
-                $query->whereNull("$modelHasRolesTable.$teamsKey")
-                      ->orWhere("$modelHasRolesTable.$teamsKey", getPermissionsTeamId());
-            })
-            ->where(function ($query) use ($teamField) {
-                $query->whereNull($teamField)
-                      ->orWhere($teamField, getPermissionsTeamId());
-            });
+        if ($teamId !== null) {
+            // Apply team-based filtering if a team ID is set
+            return $relation
+                ->where(function ($query) use ($teamsKey, $modelHasRolesTable, $teamId) {
+                    $query->whereNull("$modelHasRolesTable.$teamsKey")
+                          ->orWhere("$modelHasRolesTable.$teamsKey", $teamId);
+                })
+                ->where(function ($query) use ($teamField, $teamId) {
+                    $query->whereNull($teamField)
+                          ->orWhere($teamField, $teamId);
+                });
+        }
+
+        // If no team ID is set, return all roles without filtering
+        return $relation;
     }
 }

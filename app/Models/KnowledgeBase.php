@@ -37,18 +37,18 @@ class KnowledgeBase extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function articles()
+    public function contentSources()
     {
-        return $this->hasMany(Article::class);
+        return $this->hasMany(ContentSource::class);
     }
 
-    public function snippets()
+    public function contentItems()
     {
-        return $this->hasMany(Snippet::class);
+        return $this->hasMany(ContentItem::class);
     }
 
-    public function websites()
+    public function helpCenterCollections()
     {
-        return $this->hasMany(Website::class);
+        return $this->hasMany(HelpCenterCollection::class);
     }
 }

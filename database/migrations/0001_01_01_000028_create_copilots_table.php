@@ -12,11 +12,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->uuid('organization_id');
             $table->boolean('is_active')->default(true);
+            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete();
             $table->timestamps();
-
-            $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
         });
     }
 

@@ -20,6 +20,10 @@ use App\Models\ContactCustomAttribute;
 use Faker\Factory as Faker;
 use App\Models\Organization;
 use App\Models\CallActivity;
+use App\Models\KnowledgeBase;
+use App\Models\HelpCenterCollection;
+use App\Models\ContentSource;
+use App\Models\ContentItem;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -85,6 +89,18 @@ class SimulateSeeder extends Seeder
 
             // Create calls (5-10 per organization)
             $this->createCalls($organization, $users, $queues, $contacts);
+
+            // Create knowledge bases (2-3 per organization)
+            $knowledgeBases = $this->createKnowledgeBases($organization);
+
+            // Create help center collections (2-3 per knowledge base)
+            $this->createHelpCenterCollections($organization, $knowledgeBases);
+
+            // Create content sources (3-5 per knowledge base)
+            $contentSources = $this->createContentSources($organization, $knowledgeBases);
+
+            // Create content items (folders, articles, snippets, webpages) for each knowledge base
+            $this->createContentItems($organization, $knowledgeBases, $contentSources);
         });
 
         // ✅ Re-enable foreign key checks
@@ -114,6 +130,11 @@ class SimulateSeeder extends Seeder
         DB::table('model_has_roles')->truncate();
         DB::table('role_has_permissions')->truncate();
         DB::table('contact_tag')->truncate();
+        // Add new tables to truncate
+        ContentItem::truncate();
+        ContentSource::truncate();
+        HelpCenterCollection::truncate();
+        KnowledgeBase::truncate();
     }
 
     private function createPermissions(): array
@@ -124,6 +145,10 @@ class SimulateSeeder extends Seeder
             'manage users', 'view numbers', 'create numbers', 'edit numbers',
             'view call flows', 'create call flows', 'edit call flows',
             'view media files', 'create media files', 'edit media files',
+            // Add permissions for knowledge management
+            'view knowledge bases', 'manage knowledge bases',
+            'view content sources', 'manage content sources',
+            'view content items', 'manage content items',
         ];
 
         return collect($permissions)->map(function ($name) {
@@ -140,12 +165,16 @@ class SimulateSeeder extends Seeder
                 'manage users', 'view numbers', 'create numbers', 'edit numbers',
                 'view call flows', 'create call flows', 'edit call flows',
                 'view media files', 'create media files', 'edit media files',
+                'view knowledge bases', 'manage knowledge bases',
+                'view content sources', 'manage content sources',
+                'view content items', 'manage content items',
             ]],
             ['name' => 'Agent', 'permissions' => ['view calls', 'manage calls', 'view contacts']],
             ['name' => 'Supervisor', 'permissions' => [
                 'view calls', 'manage calls', 'view contacts', 'manage contacts',
                 'view queues', 'view departments', 'view numbers', 'view call flows',
                 'view media files',
+                'view knowledge bases', 'view content sources', 'view content items',
             ]]
         ];
 
@@ -516,5 +545,194 @@ class SimulateSeeder extends Seeder
                 'call_id' => $call->id
             ]);
         });
+    }
+
+    private function createKnowledgeBases(Organization $organization): array
+    {
+        $numKnowledgeBases = rand(2, 3); // 2-3 knowledge bases per organization
+
+        // Define possible knowledge base names
+        $knowledgeBaseNames = [
+            'Customer Support KB',
+            'Technical Documentation',
+            'Sales Resources',
+            'Billing Help',
+            'General FAQ'
+        ];
+
+        // Shuffle and select names
+        shuffle($knowledgeBaseNames);
+        $selectedNames = array_slice($knowledgeBaseNames, 0, $numKnowledgeBases);
+
+        // Create knowledge bases
+        $knowledgeBases = [];
+        for ($i = 0; $i < $numKnowledgeBases; $i++) {
+            $knowledgeBases[] = KnowledgeBase::create([
+                'id' => $this->faker->uuid,
+                'name' => $selectedNames[$i],
+                'organization_id' => $organization->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $knowledgeBases;
+    }
+
+    private function createHelpCenterCollections(Organization $organization, array $knowledgeBases): array
+    {
+        $helpCenterCollections = [];
+        foreach ($knowledgeBases as $knowledgeBase) {
+            $numCollections = rand(2, 3); // 2-3 collections per knowledge base
+
+            $collectionNames = [
+                'General Help',
+                'Billing',
+                'Technical Support',
+                'Account Management',
+                'Getting Started'
+            ];
+
+            shuffle($collectionNames);
+            $selectedNames = array_slice($collectionNames, 0, $numCollections);
+
+            for ($i = 0; $i < $numCollections; $i++) {
+                $helpCenterCollections[] = HelpCenterCollection::create([
+                    'id' => $this->faker->uuid,
+                    'name' => $selectedNames[$i],
+                    'knowledge_base_id' => $knowledgeBase->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        return $helpCenterCollections;
+    }
+
+    private function createContentSources(Organization $organization, array $knowledgeBases): array
+    {
+        $contentSources = [];
+        foreach ($knowledgeBases as $knowledgeBase) {
+            $numSources = rand(3, 5); // 3-5 content sources per knowledge base
+
+            $sourceTypes = ['telcoflo', 'zendesk', 'guru', 'notion', 'confluence', 'website'];
+            $sourceNames = [
+                'Telcoflo Docs' => 'telcoflo',
+                'Zendesk Support' => 'zendesk',
+                'Guru Knowledge' => 'guru',
+                'Notion Workspace' => 'notion',
+                'Confluence Pages' => 'confluence',
+                'Help Website' => 'website'
+            ];
+
+            $selectedTypes = array_slice($sourceTypes, 0, $numSources);
+            foreach ($selectedTypes as $type) {
+                $name = array_search($type, $sourceNames) ?: "Source {$type}";
+                $contentSources[] = ContentSource::create([
+                    'id' => $this->faker->uuid,
+                    'type' => $type,
+                    'name' => $name,
+                    'last_synced_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
+                    'knowledge_base_id' => $knowledgeBase->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        return $contentSources;
+    }
+
+    private function createContentItems(Organization $organization, array $knowledgeBases, array $contentSources): void
+    {
+        foreach ($knowledgeBases as $knowledgeBase) {
+            $numFolders = rand(2, 4); // 2-4 top-level folders per knowledge base
+            $folderNames = [
+                'Support Guides',
+                'Technical Docs',
+                'FAQs',
+                'Billing Info',
+                'Tutorials',
+                'Product Updates'
+            ];
+
+            shuffle($folderNames);
+            $selectedFolderNames = array_slice($folderNames, 0, $numFolders);
+
+            $folders = [];
+            // Create top-level folders
+            for ($i = 0; $i < $numFolders; $i++) {
+                $folders[] = ContentItem::create([
+                    'id' => $this->faker->uuid,
+                    'title' => $selectedFolderNames[$i],
+                    'type' => 'folder',
+                    'knowledge_base_id' => $knowledgeBase->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Create subfolders (1-2 per folder)
+            $subfolders = [];
+            foreach ($folders as $folder) {
+                $numSubfolders = rand(1, 2);
+                $subfolderNames = [
+                    'Basics',
+                    'Advanced',
+                    'Troubleshooting',
+                    'Tips & Tricks',
+                    'Best Practices'
+                ];
+
+                shuffle($subfolderNames);
+                $selectedSubfolderNames = array_slice($subfolderNames, 0, $numSubfolders);
+
+                for ($i = 0; $i < $numSubfolders; $i++) {
+                    $subfolders[] = ContentItem::create([
+                        'id' => $this->faker->uuid,
+                        'title' => $selectedSubfolderNames[$i],
+                        'type' => 'folder',
+                        'parent_id' => $folder->id,
+                        'knowledge_base_id' => $knowledgeBase->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+
+            // Combine folders and subfolders
+            $allFolders = array_merge($folders, $subfolders);
+
+            // Create content items (articles, snippets, webpages) in each folder
+            foreach ($allFolders as $folder) {
+                $numItems = rand(3, 5); // 3-5 content items per folder
+                $itemTypes = ['article', 'snippet', 'webpage'];
+
+                for ($i = 0; $i < $numItems; $i++) {
+                    $type = $itemTypes[array_rand($itemTypes)];
+                    $titlePrefix = $type === 'article' ? 'Article' : ($type === 'snippet' ? 'Snippet' : 'Webpage');
+                    $contentItem = ContentItem::create([
+                        'id' => $this->faker->uuid,
+                        'title' => "{$titlePrefix} {$this->faker->words(3, true)}",
+                        'content' => $type !== 'webpage' ? $this->faker->paragraphs(3, true) : null,
+                        'locale' => $this->faker->randomElement(['en', 'es', 'de', null]),
+                        'ai_ingested' => $this->faker->boolean(70),
+                        'copilot_enabled' => $this->faker->boolean(80),
+                        'ai_agent_enabled' => $this->faker->boolean(80),
+                        'help_center_enabled' => $type !== 'webpage' ? $this->faker->boolean(50) : false,
+                        'visibility' => $type === 'article' ? $this->faker->randomElement(['public', 'internal']) : 'internal',
+                        'state' => $this->faker->randomElement(['draft', 'active', 'archived']),
+                        'type' => $type,
+                        'parent_id' => $folder->id,
+                        'source_id' => $type === 'webpage' ? $contentSources[array_rand($contentSources)]->id : null,
+                        'help_center_collection_id' => $type !== 'webpage' && $this->faker->boolean(50) ? HelpCenterCollection::where('knowledge_base_id', $knowledgeBase->id)->inRandomOrder()->first()->id : null,
+                        'knowledge_base_id' => $knowledgeBase->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
     }
 }

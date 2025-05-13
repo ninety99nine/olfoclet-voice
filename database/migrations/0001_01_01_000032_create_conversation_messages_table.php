@@ -13,7 +13,7 @@ class CreateConversationMessagesTable extends Migration
             $table->string('role');
             $table->text('content');
             $table->json('context')->nullable();
-            $table->foreignUuid('thread_id')->constrained('conversation_threads')->cascadeOnDelete()->index();
+            $table->foreignUuid('thread_id')->constrained('conversation_threads')->cascadeOnDelete();
             $table->timestamps();
         });
     }
