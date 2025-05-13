@@ -1,0 +1,1 @@
+import{c as e,n as t,o as s}from"./app-Bh0CRPT1.js";import{_ as r}from"./_plugin-vue_export-helper-DlAUqK2U.js";const a={props:{height:{type:String,default:"h-16"}}};function c(n,l,o,i,p,g){return s(),e("img",{class:t(o.height),src:"/images/logo-swirl-text.png",alt:"TelcoFlo Logo"},null,2)}const f=r(a,[["render",c]]);export{f as L};

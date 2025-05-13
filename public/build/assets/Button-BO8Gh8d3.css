@@ -1,0 +1,1 @@
+@keyframes shine{0%{transform:translate(-100%)}to{transform:translate(100%)}}.animate-shine{animation:shine 2s infinite}
