@@ -46,15 +46,11 @@
 
         <!-- What We Offer Section -->
         <section class="py-20 bg-slate-50">
-
             <div class="max-w-7xl mx-auto">
-
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
                     What Telcoflo Offers
                 </h2>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
                     <!-- Omnichannel Inbox -->
                     <div class="relative p-8 bg-gray-50 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg transition-all">
                         <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">Omnichannel Inbox</h3>
@@ -95,39 +91,46 @@
         </section>
 
         <!-- Integrations Section -->
-        <section class="py-20 bg-gradient-to-b from-gray-50 to-indigo-100">
+        <section class="pt-10 pb-20 bg-gradient-to-b from-gray-50 to-indigo-100">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-4">
-                    Seamless Integrations
+                    One Dashboard, Every Channel
                 </h2>
                 <p class="text-gray-600 text-center mb-12">Connect once and always stay connected</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/facebook.png'" alt="Facebook" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/whatsapp.png'" alt="WhatsApp" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/instagram.png'" alt="Instagram" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/messenger.png'" alt="Messenger" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/wechat.png'" alt="WeChat" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/telegram.png'" alt="Telegram" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/line.png'" alt="Line" class="w-16 h-16 object-contain" />
-                    </div>
-                    <div class="flex justify-center">
-                        <img :src="'/images/channels/sms.png'" alt="SMS" class="w-16 h-16 object-contain" />
+            </div>
+
+            <div class="max-w-4xl mx-auto rounded-lg overflow-hidden mb-20">
+                <img :src="'/images/dashboard-channels.png'" alt="Channels" class="object-contain" />
+            </div>
+
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-4">
+                    We Support Most Loved Channels
+                </h2>
+                <p class="text-gray-600 text-center mb-12">Staying in touch with your customers has never been easier</p>
+                <!-- Marquee Container -->
+                <div class="overflow-hidden marquee-mask">
+                    <div ref="marquee" class="marquee flex space-x-8">
+                        <div v-for="(logo, index) in logos" :key="index" class="flex-shrink-0">
+                            <img :src="logo.src" :alt="logo.alt" class="w-16 h-16 object-contain" />
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-4">
+                    Effortless Integration
+                </h2>
+                <p class="text-gray-600 text-center mb-12">
+                    Seamlessly connect with your favorite tools to boost productivity.
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto rounded-lg overflow-hidden">
+                <img :src="'/images/dashboard-integrations.png'" alt="Integrations" class="object-contain" />
+            </div>
+
         </section>
 
         <!-- CTA Section -->
@@ -149,7 +152,6 @@
 </template>
 
 <script>
-
 import { ArrowRight } from 'lucide-vue-next';
 
 export default {
@@ -159,6 +161,22 @@ export default {
         return {
             scale: 1, // Initial scale (no scaling)
             tiltAngle: 35, // Initial tilt angle (degrees)
+            logos: [
+                { src: '/images/channels/facebook.png', alt: 'Facebook' },
+                { src: '/images/channels/whatsapp.png', alt: 'WhatsApp' },
+                { src: '/images/channels/instagram.png', alt: 'Instagram' },
+                { src: '/images/channels/messenger.png', alt: 'Messenger' },
+                { src: '/images/channels/wechat.png', alt: 'WeChat' },
+                { src: '/images/channels/telegram.png', alt: 'Telegram' },
+                { src: '/images/channels/x.png', alt: 'X' },
+                { src: '/images/channels/line.png', alt: 'Line' },
+                { src: '/images/channels/sms.png', alt: 'SMS' },
+                { src: '/images/channels/email.png', alt: 'Email' },
+                { src: '/images/channels/phone3.png', alt: 'Phone' },
+            ],
+            logoWidth: 96, // Width of each logo (w-16 = 64px) + space-x-8 (32px) = 96px
+            speed: 1, // Pixels per frame (adjustable for speed)
+            animationFrameId: null,
         };
     },
     mounted() {
@@ -194,19 +212,133 @@ export default {
         if (imageWrapper) {
             observer.observe(imageWrapper);
         }
+
+        // Start the marquee animation
+        this.startMarqueeAnimation();
+    },
+    beforeUnmount() {
+        // Cancel the animation frame when the component is destroyed
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+        }
+    },
+    methods: {
+        startMarqueeAnimation() {
+            const marquee = this.$refs.marquee;
+            if (!marquee) return;
+
+            let position = 0;
+
+            const animate = () => {
+                // Move the marquee to the left
+                position -= this.speed;
+                marquee.style.transform = `translateX(${position}px)`;
+
+                // Get the width of the container and the marquee
+                const containerWidth = marquee.parentElement.offsetWidth;
+                const marqueeWidth = marquee.scrollWidth;
+
+                // When the first logo moves completely off-screen to the left
+                if (Math.abs(position) >= this.logoWidth) {
+                    // Move the first logo to the end
+                    const firstLogo = marquee.children[0];
+                    marquee.appendChild(firstLogo);
+                    // Reset position to account for the moved logo
+                    position += this.logoWidth;
+                    marquee.style.transform = `translateX(${position}px)`;
+                }
+
+                // Continue the animation
+                this.animationFrameId = requestAnimationFrame(animate);
+            };
+
+            // Start the animation
+            this.animationFrameId = requestAnimationFrame(animate);
+        },
     },
 };
 </script>
 
 <style scoped>
+.bubble-effect {
+    animation: bubble 2s infinite ease-in-out;
+}
 
-    .bubble-effect {
-        animation: bubble 2s infinite ease-in-out;
+@keyframes bubble {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* Wave animation styles */
+.wave-container {
+    top: 500px;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    display: flex;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+}
+
+.wave {
+    opacity: 0;
+    position: absolute;
+    border-radius: 50%;
+    animation: wave-ripple 5s ease-out infinite;
+    border: 4px solid rgba(255, 255, 255, 0.073);
+}
+
+.wave:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.wave:nth-child(2) {
+    animation-delay: 1s;
+}
+
+.wave:nth-child(3) {
+    animation-delay: 2s;
+}
+
+@keyframes wave-ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0;
     }
-
-    @keyframes bubble {
-        0%, 100% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.05); opacity: 1; }
+    30% {
+        opacity: 1;
     }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
 
+/* Marquee styles */
+.marquee {
+    display: flex;
+    white-space: nowrap;
+}
+
+/* Fading effect for marquee edges */
+.marquee-mask {
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 20%,
+        black 80%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+}
 </style>

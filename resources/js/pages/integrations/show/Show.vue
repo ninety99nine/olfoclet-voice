@@ -26,7 +26,7 @@
                             </span>
                         </div>
                         <p class="text-sm text-gray-500 mt-1">
-                            Connect with Microsoft Dynamics for CRM and case management.
+                            Sync customer interactions and data for a unified view and streamlined support.
                         </p>
                     </div>
                 </div>
@@ -41,12 +41,12 @@
                     <div class="flex-1">
                         <div class="flex justify-between items-center">
                             <p class="text-lg font-semibold text-gray-900">HubSpot</p>
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                Not Connected
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Connected
                             </span>
                         </div>
                         <p class="text-sm text-gray-500 mt-1">
-                            Integrate with HubSpot for customer engagement and marketing automation.
+                            Centralize customer relationships, automate workflows, and capture leads from all channels.
                         </p>
                     </div>
                 </div>
@@ -61,12 +61,12 @@
                     <div class="flex-1">
                         <div class="flex justify-between items-center">
                             <p class="text-lg font-semibold text-gray-900">Salesforce</p>
-                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                                Not Connected
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Connected
                             </span>
                         </div>
                         <p class="text-sm text-gray-500 mt-1">
-                            Integrate with Salesforce for CRM and sales automation.
+                            Unify customer interactions and CRM data for smarter, data-driven engagement.
                         </p>
                     </div>
                 </div>
@@ -81,12 +81,112 @@
                     <div class="flex-1">
                         <div class="flex justify-between items-center">
                             <p class="text-lg font-semibold text-gray-900">Zendesk</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Connected
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Manage support tickets and customer interactions from a single dashboard.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google Sheets Integration -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                <div class="flex items-start space-x-3">
+                    <div class="p-3 bg-gray-100 rounded-full">
+                        <img :src="'/images/integrations/google-sheets.svg'" alt="Google Sheets Logo" class="h-6 w-6">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <p class="text-lg font-semibold text-gray-900">Google Sheets</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Connected
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Log customer data and generate real-time reports in one place.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipedrive Integration -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                <div class="flex items-start space-x-3">
+                    <div class="p-3 bg-gray-100 rounded-full">
+                        <img :src="'/images/integrations/pipedrive.svg'" alt="Pipedrive Logo" class="h-6 w-6">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <p class="text-lg font-semibold text-gray-900">Pipedrive</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Connected
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Track sales communications and customer touchpoints from your dashboard.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zoho Integration -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                <div class="flex items-start space-x-3">
+                    <div class="p-3 bg-gray-100 rounded-full">
+                        <img :src="'/images/integrations/zoho.svg'" alt="Zoho Logo" class="h-6 w-6">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <p class="text-lg font-semibold text-gray-900">Zoho</p>
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
                                 Not Connected
                             </span>
                         </div>
                         <p class="text-sm text-gray-500 mt-1">
-                            Connect with Zendesk for customer support and ticketing.
+                            Manage customer data, sales, and support from a unified platform.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Freshdesk Integration -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                <div class="flex items-start space-x-3">
+                    <div class="p-3 bg-gray-100 rounded-full">
+                        <img :src="'/images/integrations/freshdesk.svg'" alt="Freshdesk Logo" class="h-6 w-6">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <p class="text-lg font-semibold text-gray-900">Freshdesk</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                Not Connected
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Streamline customer support and manage service tickets efficiently.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copper Integration -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                <div class="flex items-start space-x-3">
+                    <div class="p-3 bg-gray-100 rounded-full">
+                        <img :src="'/images/integrations/copper.svg'" alt="Copper Logo" class="h-6 w-6">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <p class="text-lg font-semibold text-gray-900">Copper</p>
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                Not Connected
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Manage customer relationships directly from your Gmail inbox for efficient outreach.
                         </p>
                     </div>
                 </div>
