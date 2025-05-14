@@ -4,9 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateConversationMessagesTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('conversation_messages', function (Blueprint $table) {
             $table->uuid('id')->primary();
@@ -22,4 +22,4 @@ class CreateConversationMessagesTable extends Migration
     {
         Schema::dropIfExists('conversation_messages');
     }
-}
+};

@@ -243,6 +243,11 @@ const routes = [
                 name: 'show-nexflo',
                 component: () => import('@Pages/nexflo/show/Show.vue'),
             },
+            {
+                path: 'whatsapp-chat',
+                name: 'whatsapp-chat',
+                component: () => import('@Pages/whatsapp-chat/WhatsAppChat.vue'),
+            },
         ]
     },
     {

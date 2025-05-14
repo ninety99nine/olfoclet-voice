@@ -21,6 +21,44 @@ use Ramsey\Uuid\Uuid;
 |
 */
 
+// routes/api.php
+Route::get('/test-pusher-direct', function () {
+    $options = [
+        'cluster' => env('PUSHER_APP_CLUSTER'),
+        'useTLS' => true,
+    ];
+
+    $pusher = new \Pusher\Pusher(
+        env('PUSHER_APP_KEY'),
+        env('PUSHER_APP_SECRET'),
+        env('PUSHER_APP_ID'),
+        $options
+    );
+
+    try {
+        $pusher->trigger('whatsapp-messages', 'new-message', [
+            'id' => 'test-uuid',
+            'channel' => 'whatsapp',
+            'direction' => 'inbound',
+            'status' => 'delivered',
+            'from' => '26775993221',
+            'to' => 'telcoflo',
+            'content' => 'Test message from Pusher',
+            'message_type' => 'text',
+            'external_message_id' => 'wamid.test-message-id',
+            'created_at' => now()->toISOString(),
+            'updated_at' => now()->toISOString(),
+        ]);
+        Log::info('Pusher test event sent successfully');
+        return response()->json(['status' => 'Pusher test event sent']);
+    } catch (\Exception $e) {
+        Log::error('Pusher test event failed', [
+            'error' => $e->getMessage(),
+            'stack' => $e->getTraceAsString(),
+        ]);
+        return response()->json(['status' => 'Pusher test event failed', 'error' => $e->getMessage()], 500);
+    }
+});
 
 Route::get('/send-email', function () {
 

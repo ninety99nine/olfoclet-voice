@@ -20,7 +20,7 @@
       <div class="relative flex flex-col h-full max-h-full">
         <!-- Header -->
         <header class="p-4 pb-8 flex justify-between items-center gap-x-2">
-            <h1 class="flex-none font-semibold text-xl px-2.5">Orange Botswana</h1>
+            <h1 class="flex-none font-semibold text-xl px-2.5">Perfect Order</h1>
             <div class="lg:hidden -me-2">
                 <!-- Close Button -->
                 <button type="button"
